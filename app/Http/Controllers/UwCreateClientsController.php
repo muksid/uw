@@ -12,6 +12,7 @@ use App\UwLoanTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UwCreateClientsController extends Controller
 {
@@ -438,7 +439,6 @@ class UwCreateClientsController extends Controller
     public function createClientFile(Request $request)
     {
         //
-
         $file = $request->file('model_file');
 
         $model_id = $request->model_file_id;
@@ -452,7 +452,8 @@ class UwCreateClientsController extends Controller
 
         $modelFile->file_size = $file->getSize();
 
-        $file->move(public_path() . '/uwFiles/', $modelFile->file_hash);
+        //$file->move(public_path() . '/uwFiles/', $modelFile->file_hash);
+        Storage::disk('disk_edo_123')->put('/uwFiles/'.$modelFile->file_hash, file_get_contents($file->getRealPath()));
 
         $modelFile->file_name = $file->getClientOriginalName();
 

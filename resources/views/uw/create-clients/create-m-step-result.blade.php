@@ -838,7 +838,7 @@
                 $('body').on('click', '#getResultKATM', function () {
                     var id = $('#getResultKATM').data('id');
                     $.get('/uw/get-client-res-k/' + id, function (data) {
-                        //console.log(data);
+                        console.log(data.scoring_page1);
                         $('#scoringPage').empty();
                         $("#scoringPage").prepend(data.scoring_page);
                         $(".client_name").html(data.client.family_name + ' ' + data.client.name + ' ' + data.client.patronymic);
