@@ -722,7 +722,7 @@ class UwInquiryIndividualController extends Controller
         }
         $getFile = file_get_contents("uw/scoring_page.php");
         //$getFileScoringImg = file_get_contents("katm_files/".$modelClient->claim_id.".php");
-        $getFileScoringImg = Storage::disk('disk_edo_123')->get("katm_files/".$modelClient->claim_id.".php");
+        $getFileScoringImg = Storage::disk('disk_edo_123')->get("/katm_files/".$modelClient->claim_id.".php");
 
         return response()->json([
             'summ'   => number_format($summ),
