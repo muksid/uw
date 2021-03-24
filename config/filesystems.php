@@ -63,6 +63,16 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
 
+        'disks1' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+        ],
+
+        'disk_edo_123' => [
+            'driver' => 'local',
+            'root'   => '//172.16.1.123/T$/OSPanel/domains/edo.turonbank.uz/public',
+        ],
+
     ],
 
 ];
