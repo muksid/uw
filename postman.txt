@@ -1,0 +1,17 @@
+http://10.22.50.3:8001/katm-api/v1/claim/decline
+{
+	"security" : {
+		"pLogin" : "turonbank",
+		"pPassword" : "!trB&GkL@200130"
+	},
+
+	"data" : {
+		"pHead" : "011",
+		"pCode" : "00982",
+        "pDeclineDate" : "2020-12-10T08:56:59",
+		"pClaimId" : "10098240080",
+		"pDeclineNumber" : "1",
+		"pDeclineReason" : "1",
+		"pDeclineReasonNote" : "Mijoz arizasini bekor qildi"
+	}
+}
