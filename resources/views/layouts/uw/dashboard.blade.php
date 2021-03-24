@@ -28,17 +28,17 @@
     <!-- AdminLTE Skins. Choose a skin from the css/skins-->
     <link href="{{ asset("/admin-lte/dist/css/skins/_all-skins.min.css") }}" rel="stylesheet">
 
-    {{--<script src="{{ asset('js/treejquery.js') }}"></script>--}}
-    <!-- jQuery 2.2.3 -->
+{{--<script src="{{ asset('js/treejquery.js') }}"></script>--}}
+<!-- jQuery 2.2.3 -->
     <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
 
 <body class="skin-blue">
 
 <!-- Header -->
-@include('layouts.uw.header')
+@include('layouts.header')
 
 <!-- Sidebar -->
-@include('layouts.uw.sidebar')
+@include('layouts.sidebar')
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -46,7 +46,7 @@
 </div>
 <!-- /.content-wrapper -->
 
-@include('layouts.uw.footer')
+@include('layouts.footer')
 
 
 <!-- DataTables -->

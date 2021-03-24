@@ -11,7 +11,7 @@
             <small>@lang('blade.panel')</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="{{ route('edo-home') }}"><i class="fa fa-dashboard"></i> @lang('blade.home_page')</a></li>
+            <li><a href="{{ route('home') }}"><i class="fa fa-dashboard"></i> @lang('blade.home_page')</a></li>
             <li><a href="#">@lang('blade.user')</a></li>
             <li class="active">@lang('blade.panel')</li>
         </ol>
