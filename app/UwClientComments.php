@@ -13,4 +13,9 @@ class UwClientComments extends Model
         'title',
         'comment_type'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
 }
