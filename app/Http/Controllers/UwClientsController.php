@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
 use Response;
 
 class UwClientsController extends Controller
@@ -1286,35 +1287,30 @@ class UwClientsController extends Controller
     // download edo file
     public function downloadFile($file){
 
-        /*if (file_exists(public_path() . "/uwFiles/" . $file)) {
-
-            $orgName = UwClientFiles::where('file_hash', '=', $file)->firstOrFail();
-
-            return Response::download(public_path() . "/uwFiles/".$file,$orgName->file_name);
-
-        } else {
-
-            return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
-        }
-*/
-
         $model = UwClientFiles::find($file);
 
-        $file= public_path(). "/uwFiles/".$model->file_hash;
+        //$file= public_path(). "/uwFiles/".$model->file_hash;
 
         $headers = array(
             'Content-Type: application/octet-stream',
         );
 
-        if(file_exists(public_path() . "/uwFiles/" . $model->file_hash)){
+        /*if(file_exists(public_path() . "/uwFiles/" . $model->file_hash)){
 
             return Response::download($file, $model->file_name, $headers);
 
         } else {
 
             return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
+        }*/
+
+        if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
+
+            return Storage::disk('disk_edo_123')->download('/uwFiles/'.$model->file_hash, $model->file_name, $headers);
+
         }
 
+        return back();
 
     }
 

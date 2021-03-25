@@ -436,6 +436,18 @@
                                             @break
                                             @case(3)
                                             <h3 class="text-green"><i class="fa fa-check-circle-o"></i> Ariza Tasdiqlandi</h3>
+                                            @foreach($modelComments as $key => $value)
+                                                @if($value->comment_type == 3)
+                                                <div class="comment-text">
+                                                          <span class="username">
+                                                              <b>{{ $key+1 }}. <i class="fa fa-desktop"></i> Anderrayter:</b>
+                                                            <span class="text-muted pull-right"><i class="fa fa-clock-o"></i>
+                                                                {{ \Carbon\Carbon::parse($value->created_at)->format('d.m.Y H:i') }}</span>
+                                                          </span>
+                                                    {{ $value->user->lname??'' }} {{ $value->user->fname??'' }}
+                                                </div>
+                                                @endif
+                                            @endforeach
                                             @break
                                             @case(0)
                                             <h3 class="text-maroon"><i class="fa fa-pencil"></i> Ariza Taxrirlashda</h3>

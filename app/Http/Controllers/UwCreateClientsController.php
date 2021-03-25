@@ -474,9 +474,16 @@ class UwCreateClientsController extends Controller
     {
         //
         $model = UwClientFiles::find($id);
-        $file_path = public_path().'/uwFiles/'.$model->file_hash;
+
+        /*$file_path = public_path().'/uwFiles/'.$model->file_hash;
         if(file_exists($file_path)){
             unlink($file_path);
+        }*/
+
+        if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
+
+            Storage::disk('disk_edo_123')->delete('/uwFiles/'.$model->file_hash);
+
         }
 
         $model->delete();
