@@ -75,6 +75,12 @@
                                                 <td>4.</td>
                                                 <td>Pasport ma`lumotlari</td>
                                                 <td><i class="fa fa-user"></i>
+                                                    Pasport turi: <b>@if($model->document_type == 0)
+                                                            ID karta
+                                                        @elseif($model->document_type == 6)
+                                                            Pasport
+                                                        @endif
+                                                    </b>
                                                     {{ $model->document_serial ?? ''}} {{ $model->document_number ?? ''}}
                                                     {{ \Carbon\Carbon::parse($model->document_date)->format('d.m.Y') }} yil.
                                                 </td>
