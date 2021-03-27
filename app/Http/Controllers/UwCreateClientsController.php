@@ -110,6 +110,7 @@ class UwCreateClientsController extends Controller
             'registration_district' => 'required',
             'birth_date' => 'required',
             'gender' => 'required',
+            'document_type' => 'required',
             'document_serial' => 'required',
             'document_number' => 'required',
             'document_date' => 'required',
@@ -222,9 +223,6 @@ class UwCreateClientsController extends Controller
         $loanType = UwLoanTypes::find($request->loan_type);
 
         $claim_number = $lastModelId->claim_number + 1;
-        if ($lastModelId->claim_number < 40000){
-            $claim_number = 40000;
-        }
         $claim_id = '1'.$branchCode.$claim_number;
         $model->user_id = Auth::id();
         $model->branch_code = $branchCode;
@@ -235,7 +233,6 @@ class UwCreateClientsController extends Controller
         $model->agreement_date = today();
         $model->client_type = "08";
         $model->resident = 1;
-        $model->document_type = 6;
         $model->nibbd = "";
         $model->live_address = $model->registration_address;
         $model->inn = $inn;
@@ -246,13 +243,11 @@ class UwCreateClientsController extends Controller
         $model->status = 1;
 
         if ($checkModel->count() > 0){
-            //$request->session()->forget('model');
 
             return back()->with(
                 [
                     'status' => 'warning',
                     'message' => 'Mijoz tizimda mavjud Risk Adminstratorga murojaat qiling!!! (ip:247)',
-                    //'data' => 'Inspektor: '.$checkModel->user->lname.' '.$checkModel->user->fname.' (MFO: '.$checkModel->branch_code.')',
                     'data' => $checkModel,
                 ]);
         }

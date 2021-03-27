@@ -107,6 +107,19 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="col-md-2">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label>Pasport turi <span class="text-red">*</span></label>
+                                            <select name="document_type" class="form-control" required>
+                                                <option value="" selected disabled>Tanlang</option>
+                                                <option value="6" @if(6 == ($model->document_type ?? '')) selected @endif>Pasport</option>
+                                                <option value="0" @if(7 == ($model->document_type ?? '')) selected @endif>ID karta</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-1">
                                     <div class="box-body">
                                         <div class="form-group">
