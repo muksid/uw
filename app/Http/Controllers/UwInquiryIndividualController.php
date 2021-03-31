@@ -44,6 +44,7 @@ class UwInquiryIndividualController extends Controller
         $creditDebt = 0;
         $totalMonthPayment = 0;
         $creditCanBe = 0;
+        $monthlyPay = 0;
         if ($clientK){
             $creditDebt = $clientK->katm_summ;
             $scoringBall = $scoringBall['sc_ball'];
@@ -51,6 +52,7 @@ class UwInquiryIndividualController extends Controller
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * 0.5) - $creditDebt;
             $creditCanBe = ($totalMonthPayment + $d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
+            $monthlyPay = $model->summa/$model->loanType->credit_duration + $model->summa*$model->loanType->procent * 0.01/365 * 30;
         }
         // In CS max sum can be
         if ($creditCanBe >= $model->summa){
@@ -65,6 +67,7 @@ class UwInquiryIndividualController extends Controller
             'credit_sum' => $model->summa,
             'credit_can_be' => $creditCanBe,
             'scoring_ball' => $scoringBall,
+            'monthly_pay' => $monthlyPay,
         ];
 
     }
@@ -455,7 +458,7 @@ class UwInquiryIndividualController extends Controller
                     'katm_tb' => $arr_tb_json
                 ]);
 
-            if ($is_inps == 1 && $katm->katm_sc_ball > 199){
+            if ($is_inps == 1 && $scoring_ball > 199){
 
                 return $this->creditReportI($id, $claim_id);
 

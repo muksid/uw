@@ -361,7 +361,13 @@
                                                         </span>
                                                     </a>
                                                 </li>
-                                                <li><a href="#">5. Kredit ajratish mumkin:
+                                                <li><a href="#">5. O`rtacha oylik to`lovi:
+                                                        <span class="pull-right badge bg-aqua" style="font-size: large">
+                                                            <span id="monthly_pay"></span> so`m
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                                <li><a href="#">6. Kredit ajratish mumkin:
                                                         <span class="pull-right badge bg-aqua-active" style="font-size: large">
                                                             <span id="credit_can_be"></span> so`m
                                                         </span>
@@ -756,6 +762,7 @@
                 $('#total_month_payment').empty().append(formatCurrency(res.credit_results.total_month_payment));
                 $('#total_month_salary').empty().append(formatCurrency(res.credit_results.total_month_salary));
                 $('#total_monthly').empty().append(res.credit_results.total_monthly);
+                $('#monthly_pay').empty().append(formatCurrency(res.credit_results.monthly_pay));
                 $('#scoring_ball').empty().append(res.credit_results.scoring_ball);
                 if (is_inps != 1){
                     button_res_i = '';
@@ -766,13 +773,14 @@
 
             var katm_inps_route = "{{ route('uw.get-result-buttons', ['id' => $model->id]) }}";
             $.get(katm_inps_route, function(res){
-                //console.log(res);
+                console.log(res.credit_results.monthly_pay);
                 //console.log(res.data_i.length);
                 $('#credit_can_be').append(formatCurrency(res.credit_results.credit_can_be));
                 $('#credit_sum').append(formatCurrency(res.credit_results.credit_sum));
                 $('#total_month_payment').append(formatCurrency(res.credit_results.total_month_payment));
                 $('#total_month_salary').append(formatCurrency(res.credit_results.total_month_salary));
                 $('#total_monthly').append(res.credit_results.total_monthly);
+                $('#monthly_pay').append(formatCurrency(res.credit_results.monthly_pay));
                 $('#scoring_ball').append(res.credit_results.scoring_ball);
 
                 sendToAdminButton.append(button_send_a);
