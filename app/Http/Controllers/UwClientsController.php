@@ -1288,27 +1288,26 @@ class UwClientsController extends Controller
     public function downloadFile($file){
 
         $model = UwClientFiles::find($file);
-
-        //$file= public_path(). "/uwFiles/".$model->file_hash;
+        $file= public_path(). "/uwFiles/".$model->file_hash;
 
         $headers = array(
             'Content-Type: application/octet-stream',
         );
 
-        /*if(file_exists(public_path() . "/uwFiles/" . $model->file_hash)){
+        if(file_exists(public_path() . "/uwFiles/" . $model->file_hash)){
 
-            return Response::download($file, $model->file_name, $headers);
+            return Response::download($file, $model->file_name);
 
         } else {
 
             return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
-        }*/
+        }
 
-        if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
+        /*if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
 
             return Storage::disk('disk_edo_123')->download('/uwFiles/'.$model->file_hash, $model->file_name, $headers);
 
-        }
+        }*/
 
         return back();
 

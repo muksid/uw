@@ -32,7 +32,7 @@ class UwInquiryIndividualController extends Controller
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
         $scoringBall = json_decode($clientK['katm_score'], true);
 
-        // Client Debitors Payment Calculate
+        // Client Debtors Payment Calculate
         $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
         $d_pay = 0;
         if ($debPayment){
@@ -44,19 +44,28 @@ class UwInquiryIndividualController extends Controller
         $creditDebt = 0;
         $totalMonthPayment = 0;
         $creditCanBe = 0;
+        $creditCanBeAnn = 0;
         $monthlyPay = 0;
+        $monthlyPayAnn = 0;
+        $pv = 0;
         if ($clientK){
             $creditDebt = $clientK->katm_summ;
-            $scoringBall = $scoringBall['sc_ball'];
+            $scoringBall = $clientK->katm_sc_ball;
         }
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * 0.5) - $creditDebt;
             $creditCanBe = ($totalMonthPayment + $d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
             $monthlyPay = $model->summa/$model->loanType->credit_duration + $model->summa*$model->loanType->procent * 0.01/365 * 30;
+
+            $creditCanBeAnn = $totalMonthPayment*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
+            $monthlyPayAnn = -(($pv - $model->summa) * $model->loanType->procent*0.01/12)/ (1 - pow((1 + $model->loanType->procent*0.01/12), (-$model->loanType->credit_duration)));
         }
+
         // In CS max sum can be
-        if ($creditCanBe >= $model->summa){
+        if (Auth::user()->uwUsers() == 'credit_insp' && $creditCanBe >= $model->summa){
+
             $creditCanBe = $model->summa;
+
         }
 
         return [
@@ -68,6 +77,8 @@ class UwInquiryIndividualController extends Controller
             'credit_can_be' => $creditCanBe,
             'scoring_ball' => $scoringBall,
             'monthly_pay' => $monthlyPay,
+            'credit_can_be_ann' => $creditCanBeAnn,
+            'monthly_pay_ann' => $monthlyPayAnn,
         ];
 
     }
@@ -724,8 +735,8 @@ class UwInquiryIndividualController extends Controller
 
         }
         $getFile = file_get_contents("uw/scoring_page.php");
-        //$getFileScoringImg = file_get_contents("katm_files/".$modelClient->claim_id.".php");
-        $getFileScoringImg = Storage::disk('disk_edo_123')->get("/katm_files/".$modelClient->claim_id.".php");
+        $getFileScoringImg = file_get_contents("katm_files/".$modelClient->claim_id.".php");
+        //$getFileScoringImg = Storage::disk('disk_edo_123')->get("/katm_files/".$modelClient->claim_id.".php");
 
         return response()->json([
             'summ'   => number_format($summ),
@@ -750,7 +761,7 @@ class UwInquiryIndividualController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getStatusSend($id)
+    public function getStatusSend($id, $sch_type)
     {
         //
         // Scoring Calculator
@@ -765,13 +776,17 @@ class UwInquiryIndividualController extends Controller
         $creditCanBe = 0;
         if ($clientK){
             $creditDebt = $clientK->katm_summ;
-            $scoringBall = $scoringBall['sc_ball'];
+            $scoringBall = $clientK->katm_sc_ball;
         }
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * 0.5) - $creditDebt;
-            $creditCanBe = $totalMonthPayment * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
+            if ($sch_type == 1){
+                $creditCanBe = $totalMonthPayment * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
+            } else {
+                $creditCanBe = $totalMonthPayment*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/
+                    ($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
+            }
         }
-
 
         if (!$clientK){
             $status = 0;

@@ -492,12 +492,8 @@
                                         <div class="form-group">
                                             <label class="slider-label">Kredit %<sup
                                                         class="text-red">*</sup></label>
-                                            <select name="calcLoanInterest" id="calcLoanInterest"
-                                                    class="form-control select2" style="width: 100%;">
-                                                <option value="23">23 %</option>
-                                                <option value="24">24 %</option>
-                                                <option value="25">25 %</option>
-                                            </select>
+                                            <input type="text" id="calcLoanInterest" name="calcLoanInterest"
+                                                   class="form-control" value="{{ old('calcLoanInterest') }}">
                                         </div>
                                     </div>
 

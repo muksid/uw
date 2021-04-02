@@ -99,13 +99,12 @@
             </div>
         </div>
     </section>
-    <!-- /.content -->
 
-    <!-- Main content -->
     <section class="content">
         <h1>Kredit Calculator
             <small><i class="fa fa-calculator text-primary"></i></small>
         </h1>
+
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-danger">
@@ -134,13 +133,8 @@
                                         <div class="form-group">
                                             <label class="slider-label">Kredit %<sup
                                                         class="text-red">*</sup></label>
-                                            <select name="calcLoanInterest" id="calcLoanInterest"
-                                                    class="form-control select2" style="width: 100%;">
-                                                <option value="23">23 %</option>
-                                                <option value="24">24 %</option>
-                                                <option value="25">25 %</option>
-                                                <option value="26">26 %</option>
-                                            </select>
+                                            <input type="text" id="calcLoanInterest" name="calcLoanInterest"
+                                                   class="form-control" value="{{ old('calcLoanInterest') }}">
                                         </div>
                                     </div>
 
@@ -149,14 +143,10 @@
                                 <div class="col-md-3 col-sm-6 col-xs-12">
                                     <div class="box-body">
                                         <div class="form-group">
-                                            <label class="slider-label">Kredit muddati<sup
+                                            <label class="slider-label">Kredit muddati (oy)<sup
                                                         class="text-red">*</sup></label>
-                                            <select name="calcLoanMonth" id="calcLoanMonth" class="form-control select2"
-                                                    style="width: 100%;">
-                                                <option value="12">12 oy</option>
-                                                <option value="24">24 oy</option>
-                                                <option value="36">36 oy</option>
-                                            </select>
+                                            <input type="text" id="calcLoanMonth" name="calcLoanMonth"
+                                                   class="form-control" value="{{ old('calcLoanMonth') }}">
                                         </div>
                                     </div>
 
@@ -169,8 +159,8 @@
                                                         class="text-red">*</sup></label>
                                             <select name="calcLoanType" id="calcLoanType" class="form-control select2"
                                                     style="width: 100%;">
-                                                <option value="1">Difference calc</option>
-                                                <option value="2">Annuity calc</option>
+                                                <option value="1">Differentsial (Oddiy)</option>
+                                                <option value="2">Annuitet</option>
                                             </select>
                                         </div>
                                     </div>
@@ -229,14 +219,7 @@
         <!-- /.row -->
 
         <script>
-
-
-            $(function () {
-                $("#example1").DataTable();
-            });
-
             $(document).ready(function() {
-
                 $("#credit_type").change(function() {
                     var id = $(this).val();
                     $.ajax({
@@ -298,15 +281,11 @@
             $('.price-summa').on('keydown', function (e) {
 
                 if (this.selectionStart || this.selectionStart == 0) {
-                    // selectionStart won't work in IE < 9
-
                     var key = e.which;
                     var prevDefault = true;
-
                     var thouSep = " ";  // your seperator for thousands
                     var deciSep = ",";  // your seperator for decimals
                     var deciNumber = 2; // how many numbers after the comma
-
                     var thouReg = new RegExp(thouSep, "g");
                     var deciReg = new RegExp(deciSep, "g");
 

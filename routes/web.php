@@ -10,6 +10,7 @@
 |
 */
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -101,7 +102,7 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('uw-get-result-buttons/{id}', 'UwInquiryIndividualController@getResultButtons')->name('uw.get-result-buttons');
         Route::get('get-client-res-k/{id}','UwInquiryIndividualController@getClientKatm');
         Route::get('get-client-res-i/{id}','UwInquiryIndividualController@getClientInps');
-        Route::get('get-status-send/{id}','UwInquiryIndividualController@getStatusSend');
+        Route::get('get-status-send/{id}/{sch_type}','UwInquiryIndividualController@getStatusSend');
         Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
 
         // GUAR

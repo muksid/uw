@@ -447,8 +447,8 @@ class UwCreateClientsController extends Controller
 
         $modelFile->file_size = $file->getSize();
 
-        //$file->move(public_path() . '/uwFiles/', $modelFile->file_hash);
-        Storage::disk('disk_edo_123')->put('/uwFiles/'.$modelFile->file_hash, file_get_contents($file->getRealPath()));
+        $file->move(public_path() . '/uwFiles/', $modelFile->file_hash);
+        //Storage::disk('disk_edo_123')->put('/uwFiles/'.$modelFile->file_hash, file_get_contents($file->getRealPath()));
 
         $modelFile->file_name = $file->getClientOriginalName();
 
@@ -470,16 +470,15 @@ class UwCreateClientsController extends Controller
         //
         $model = UwClientFiles::find($id);
 
-        /*$file_path = public_path().'/uwFiles/'.$model->file_hash;
+        $file_path = public_path().'/uwFiles/'.$model->file_hash;
         if(file_exists($file_path)){
             unlink($file_path);
-        }*/
+        }
 
-        if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
+        /*if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
 
             Storage::disk('disk_edo_123')->delete('/uwFiles/'.$model->file_hash);
-
-        }
+        }*/
 
         $model->delete();
 

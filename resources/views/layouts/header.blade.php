@@ -25,31 +25,16 @@
 
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
-                <!-- Messages: style can be found in dropdown.less-->
-                <li class="dropdown messages-menu">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="fa fa-envelope-o"></i>
-                        <span class="label label-success"></span>
-                    </a>
-                </li>
-                <!-- Notifications: style can be found in dropdown.less -->
-                <li class="dropdown notifications-menu">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="fa fa-clock-o"></i>
-                        <span class="label label-danger"></span>
-                    </a>
-                </li>
                 <!-- User Account: style can be found in dropdown.less -->
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown1">
-                        <img src="/admin-lte/dist/img/user.png" class="user-image" alt="User Image">
+                        <img src="{{ url('/admin-lte/dist/img/user.png') }}" class="user-image">
                         <span class="hidden-xs">{{ mb_substr(Auth::user()->fname ??'', 0,1).'.'.Auth::user()->lname }}</span>
-
                     </a>
                     <ul class="dropdown-menu">
                         <!-- User image -->
                         <li class="user-header">
-                            <img src="/admin-lte/dist/img/user.png" class="img-circle" alt="User Image">
+                            <img src="{{ url('/admin-lte/dist/img/user.png') }}" class="img-circle">
 
                             <p>
                                 {{Auth::user()->fname}} {{Auth::user()->lname}}

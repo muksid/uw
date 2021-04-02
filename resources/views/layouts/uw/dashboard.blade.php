@@ -25,14 +25,13 @@
 
     <link href="{{ asset("/admin-lte/dist/css/AdminLTE.min.css") }}" rel="stylesheet" type="text/css">
 
-    <!-- AdminLTE Skins. Choose a skin from the css/skins-->
+    <link href="{{ asset("/admin-lte/plugins/iCheck/all.css") }}" rel="stylesheet" type="text/css">
+
     <link href="{{ asset("/admin-lte/dist/css/skins/_all-skins.min.css") }}" rel="stylesheet">
 
-{{--<script src="{{ asset('js/treejquery.js') }}"></script>--}}
-<!-- jQuery 2.2.3 -->
     <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
 
-<body class="skin-blue">
+<body class="skin-green">
 
 <!-- Header -->
 @include('layouts.header')
@@ -48,9 +47,9 @@
 
 @include('layouts.footer')
 
-
 <!-- DataTables -->
 <script src="{{ asset("/admin-lte/plugins/datatables/jquery.dataTables.min.js") }}"></script>
+
 <script src="{{ asset("/admin-lte/plugins/datatables/dataTables.bootstrap.min.js") }}"></script>
 
 <!-- AdminLTE App -->
