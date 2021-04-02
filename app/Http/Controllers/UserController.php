@@ -342,7 +342,7 @@ class UserController extends Controller
                         ->get();
 
                     return view('users.edit',compact('user','departments','roles',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count',));
+                        'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
 
                     break;
                 case('user'):

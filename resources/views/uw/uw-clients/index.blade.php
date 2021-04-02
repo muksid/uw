@@ -4,13 +4,13 @@
 
     <section class="content-header">
         <h1>
-            Underwriter Arizalar
+            Anderrayting Arizalar
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">underwriter</a></li>
-            <li class="active">underwriter</li>
+            <li><a href="#">anderrayting</a></li>
+            <li class="active">anderrayting</li>
         </ol>
         @if (count($errors) > 0)
             <div class="alert alert-danger">
@@ -65,7 +65,6 @@
                                 <th>Mijoz nomi</th>
                                 <th>Kredit summasi</th>
                                 <th class="text-center">@lang('blade.status')</th>
-                                <th class="text-center">KATM qarzdorligi</th>
                                 <th class="text-center">Ko`rish</th>
                                 <th><i class="fa fa-pencil-square-o"></i></th>
                                 <th><i class="fa fa-trash-o"></i></th>
@@ -105,26 +104,6 @@
                                             <span class="badge bg-aqua-active">Tasdiqlangan</span>
                                         @endif
                                     </td>
-                                    <td class="text-center">
-                                        @if($summ = $model->katm->katm_summ??'')
-                                            @if($summ == 0)
-                                                <p class="text-green text-bold">{{ number_format(0, 2) }}</p>
-                                                @else
-                                                <p class="text-maroon text-bold">{{ number_format($model->katm->katm_summ, 2) }}</p>
-                                            @endif
-
-                                            @else
-                                            <p class="text-green text-bold">{{ number_format(0, 2) }}</p>
-                                        @endif
-
-                                    </td>
-                                    {{--<td>
-                                        <a class="btn btn-flat btn-primary" href="{{ route('uw-katm',
-                                                    ['id' => $model->id,
-                                                    'claim_id' => $model->claim_id]) }}">
-                                            <i class="fa fa-eye-slash"></i> Ko`rish
-                                        </a>
-                                    </td>--}}
                                     <td>
                                         <a class="btn btn-primary" href="{{ route('uw.create.step.result',
                                                     ['id' => $model->id]) }}">
@@ -501,7 +480,7 @@
                     $.get('/uw-clients/' + model_id, function (data) {
                         console.log(data);
 
-                        $('#modalHeader').html("Edit client");
+                        $('#modalHeader').html("Mijoz ma`lumotlarini o`zgartirish");
 
                         $('#btn-save').val("editClient");
 

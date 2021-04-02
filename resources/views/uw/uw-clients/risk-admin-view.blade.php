@@ -405,14 +405,52 @@
                                                         </span>
                                                     </a>
                                                 </li>
-                                                <li><a href="#">5. Kredit ajratish mumkin:
-                                                        <span class="pull-right badge bg-aqua-active" style="font-size: large">
-                                                            <span id="credit_can_be"></span> so`m
-                                                        </span>
-                                                    </a>
-                                                </li>
-
                                             </ul>
+                                            <table class="table table-bordered">
+                                                <tbody class="text-center">
+                                                <tr>
+                                                    <th colspan="2"><h4 class="text-maroon text-bold"><i class="fa fa-calculator"></i> Kredit grafik turini tanlang?</h4></th>
+                                                </tr>
+                                                <tr class="bg-blue-active">
+                                                    <div class="form-group">
+                                                        <th>
+                                                            <label>
+                                                                Differentsial (Oddiy)
+                                                                <input type="radio" name="sch_type" value="1" class="flat-red" checked>
+                                                            </label>
+                                                        </th>
+                                                        <th>
+                                                            <label>
+                                                                Annuitet
+                                                                <input type="radio" name="sch_type" value="2" class="flat-red">
+                                                            </label>
+                                                        </th>
+                                                    </div>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" class="text-bold bg-gray-active">Mijozning kredit bo`chiya o`rtacha oylik to`lovi:</td>
+                                                </tr>
+                                                <tr class="bg-aqua-active">
+                                                    <td>
+                                                        <h4><span id="monthly_pay"></span> so`m</h4>
+                                                    </td>
+                                                    <td>
+                                                        <h4><span id="monthly_pay_ann"></span> so`m</h4>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" class="text-bold bg-gray-active">Mijozga shu miqdorda kredit ajratish mumkin:</td>
+                                                </tr>
+                                                <tr class="bg-aqua-active">
+                                                    <td>
+                                                        <h4><span id="credit_can_be"></span> so`m</h4>
+                                                    </td>
+                                                    <td>
+                                                        <h4><span id="credit_can_be_ann"></span> so`m</h4>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
 
@@ -656,12 +694,15 @@
             var katm_inps_route = "{{ route('uw.get-result-buttons', ['id' => $model->id]) }}";
 
             $.get(katm_inps_route, function(res){
-                console.log(res);
+                //console.log(res);
                 $('#credit_can_be').append(formatCurrency(res.credit_results.credit_can_be));
+                $('#credit_can_be_ann').empty().append(formatCurrency(res.credit_results.credit_can_be_ann));
                 $('#credit_sum').append(formatCurrency(res.credit_results.credit_sum));
                 $('#total_month_payment').append(formatCurrency(res.credit_results.total_month_payment));
                 $('#total_month_salary').append(formatCurrency(res.credit_results.total_month_salary));
                 $('#total_monthly').append(res.credit_results.total_monthly);
+                $('#monthly_pay').empty().append(formatCurrency(res.credit_results.monthly_pay));
+                $('#monthly_pay_ann').empty().append(formatCurrency(res.credit_results.monthly_pay_ann));
                 $('#scoring_ball').append(res.credit_results.scoring_ball);
                 if (res.data_k !== null) {
                     resultButton.append(button_res_k);
@@ -972,8 +1013,6 @@
                     ],
                     order: [[0, 'desc']]
                 });
-
-
 
                 $('#confirmLoan').click(function () {
 

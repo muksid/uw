@@ -6,13 +6,13 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Arizalar
+            Anderrayting Arizalar
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">underwriter</a></li>
-            <li class="active">underwriter</li>
+            <li><a href="#">anderrayting</a></li>
+            <li class="active">anderrayting</li>
         </ol>
 
         @if (count($errors) > 0)
@@ -131,7 +131,6 @@
                                 <th>Kredit summasi</th>
                                 <th>Sanasi</th>
                                 <th class="text-center">@lang('blade.status')</th>
-                                <th class="text-center">Skoring</th>
                                 <th><i class="fa fa-bank"></i> Filial Nomi</th>
                                 <th class="text-center"><i class="fa fa-user"></i> Filial Inspektor</th>
                             </tr>
@@ -180,15 +179,6 @@
                                             <span class="badge bg-aqua-active">Tasdiqlandi</span>
                                             @elseif($model->status == 4)
                                             <span class="badge bg-aqua-active">Yopilgan</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if($model->katm)
-                                            @if($model->katm->katm_sc_ball > 199)
-                                                <p class="text-green text-bold"><i class="fa fa-arrow-circle-o-up"></i> {{ $model->katm->katm_sc_ball }}</p>
-                                            @else
-                                                <p class="text-maroon text-bold"><i class="fa fa-arrow-circle-o-down"></i> {{ $model->katm->katm_sc_ball }}</p>
-                                            @endif
                                         @endif
                                     </td>
                                     <td>{{ $model->filial->filial_code??'' }} - <span class="badge bg-red-active">{{ $model->filial->title??'' }}</span></td>
