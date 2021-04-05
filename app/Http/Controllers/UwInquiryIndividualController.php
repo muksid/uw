@@ -329,9 +329,9 @@ class UwInquiryIndividualController extends Controller
             /**/
             $score_img = $md_array[10]['td'][1]['img']['src'];
             $file_name = $claim_id.'.php';
-            //$file_path = public_path().'/katm_files/'.$file_name;
+            $file_path = public_path().'/katm_files/'.$file_name;
 
-            $file_path = "//172.16.1.123/T$/OSPanel/domains/edo.turonbank.uz/public/katm_files/".$file_name;
+            //$file_path = "//172.16.1.123/T$/OSPanel/domains/edo.turonbank.uz/public/katm_files/".$file_name;
             $score_img_file = fopen($file_path, "w+") or die("Unable to open file!");
             fwrite($score_img_file, $score_img);
             fclose($score_img_file);
