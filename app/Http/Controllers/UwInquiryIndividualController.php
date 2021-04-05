@@ -57,15 +57,13 @@ class UwInquiryIndividualController extends Controller
             $creditCanBe = ($totalMonthPayment + $d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
             $monthlyPay = $model->summa/$model->loanType->credit_duration + $model->summa*$model->loanType->procent * 0.01/365 * 30;
 
-            $creditCanBeAnn = $totalMonthPayment*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
+            $creditCanBeAnn = ($totalMonthPayment + $d_pay)*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
             $monthlyPayAnn = -(($pv - $model->summa) * $model->loanType->procent*0.01/12)/ (1 - pow((1 + $model->loanType->procent*0.01/12), (-$model->loanType->credit_duration)));
         }
 
         // In CS max sum can be
         if (Auth::user()->uwUsers() == 'credit_insp' && $creditCanBe >= $model->summa){
-
             $creditCanBe = $model->summa;
-
         }
 
         return [
@@ -764,7 +762,6 @@ class UwInquiryIndividualController extends Controller
     public function getStatusSend($id, $sch_type)
     {
         //
-        // Scoring Calculator
         $model = UwClients::find($id);
         $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
 
@@ -772,6 +769,16 @@ class UwInquiryIndividualController extends Controller
         $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)->groupBy('PERIOD')->get()->count();
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
         $scoringBall = json_decode($clientK['katm_score'], true);
+
+        // Client Debtors Payment Calculate
+        $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
+        $d_pay = 0;
+        if ($debPayment){
+            foreach ($debPayment as $key => $value){
+                $d_pay+=$value->total_sum/$value->total_month * 0.87 * 0.5;
+            }
+        }
+
         $creditDebt = 0;
         $creditCanBe = 0;
         if ($clientK){
@@ -781,9 +788,9 @@ class UwInquiryIndividualController extends Controller
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * 0.5) - $creditDebt;
             if ($sch_type == 1){
-                $creditCanBe = $totalMonthPayment * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
+                $creditCanBe = ($totalMonthPayment+$d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
             } else {
-                $creditCanBe = $totalMonthPayment*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/
+                $creditCanBe = ($totalMonthPayment+$d_pay) * (pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/
                     ($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
             }
         }
@@ -803,12 +810,17 @@ class UwInquiryIndividualController extends Controller
             $modal_style = 'warning';
             $message = 'Skoring bali (200 ball) dan yuqori emas!!!';
         }
-        elseif ($model->is_inps == 1 && $model->summa >= $creditCanBe && $model->loanType->short_code == 'M'){
+        elseif ($model->is_inps == 1 && $model->summa >= $creditCanBe){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
         }
-        elseif ($model->is_inps == 1 && $scoringBall < 200 && $model->summa >= $creditCanBe && $model->loanType->short_code == 'M'){
+        elseif ($clientTotalSumMonthly < 3){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Mijozning Oylik ish xaqqi davri yetarli emas (3 oydan kam)!!!';
+        }
+        elseif ($model->is_inps == 1 && $scoringBall < 200 && $model->summa >= $creditCanBe){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
