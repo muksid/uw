@@ -1263,7 +1263,9 @@
                     //console.log('ds');
                     var id = $('#sendToAdmin').data('id');
 
-                    $.get('/uw/get-status-send/' + id, function (response) {
+                    var getSChType = $("input:radio[name=sch_type]:checked").val();
+
+                    $.get('/uw/get-status-send/' + id+'/'+getSChType, function (response) {
                         //console.log(response);
                         if(response.status === 1)
                         {
