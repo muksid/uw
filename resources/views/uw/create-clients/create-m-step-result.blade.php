@@ -1077,7 +1077,7 @@
                     var getSChType = $("input:radio[name=sch_type]:checked").val();
 
                     $.get('/uw/get-status-send/' + id+'/'+getSChType, function (response) {
-                        console.log(response);
+                        //console.log(response);
                         if(response.status === 1)
                         {
                             $('#btn-save-send').val("sendLoan");
