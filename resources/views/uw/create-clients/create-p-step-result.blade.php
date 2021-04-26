@@ -401,13 +401,13 @@
                                                         <th>
                                                             <label>
                                                                 Differentsial (Oddiy)
-                                                                <input type="radio" name="sch_type" value="1" class="flat-red" checked>
+                                                                <input type="radio" name="sch_type" value="1" class="flat-red" {{ $sch_type_d }}>>
                                                             </label>
                                                         </th>
                                                         <th>
                                                             <label>
                                                                 Annuitet
-                                                                <input type="radio" name="sch_type" value="2" class="flat-red">
+                                                                <input type="radio" name="sch_type" value="2" class="flat-red" {{ $sch_type_a }}>>
                                                             </label>
                                                         </th>
                                                     </div>
@@ -1714,10 +1714,12 @@
 
                         var actionType = $('#btn-save-send').val();
 
+                        var getSChType = $("input:radio[name=sch_type]:checked").val();
+
                         $('#btn-save-send').html('Sending..');
 
                         $.ajax({
-                            data: $('#sendForm').serialize(),
+                            data: $('#sendForm').serialize() + "&sch_type="+getSChType,
                             url: "{{ url('/uw/cs-app-send') }}",
                             type: "POST",
                             dataType: 'json',

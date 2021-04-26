@@ -11,7 +11,6 @@ use App\UwKatmClients;
 use App\UwLoanTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class UwInquiryIndividualController extends Controller
 {
@@ -37,7 +36,7 @@ class UwInquiryIndividualController extends Controller
         $d_pay = 0;
         if ($debPayment){
             foreach ($debPayment as $key => $value){
-                $d_pay+=$value->total_sum/$value->total_month * 0.87 * 0.5;
+                $d_pay+=$value->total_sum/$value->total_month * 0.87 * $model->loanType->dept_procent/100;
             }
         }
 
@@ -53,7 +52,7 @@ class UwInquiryIndividualController extends Controller
             $scoringBall = $clientK->katm_sc_ball;
         }
         if ($clientTotalSum){
-            $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * 0.5) - $creditDebt;
+            $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
             $creditCanBe = ($totalMonthPayment + $d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
             $monthlyPay = $model->summa/$model->loanType->credit_duration + $model->summa*$model->loanType->procent * 0.01/365 * 30;
 
@@ -64,6 +63,11 @@ class UwInquiryIndividualController extends Controller
         // In CS max sum can be
         if (Auth::user()->uwUsers() == 'credit_insp' && $creditCanBe >= $model->summa){
             $creditCanBe = $model->summa;
+        }
+
+        // In CS max sum can be
+        if (Auth::user()->uwUsers() == 'credit_insp' && $creditCanBeAnn >= $model->summa){
+            $creditCanBeAnn = $model->summa;
         }
 
         return [
@@ -775,7 +779,7 @@ class UwInquiryIndividualController extends Controller
         $d_pay = 0;
         if ($debPayment){
             foreach ($debPayment as $key => $value){
-                $d_pay+=$value->total_sum/$value->total_month * 0.87 * 0.5;
+                $d_pay+=$value->total_sum/$value->total_month * 0.87 * $model->loanType->dept_procent/100;
             }
         }
 
@@ -786,7 +790,7 @@ class UwInquiryIndividualController extends Controller
             $scoringBall = $clientK->katm_sc_ball;
         }
         if ($clientTotalSum){
-            $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * 0.5) - $creditDebt;
+            $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
             if ($sch_type == 1){
                 $creditCanBe = ($totalMonthPayment+$d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
             } else {

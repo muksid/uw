@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Filials;
 use App\Role;
 use App\User;
+use App\UwClients;
 use App\UwUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -63,10 +64,10 @@ class UwUsersController extends Controller
         //
         $row_id = $request->model_id;
 
-/*        $check_user = UwUsers::where('user_id', $request->user_id)->first();
-        if ($check_user){
-            return response()->json(array('error' => 'User already inserted'));
-        }*/
+        $check_user = UwUsers::where('user_id', $request->user_id)->where('status', 1)->first();
+        if ($check_user && $request->model_id < 0){
+            return response()->json(array('error' => 'User already inserted', 'msg' => $request->all()));
+        }
 
         UwUsers::updateOrCreate(['id' => $row_id],
             [
@@ -97,8 +98,6 @@ class UwUsersController extends Controller
                 'id' => 100
             )
         );
-
-        //return response()->json($user);
     }
 
     /**
@@ -162,12 +161,20 @@ class UwUsersController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         //
-        //UwUsers::find($id)->delete();
+        $model = UwUsers::find($id);
+
+        $checkCredits = UwClients::where('user_id', $model->user_id)->first();
+
+        if ($checkCredits){
+            return response()->json(['success'=>'Ushbu inspektorda Andirrayting mijozlari mavjud!!!', 'msg' => $id]);
+        }
+
+        $model->delete();
 
         return response()->json(['success'=>'Filial Deleted successfully']);
     }

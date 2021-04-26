@@ -54,6 +54,7 @@ class UwCreateClientsController extends Controller
                     '<th>'.'Kredit Davri'.'</th>'.
                     '<th>'.'Imtiy davr'.'</th>'.
                     '<th>'.'Valyuta'.'</th>'.
+                    '<th>'.'Qarz yuki %'.'</th>'.
                     '<tr>';
                 foreach ($models as $key => $values) {
                     $key = $key+1;
@@ -64,6 +65,7 @@ class UwCreateClientsController extends Controller
                         '<td>'.$values->credit_duration.' oy</td>'.
                         '<td>'.$values->credit_exemtion.' oy</td>'.
                         '<td>'.$values->currency.'</td>'.
+                        '<td>'.$values->dept_procent.' %</td>'.
                         '</tr>';
                 }
             }
@@ -282,7 +284,14 @@ class UwCreateClientsController extends Controller
 
         $districts = UnDistricts::where('status', 1)->get();
 
-        return view('uw.create-clients.create-'.$blade.'-step-result',compact('model', 'modelComments', 'regions', 'districts'));
+        $sch_type_d = 'checked';
+        $sch_type_a = '';
+        if ($model->sch_type == 2){
+            $sch_type_d = '';
+            $sch_type_a = 'checked';
+        }
+
+        return view('uw.create-clients.create-'.$blade.'-step-result',compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
     }
 
     /**

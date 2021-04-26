@@ -416,13 +416,13 @@
                                                         <th>
                                                             <label>
                                                                 Differentsial (Oddiy)
-                                                                <input type="radio" name="sch_type" value="1" class="flat-red" checked>
+                                                                <input type="radio" name="sch_type" value="1" class="flat-red" {{ $sch_type_d }}>
                                                             </label>
                                                         </th>
                                                         <th>
                                                             <label>
                                                                 Annuitet
-                                                                <input type="radio" name="sch_type" value="2" class="flat-red">
+                                                                <input type="radio" name="sch_type" value="2" class="flat-red" {{ $sch_type_a }}>
                                                             </label>
                                                         </th>
                                                     </div>
@@ -722,6 +722,13 @@
                 }
                 return (neg ? "-" : '') + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
             }
+
+            $(function () {
+                $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+                    checkboxClass: 'icheckbox_flat-green',
+                    radioClass: 'iradio_flat-green'
+                });
+            });
 
             $(document).ready( function () {
                 $.ajaxSetup({

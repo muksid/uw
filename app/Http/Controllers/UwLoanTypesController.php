@@ -64,6 +64,7 @@ class UwLoanTypesController extends Controller
                 'credit_duration' => $request->credit_duration,
                 'credit_exemtion' => $request->credit_exemtion,
                 'currency' => $request->currency,
+                'dept_procent' => $request->dept_procent,
                 'short_code' => $request->short_code,
                 'isActive' => $request->isActive
             ]);

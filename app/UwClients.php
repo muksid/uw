@@ -37,6 +37,7 @@ class UwClients extends Model
         'pin',
         'katm_sir',
         'summa',
+        'sch_type',
         'live_address',
         'live_number',
         'job_address',

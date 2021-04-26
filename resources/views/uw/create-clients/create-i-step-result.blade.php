@@ -872,6 +872,7 @@
                     </div>
                     <form id="sendForm" name="sendForm">
                         <input type="hidden" name="uw_clients_id" id="uw_clients_id" value="{{ $model->id }}">
+                        <input type="hidden" name="sch_type" id="sch_type" value="">
                         <div class="col-md-10">
                             <div class="box-body">
                                 <div class="form-group">
@@ -1714,10 +1715,12 @@
 
                         var actionType = $('#btn-save-send').val();
 
+                        var getSChType = $("input:radio[name=sch_type]:checked").val();
+
                         $('#btn-save-send').html('Sending..');
 
                         $.ajax({
-                            data: $('#sendForm').serialize(),
+                            data: $('#sendForm').serialize() + "&sch_type="+getSChType,
                             url: "{{ url('/uw/cs-app-send') }}",
                             type: "POST",
                             dataType: 'json',
