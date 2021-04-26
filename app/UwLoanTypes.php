@@ -15,6 +15,7 @@ class UwLoanTypes extends Model
         'credit_exemtion',
         'currency',
         'short_code',
+        'dept_procent',
         'isActive'
     ];
 }

@@ -79,6 +79,7 @@
                                 <th>Kredit Davri</th>
                                 <th>Imtiy davr</th>
                                 <th>Valyuta</th>
+                                <th>Qarz yuki %</th>
                             </tr>
                             @foreach($models as $key => $model)
                                 <tr class="clickable-row tr-cursor" data-href="{{ route('uw.create.step.one',['id' => $model->id]) }}">
@@ -88,6 +89,7 @@
                                     <td>{{ $model->credit_duration }} oy</td>
                                     <td>{{ $model->credit_exemtion }} oy</td>
                                     <td>{{ $model->currency }}</td>
+                                    <td>{{ $model->dept_procent }} %</td>
                                 </tr>
                             @endforeach
                             </tbody>

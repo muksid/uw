@@ -165,7 +165,7 @@ class UwClientsController extends Controller
     public function riskAdminView($id,$claim_id)
     {
         //
-        $model = UwClients::where('id', $id)->where('claim_id', $claim_id)->firstOrFail();
+        $model = UwClients::findOrFail($id);
 
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
@@ -174,7 +174,14 @@ class UwClientsController extends Controller
             ->orWhere(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->document_serial.$model->document_serial)
             ->get();
 
-        return view('uw.uw-clients.risk-admin-view', compact('model', 'modelComments', 'duplicateClients'));
+        $sch_type_d = 'checked';
+        $sch_type_a = '';
+        if ($model->sch_type == 2){
+            $sch_type_d = '';
+            $sch_type_a = 'checked';
+        }
+
+        return view('uw.uw-clients.risk-admin-view', compact('model', 'modelComments', 'duplicateClients', 'sch_type_d', 'sch_type_a'));
     }
 
     public function superAdminView($id,$claim_id)
@@ -217,9 +224,9 @@ class UwClientsController extends Controller
 
         $model = UwClients::findOrFail($id);
 
-        $model->update(['status' => 2, 'iabs_num' => $request->iabs_num]);
+        $model->update(['status' => 2, 'iabs_num' => $request->iabs_num, 'sch_type' => $request->sch_type]);
 
-        return response()->json(array('success' => true, 'msg' => $id));
+        return response()->json(array('success' => true, 'msg' => 'send'));
     }
 
     public function riskAdminConfirm(Request $request){

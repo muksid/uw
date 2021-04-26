@@ -72,7 +72,7 @@
                                 <th>Job</th>
                                 <th>status</th>
                                 <th><i class="fa fa-pencil-square-o"></i></th>
-                                {{--<th><i class="fa fa-trash-o"></i></th>--}}
+                                <th><i class="fa fa-trash-o"></i></th>
                                 <th>Date</th>
                             </tr>
                             </thead>
@@ -126,13 +126,13 @@
                                             <i class="fa fa-pencil"></i>
                                         </button>
                                     </td>
-                                    {{--<td>
-                                        <button type="button" class="btn btn-flat btn-danger" id="deleteUser" disabled
+                                    <td>
+                                        <button type="button" class="btn btn-flat btn-danger" id="deleteUser"
                                                 data-id="{{ $model->id }}">
                                             <i class="fa fa-trash"></i>
                                         </button>
-                                    </td>--}}
-                                    <td>{{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')}}</td>
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($model->created_at)->format('d M, Y H:i')}}</td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -244,7 +244,7 @@
                                     </h4>
                                 </div>
                                 <div class="modal-body">
-                                    <h5>User Successfully deleted</h5>
+                                    <h4><span id="res_message"></span></h4>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-outline" data-dismiss="modal">@lang('blade.close')
@@ -325,7 +325,7 @@
                     var model_id = $(this).data('id');
 
                     $.get('/uw/uw-users/' + model_id, function (data) {
-                        console.log(data);
+                        //console.log(data);
                         $('#modalHeader').html("Edit User");
                         $('#btn-save').val("editUser");
                         $('#modalForm').modal('show');
@@ -362,7 +362,9 @@
                             url: "{{ url('uw/uw-users') }}"+'/'+id,
                             success: function (data)
                             {
+                                console.log(data);
                                 $('#successModal').modal('show');
+                                $('#res_message').html(data.success);
                                 $("#rowId_" + id).remove();
                             }
                         });
@@ -392,6 +394,7 @@
                             dataType: 'json',
 
                             success: function (data) {
+                                console.log(data);
                                 if (data.error){
                                     $('#errorMessage').html(data.error);
                                     $('#userForm').trigger("reset");

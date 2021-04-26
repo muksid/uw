@@ -103,7 +103,7 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('get-client-res-k/{id}','UwInquiryIndividualController@getClientKatm');
         Route::get('get-client-res-i/{id}','UwInquiryIndividualController@getClientInps');
         Route::get('get-status-send/{id}/{sch_type}','UwInquiryIndividualController@getStatusSend');
-        Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
+        #Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
 
         // GUAR
         Route::get('uw-get-client-guars/{id}', 'UwCreateClientsController@getClientGuars')->name('uw.get-client-guars');

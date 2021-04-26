@@ -61,12 +61,13 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Title</th>
-                                <th>Credit type</th>
-                                <th>Procent</th>
-                                <th>Credit Dur</th>
-                                <th>Credit Exam</th>
-                                <th>Currency</th>
+                                <th>Kredit nomi</th>
+                                <th>Code</th>
+                                <th>Foiz %</th>
+                                <th>Davr</th>
+                                <th>Imt davr</th>
+                                <th>Valyuta</th>
+                                <th>Qarz yuki %</th>
                                 <th>Short Code</th>
                                 <th>IsActive</th>
                                 <th>Created at</th>
@@ -91,15 +92,15 @@
                     <form id="postForm" name="postForm">
                         <input type="hidden" name="post_id" id="post_id">
                         <div class="row">
-                            <div class="col-sm-8">
+                            <div class="col-sm-12">
                                 <div class="form-group">
-                                    <label>Title</label>
+                                    <label>Kredit nomi</label>
                                     <input type="text" class="form-control" id="title" name="title" value="" required="">
                                 </div>
                             </div>
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label>Title (Short)</label>
+                                    <label>Kredit turi</label>
                                     <select class="form-control" name="short_code" id="short_code">
                                         <option value="M">(M) Mikroqarz</option>
                                         <option value="I">(I) Iste`mol</option>
@@ -108,11 +109,9 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label>Credit Type</label>
+                                    <label>Kredit code</label>
                                     <select class="form-control" name="credit_type" id="credit_type">
                                         <option value="32">Mikroqarz</option>
                                         <option value="21">Iste`mol</option>
@@ -121,22 +120,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label>Credit davri</label>
-                                    <input type="number" class="form-control" id="credit_duration" name="credit_duration" value="" required="">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label>Credit Imt davri</label>
-                                    <input type="number" class="form-control" id="credit_exemtion" name="credit_exemtion" value="" required="">
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <!-- text input -->
+                            <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Valyuta</label>
                                     <select class="form-control" name="currency" id="currency">
@@ -147,11 +131,32 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Credit davri</label>
+                                    <input type="number" class="form-control" id="credit_duration" name="credit_duration" value="" required="">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Credit Imt davri</label>
+                                    <input type="number" class="form-control" id="credit_exemtion" name="credit_exemtion" value="" required="">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
                                 <!-- text input -->
                                 <div class="form-group">
-                                    <label>Percent</label>
+                                    <label>Foiz %</label>
                                     <input type="number" class="form-control" id="procent" name="procent" value="" required="">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <!-- text input -->
+                                <div class="form-group">
+                                    <label>Qarz yuki</label>
+                                    <input type="number" class="form-control" id="dept_procent" name="dept_procent" value="" required="">
                                 </div>
                             </div>
                         </div>
@@ -162,14 +167,14 @@
                                 <div class="form-group">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox"  id="isActive" name="isActive" value="1" checked="checked">
-                                        <label class="form-check-label">Checkbox checked</label>
+                                        <label class="form-check-label">Active</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <button type="submit" class="btn btn-primary pull-left" id="btn-save" value="create"><i class="fa fa-save"></i> Save
+                                <button type="submit" class="btn btn-primary pull-left" id="btn-save" value="create"><i class="fa fa-save"></i> @lang('blade.save')
                                 </button>
                             </div>
                         </div>
@@ -275,10 +280,23 @@
                     { data: 'id', name: 'id', 'visible': true},
                     { data: 'title', name: 'title'},
                     { data: 'credit_type', name: 'credit_type' },
-                    { data: 'procent', name: 'procent' },
-                    { data: 'credit_duration', name: 'credit_duration' },
-                    { data: 'credit_exemtion', name: 'credit_exemtion' },
+                    { data: "procent", name: 'procent',
+                        render: function (data, type, row) {
+                            return data+' %';
+                        }
+                    },
+                    { data: "credit_duration", name: 'credit_duration',
+                        render: function (data, type, row) {
+                            return data+' oy';
+                        }
+                    },
+                    { data: "credit_exemtion", name: 'credit_exemtion',
+                        render: function (data, type, row) {
+                            return data+' oy';
+                        }
+                    },
                     { data: 'currency', name: 'currency' },
+                    { data: 'dept_procent', name: 'dept_procent' },
                     { data: 'short_code', name: 'short_code' },
                     { data: "isActive", name: 'isActive', className: 'bg-info',
                         render: function (data, type, row) {
@@ -321,6 +339,7 @@
                     $('#credit_duration').val(data.credit_duration);
                     $('#credit_exemtion').val(data.credit_exemtion);
                     $('#currency').val(data.currency);
+                    $('#dept_procent').val(data.dept_procent);
                     $('#short_code').val(data.short_code);
                     $('#isActive').val(data.isActive);
                 })

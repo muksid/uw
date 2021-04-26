@@ -401,13 +401,13 @@
                                                         <th>
                                                             <label>
                                                                 Differentsial (Oddiy)
-                                                                <input type="radio" name="sch_type" value="1" class="flat-red" checked>
+                                                                <input type="radio" name="sch_type" value="1" class="flat-red" {{ $sch_type_d }}>
                                                             </label>
                                                         </th>
                                                         <th>
                                                             <label>
                                                                 Annuitet
-                                                                <input type="radio" name="sch_type" value="2" class="flat-red">
+                                                                <input type="radio" name="sch_type" value="2" class="flat-red" {{ $sch_type_a }}>
                                                             </label>
                                                         </th>
                                                     </div>
@@ -872,6 +872,7 @@
                     </div>
                     <form id="sendForm" name="sendForm">
                         <input type="hidden" name="uw_clients_id" id="uw_clients_id" value="{{ $model->id }}">
+                        <input type="hidden" name="sch_type" id="sch_type" value="">
                         <div class="col-md-10">
                             <div class="box-body">
                                 <div class="form-group">
@@ -1288,11 +1289,13 @@
                 });
 
                 // BUTTON GET STATUS SEND TO ADMIN
-                $('body').on('click', '#confirmSendToAdmin', function () {
+                /*$('body').on('click', '#confirmSendToAdmin', function () {
                     //console.log('ds');
                     var id = $('#confirmSendToAdmin').data('id');
 
-                    $.get('/uw/get-confirm-send/' + id, function (response) {
+                    var getSChType = $("input:radio[name=sch_type]:checked").val();
+
+                    $.get('/uw/get-confirm-send/'+id, function (response) {
                         //console.log(response);
                         if(response.status === 1)
                         {
@@ -1312,7 +1315,7 @@
                         }
                     });
 
-                });
+                });*/
 
                 // request DEBTORS
                 $('#debtors_datatable').DataTable({
@@ -1713,10 +1716,12 @@
 
                         var actionType = $('#btn-save-send').val();
 
+                        var getSChType = $("input:radio[name=sch_type]:checked").val();
+
                         $('#btn-save-send').html('Sending..');
 
                         $.ajax({
-                            data: $('#sendForm').serialize(),
+                            data: $('#sendForm').serialize() + "&sch_type="+getSChType,
                             url: "{{ url('/uw/cs-app-send') }}",
                             type: "POST",
                             dataType: 'json',
@@ -1724,6 +1729,7 @@
                                 $("#loading-gif").show();
                             },
                             success: function (data) {
+                                console.log(data);
                                 $("#loading-gif").hide();
                                 $('#sendForm').trigger("reset");
                                 $('#modalFormSend').modal('hide');
