@@ -819,11 +819,11 @@ class UwInquiryIndividualController extends Controller
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
         }
-        /*elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 3){
+        elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 3){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Mijozning Oylik ish xaqqi davri yetarli emas (3 oydan kam)!!!';
-        }*/
+        }
         elseif ($model->is_inps == 1 && $scoringBall < 200 && $model->summa >= $creditCanBe){
             $status = 0;
             $modal_style = 'warning';
