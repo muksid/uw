@@ -687,15 +687,15 @@ class UwClientsController extends Controller
         $katm_scoring = json_decode($katm['katm_score'], true);
 
         /* test begin*/
-       /*$fileBase = UwKatmClients::all();
-        foreach ($fileBase as $key => $value){
-            $file_name = $value->claim_id.'.php';
-            $file_path = public_path().'/katm_files/'.$file_name;
-            $score_img_file = fopen($file_path, "w") or die("Unable to open file!");
-            fwrite($score_img_file, $value->katm_img);
-            fclose($score_img_file);
-        }
-        print_r('dasdsa'); die;*/
+        /*$fileBase = UwKatmClients::all();
+         foreach ($fileBase as $key => $value){
+             $file_name = $value->claim_id.'.php';
+             $file_path = public_path().'/katm_files/'.$file_name;
+             $score_img_file = fopen($file_path, "w") or die("Unable to open file!");
+             fwrite($score_img_file, $value->katm_img);
+             fclose($score_img_file);
+         }
+         print_r('dasdsa'); die;*/
         /* test end */
 
         if ($katm && $costs_m){
@@ -1514,27 +1514,27 @@ class UwClientsController extends Controller
                 $guard_type = ' - ';
             }
         }
-            $array_from_to = array (
-                '[filial_name]' => $model->filial->title_ru,
-                '[region_name]' => mb_convert_case($model->region->name, MB_CASE_TITLE, "UTF-8"),
-                '[district_name]' => mb_convert_case($model->district->name, MB_CASE_TITLE, "UTF-8"),
-                '[live_address]' => $this->transliterate($model->live_address),
-                '[client_name]' => $this->transliterate($model->family_name.' '.$model->name.' '.$model->patronymic),
-                '[loan_month]' => $model->credit_duration,
-                '[loan_interest]' => $model->procent,
-                '[loan_sum]' => number_format($model->summa),
-                '[loan_sum_word]' => $this->convertNumberToWord($model->summa),
-                '[guard_name]' => $model->credits->credit_security_name??'',
-                '[guard_type]' => $guard_type,
-                '[loan_date]' => date("d.m.Y", strtotime($model->created_at)),
-                '[client_name_short]' => $this->transliterate(mb_substr($model->name, 0,1).'.'.mb_substr($model->patronymic, 0,1).'.'.$model->family_name),
-            );
+        $array_from_to = array (
+            '[filial_name]' => $model->filial->title_ru,
+            '[region_name]' => mb_convert_case($model->region->name, MB_CASE_TITLE, "UTF-8"),
+            '[district_name]' => mb_convert_case($model->district->name, MB_CASE_TITLE, "UTF-8"),
+            '[live_address]' => $this->transliterate($model->live_address),
+            '[client_name]' => $this->transliterate($model->family_name.' '.$model->name.' '.$model->patronymic),
+            '[loan_month]' => $model->credit_duration,
+            '[loan_interest]' => $model->procent,
+            '[loan_sum]' => number_format($model->summa),
+            '[loan_sum_word]' => $this->convertNumberToWord($model->summa),
+            '[guard_name]' => $model->credits->credit_security_name??'',
+            '[guard_type]' => $guard_type,
+            '[loan_date]' => date("d.m.Y", strtotime($model->created_at)),
+            '[client_name_short]' => $this->transliterate(mb_substr($model->name, 0,1).'.'.mb_substr($model->patronymic, 0,1).'.'.$model->family_name),
+        );
 
-            $getFile = file_get_contents("uw/uw_app_blank.html");
+        $getFile = file_get_contents("uw/uw_app_blank.html");
 
-            $print_page = str_replace(array_keys($array_from_to), $array_from_to, $getFile);
+        $print_page = str_replace(array_keys($array_from_to), $array_from_to, $getFile);
 
-            return response()->json($print_page);
+        return response()->json($print_page);
     }
 
     /**

@@ -401,13 +401,13 @@
                                                         <th>
                                                             <label>
                                                                 Differentsial (Oddiy)
-                                                                <input type="radio" name="sch_type" value="1" class="flat-red" {{ $sch_type_d }}>>
+                                                                <input type="radio" name="sch_type" value="1" class="flat-red" {{ $sch_type_d }}>
                                                             </label>
                                                         </th>
                                                         <th>
                                                             <label>
                                                                 Annuitet
-                                                                <input type="radio" name="sch_type" value="2" class="flat-red" {{ $sch_type_a }}>>
+                                                                <input type="radio" name="sch_type" value="2" class="flat-red" {{ $sch_type_a }}>
                                                             </label>
                                                         </th>
                                                     </div>
@@ -1077,7 +1077,7 @@
                 $('body').on('click', '#getResultKATM', function () {
                     var id = $('#getResultKATM').data('id');
                     $.get('/uw/get-client-res-k/' + id, function (data) {
-                        //console.log(data);
+                        console.log(data);
                         $('#scoringPage').empty();
                         $("#scoringPage").prepend(data.scoring_page);
                         $(".client_name").html(data.client.family_name + ' ' + data.client.name + ' ' + data.client.patronymic);
@@ -1102,6 +1102,9 @@
                         $(".client_live_address").html(data.client.live_address);
                         $(".client_pin").html(data.client.pin);
                         $(".client_inn").html(data.client.inn);
+                        if (data.scoring.client_info_7){
+                            $(".client_info_7").html(data.scoring.client_info_7);
+                        }
                         $(".client_phone").html(data.client.phone);
 
                         var doc_formattedDate = new Date(data.client.document_date);
@@ -1201,9 +1204,10 @@
                         }
 
                         $('#tb_row_12_agr_summ').html(data.table.row_12.agr_summ);
-                        $('#tb_row_12_agr_comm2').html(data.table.row_12.agr_comm2.content);
+                        $('#tb_row_12_agr_comm2').html(data.table.row_12.agr_comm2);
                         $('#tb_row_12_agr_comm3').html(data.table.row_12.agr_comm3);
                         $('#tb_row_12_agr_comm4').html(data.table.row_12.agr_comm4);
+                        $('#tb_row_12_agr_date').html(data.table.row_12.agr_date);
 
                         $('#tb_ft_claim_id').html(data.client.claim_id);
                         $('#tb_ft_claim_date').html(data.client.claim_date);

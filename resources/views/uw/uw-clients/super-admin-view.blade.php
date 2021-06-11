@@ -674,6 +674,9 @@
                         $(".client_pin").html(data.client.pin);
                         $(".client_inn").html(data.client.inn);
                         $(".client_phone").html(data.client.phone);
+                        if (data.scoring.client_info_7){
+                            $(".client_info_7").html(data.scoring.client_info_7);
+                        }
 
                         var doc_formattedDate = new Date(data.client.document_date);
                         var doc_d = doc_formattedDate.getDate();
