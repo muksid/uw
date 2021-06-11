@@ -26,9 +26,14 @@ class UwInquiryIndividualController extends Controller
         //
         $model = UwClients::find($id);
 
-        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->groupBy('claim_id')->sum('INCOME_SUMMA');
-        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)->groupBy('PERIOD')->get()->count();
+        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+            ->groupBy('claim_id')->sum('INCOME_SUMMA');
+
+        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
+            ->groupBy('PERIOD')->get()->count();
+
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
         $scoringBall = json_decode($clientK['katm_score'], true);
 
         // Client Debtors Payment Calculate
@@ -326,7 +331,8 @@ class UwInquiryIndividualController extends Controller
             $client_info_4 = $md_array[4]['td'][1]['span']; /*adres*/
             $client_info_5 = $md_array[5]['td'][1]['span']; /*pinfl*/
             $client_info_6 = $md_array[6]['td'][1]['span']; /*pinfl*/
-            $client_info_8 = $md_array[8]['td'][1]['span']; /*pasport*/
+            $client_info_7 = $md_array[7]['td'][1]['span']; /*passport*/
+            $client_info_8 = $md_array[8]['td'][1]['span']; /*telephone*/
 
             /**/
             $score_img = $md_array[10]['td'][1]['img']['src'];
@@ -393,33 +399,33 @@ class UwInquiryIndividualController extends Controller
             $tb_9_4 = $md_array['27']['td'][5]['span'];
 
             /* -- tb 12 -- */
-            if (count($md_array[30]['td'][2]['span'][0]) > 1) {
+            if (count($md_array[31]['td'][2]['span'][0]) > 2) {
                 # code...
-                $tb_12_0 = $md_array[30]['td'][2]['span'][0]['span'];
+                $tb_12_0 = $md_array[31]['td'][2]['span'][0]['span'];
             } else{
                 $tb_12_0 = 0;
             }
 
-            if (count($md_array[30]['td'][2]['span'][1]) > 1) {
-                $tb_12_1 = $md_array[30]['td'][2]['span'][1]['span'];
+            if (count($md_array[31]['td'][2]['span'][1]) > 2) {
+                $tb_12_1 = $md_array[31]['td'][2]['span'][1]['span'];
             } else {
                 $tb_12_1 = '';
             }
 
-            if (count($md_array[30]['td'][2]['span'][2]) > 1) {
-                $tb_12_2 = $md_array[30]['td'][2]['span'][2]['span'];
+            if (count($md_array[31]['td'][2]['span'][2]) > 2) {
+                $tb_12_2 = $md_array[31]['td'][2]['span'][2]['span'];
             } else {
                 $tb_12_2 = '';
             }
 
-            if (count($md_array[30]['td'][2]['span'][3]) > 1) {
-                $tb_12_3 = $md_array[30]['td'][2]['span'][3]['span'];
+            if (count($md_array[31]['td'][2]['span'][3]) > 2) {
+                $tb_12_3 = $md_array[31]['td'][2]['span'][3]['span'];
             } else {
                 $tb_12_3 = '';
             }
 
-            if (count($md_array[30]['td'][2]['span'][4]) > 1) {
-                $tb_12_4 = $md_array[30]['td'][2]['span'][4]['span'];
+            if (count($md_array[31]['td'][2]['span'][4]) > 2) {
+                $tb_12_4 = $md_array[31]['td'][2]['span'][4]['span'];
             } else {
                 $tb_12_4 = '';
             }
@@ -438,6 +444,7 @@ class UwInquiryIndividualController extends Controller
                 'client_info_4' => $client_info_4,
                 'client_info_5' => $client_info_5,
                 'client_info_6' => $client_info_6,
+                'client_info_7' => $client_info_7,
                 'client_info_8' => $client_info_8,
                 'ft_claim_id' => $ft_claim_id,
                 'ft_katm_id' => $ft_katm_id,
@@ -767,11 +774,17 @@ class UwInquiryIndividualController extends Controller
     {
         //
         $model = UwClients::find($id);
+
         $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
 
-        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->groupBy('claim_id')->sum('INCOME_SUMMA');
-        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)->groupBy('PERIOD')->get()->count();
+        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+            ->groupBy('claim_id')->sum('INCOME_SUMMA');
+
+        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
+            ->groupBy('PERIOD')->get()->count();
+
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
         $scoringBall = json_decode($clientK['katm_score'], true);
 
         // Client Debtors Payment Calculate
@@ -819,7 +832,7 @@ class UwInquiryIndividualController extends Controller
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
         }
-        elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 3){
+        elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 2){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Mijozning Oylik ish xaqqi davri yetarli emas (3 oydan kam)!!!';

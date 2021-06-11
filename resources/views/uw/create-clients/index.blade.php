@@ -70,6 +70,8 @@
                             </div>
                         </div>
 
+                        @if(\Illuminate\Support\Facades\Auth::user()->branch_code == '00192'
+                        || \Illuminate\Support\Facades\Auth::user()->branch_code == '01144')
                         <table class="table table-hover" id="loan_tables">
                             <tbody>
                             <tr>
@@ -82,6 +84,7 @@
                                 <th>Qarz yuki %</th>
                             </tr>
                             @foreach($models as $key => $model)
+
                                 <tr class="clickable-row tr-cursor" data-href="{{ route('uw.create.step.one',['id' => $model->id]) }}">
                                     <td>{{ $key+= 1 }}</td>
                                     <td>{{ $model->title }}</td>
@@ -91,13 +94,15 @@
                                     <td>{{ $model->currency }}</td>
                                     <td>{{ $model->dept_procent }} %</td>
                                 </tr>
+
                             @endforeach
                             </tbody>
                         </table>
+                        @else <br>
+                            <h3 class="text-maroon text-left"> Ushbu filialda kreditlash operatsiyasi vaqtincha to'xtatilgan! <span class="fa fa-frown-o"></span></h3>
+                        @endif
                     </div>
-                    <!-- /.box-body -->
                 </div>
-                <!-- /.box -->
             </div>
         </div>
     </section>
