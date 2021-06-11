@@ -66,9 +66,7 @@
                                 <th>Foiz %</th>
                                 <th>Davr</th>
                                 <th>Imt davr</th>
-                                <th>Valyuta</th>
                                 <th>Qarz yuki %</th>
-                                <th>Short Code</th>
                                 <th>IsActive</th>
                                 <th>Created at</th>
                                 <th>Action</th>
@@ -249,6 +247,9 @@
     <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
 
     <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
+
+    <script src="{{ asset ("/js/moment.min.js") }}"></script>
+
     <style>
         .loading-gif {
             background: url({{asset('images/loading-3.gif')}}) no-repeat center center;
@@ -278,9 +279,9 @@
                 },
                 columns: [
                     { data: 'id', name: 'id', 'visible': true},
-                    { data: 'title', name: 'title'},
+                    { data: 'title', name: 'title', className: 'text-sm', width: "220px"},
                     { data: 'credit_type', name: 'credit_type' },
-                    { data: "procent", name: 'procent',
+                    { data: "procent", name: 'procent', className: 'text-primary text-center',
                         render: function (data, type, row) {
                             return data+' %';
                         }
@@ -290,15 +291,17 @@
                             return data+' oy';
                         }
                     },
-                    { data: "credit_exemtion", name: 'credit_exemtion',
+                    { data: "credit_exemtion", name: 'credit_exemtion', className: 'text-success text-center',
                         render: function (data, type, row) {
                             return data+' oy';
                         }
                     },
-                    { data: 'currency', name: 'currency' },
-                    { data: 'dept_procent', name: 'dept_procent' },
-                    { data: 'short_code', name: 'short_code' },
-                    { data: "isActive", name: 'isActive', className: 'bg-info',
+                    { data: 'dept_procent', name: 'dept_procent', className: 'text-maroon text-center',
+                        render: function (data, type, row) {
+                            return data+' %';
+                        }
+                     },
+                    { data: "isActive", name: 'isActive', className: 'bg-info text-center',
                         render: function (data, type, row) {
                             if (data === 1) {
                                 return '<i class="fa fa-check-circle-o text-success"></i>';
@@ -309,10 +312,14 @@
                             return 'None';
                         }
                     },
-                    { data: 'created_at', name: 'created_at' },
+                    { data: 'created_at', name: 'created_at',
+                        render : function (data,full ) {
+                            return moment(data).format('DD.MM.YYYY');
+                        }
+                    },
                     { data: 'action', name: 'action', orderable: false},
                 ],
-                order: [[0, 'desc']]
+                order: [[7, 'DESC']]
             });
 
             $('#add-new-post').click(function () {
