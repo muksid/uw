@@ -69,9 +69,6 @@
                                 </select>
                             </div>
                         </div>
-
-                        @if(\Illuminate\Support\Facades\Auth::user()->branch_code == '00192'
-                        || \Illuminate\Support\Facades\Auth::user()->branch_code == '01144')
                         <table class="table table-hover" id="loan_tables">
                             <tbody>
                             <tr>
@@ -98,9 +95,6 @@
                             @endforeach
                             </tbody>
                         </table>
-                        @else <br>
-                            <h3 class="text-maroon text-left"> Ushbu filialda kreditlash operatsiyasi vaqtincha to'xtatilgan! <span class="fa fa-frown-o"></span></h3>
-                        @endif
                     </div>
                 </div>
             </div>

@@ -20,7 +20,7 @@ class UwLoanTypesController extends Controller
         //
         if(request()->ajax())
         {
-            return datatables()->of(UwLoanTypes::latest()->get())
+            return datatables()->of(UwLoanTypes::get())
                 ->addColumn('action', function($data){
                     //$button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit btn btn-success edit-post "><i class="fa fa-pencil"></i></a>';
                     //$button .= '&nbsp;&nbsp;';
