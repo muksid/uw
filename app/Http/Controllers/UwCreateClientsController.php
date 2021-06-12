@@ -8,11 +8,12 @@ use App\UwClientComments;
 use App\UwClientFiles;
 use App\UwClientGuars;
 use App\UwClients;
+use App\UwLoanBank;
 use App\UwLoanTypes;
+use App\UwUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class UwCreateClientsController extends Controller
 {
@@ -24,7 +25,22 @@ class UwCreateClientsController extends Controller
     public function index(Request $request)
     {
         //
-        $models = UwLoanTypes::where('short_code', 'M')->where('isActive', 1)->orderBy('id', 'DESC')->get();
+        $filial = DB::table('uw_users as a')
+            ->leftJoin('filials as b', 'a.filial_id', '=', 'b.id')
+            ->where('a.user_id', Auth::id())
+            ->where('a.status', 1)
+            ->select('b.parent_id')
+            ->first();
+
+        $models = UwLoanTypes::whereHas('banks',
+            function ($query) use ($filial) {
+                $query->where('filials_id', $filial->parent_id);
+                $query->where('isActive', 1);
+            })
+            ->where('short_code', 'M')
+            ->where('isActive', 1)
+            ->orderBy('id', 'DESC')
+            ->get();
 
         //$request->session()->forget('model');
 
@@ -44,7 +60,23 @@ class UwCreateClientsController extends Controller
         if ($request->ajax())
         {
             $output="";
-            $models = UwLoanTypes::where('credit_type', $request->credit_type)->where('isActive', 1)->get();
+            //$models = UwLoanTypes::where('credit_type', $request->credit_type)->where('isActive', 1)->get();
+            $filial = DB::table('uw_users as a')
+                ->leftJoin('filials as b', 'a.filial_id', '=', 'b.id')
+                ->where('a.user_id', Auth::id())
+                ->where('a.status', 1)
+                ->select('b.parent_id')
+                ->first();
+
+            $models = UwLoanTypes::whereHas('banks',
+                function ($query) use ($filial) {
+                    $query->where('filials_id', $filial->parent_id);
+                    $query->where('isActive', 1);
+                })
+                ->where('credit_type', $request->credit_type)
+                ->where('isActive', 1)
+                ->orderBy('id', 'DESC')
+                ->get();
             if ($models)
             {
                 $output .='<tr>'.
@@ -61,11 +93,11 @@ class UwCreateClientsController extends Controller
                     $output .='<tr class="clickable-row tr-cursor" data-href="'.route("uw.create.step.one",["id" => $values->id]).'">'.
                         '<td>'.$key++.'</td>'.
                         '<td><a href="'.route("uw.create.step.one",["id" => $values->id]).'">'.$values->title.'</a></td>'.
-                        '<td>'.$values->procent.' %</td>'.
+                        '<td class="text-green">'.$values->procent.' %</td>'.
                         '<td>'.$values->credit_duration.' oy</td>'.
                         '<td>'.$values->credit_exemtion.' oy</td>'.
                         '<td>'.$values->currency.'</td>'.
-                        '<td>'.$values->dept_procent.' %</td>'.
+                        '<td class="text-maroon">'.$values->dept_procent.' %</td>'.
                         '</tr>';
                 }
             }

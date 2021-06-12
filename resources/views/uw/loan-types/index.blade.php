@@ -56,6 +56,7 @@
                     </div>
                 </div>
                 <!-- /.box-header -->
+                <div id="loading" class="loading-gif" style="display: none"></div>
                 <div class="box-body">
                     <table class="table table-striped table-bordered" id="laravel_datatable">
                         <thead>
@@ -236,6 +237,72 @@
         </div>
     </div>
 
+    {{--banks modal--}}
+    <div id="BanksModal" class="modal fade modal-info" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header bg-info">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div id="loanName"></div>
+                </div>
+                <form id="bankForm" name="bankForm">
+                    <input type="text" id="loan_id" name="loan_id" hidden>
+                    <div class="modal-body">
+                        <div class="box-body no-padding">
+                            <div class="mailbox-controls">
+                                <!-- Check all button -->
+                                <button type="button" class="btn btn-default btn-sm checkbox-toggle"><i class="fa fa-square-o"></i>
+                                </button>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover">
+                                    <tbody id="exp">
+                                    </tbody>
+                                    <tbody id="filialsData">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-outline" id="btn-bank-save">Saqlash</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            //Enable iCheck plugin for checkboxes
+            //iCheck for checkbox and radio inputs
+            $('.mailbox-messages input[type="checkbox"]').iCheck({
+                checkboxClass: 'icheckbox_flat-blue',
+                radioClass: 'iradio_flat-blue'
+            });
+
+            //Enable check and uncheck all functionality
+            $(".checkbox-toggle").click(function () {
+                var clicks = $(this).data('clicks');
+                if (clicks) {
+                    //Uncheck all checkboxes
+                    $(".mailbox-messages input[type='checkbox']").iCheck("uncheck");
+                    $(".fa", this).removeClass("fa-check-square-o").addClass('fa-square-o');
+                } else {
+                    //Check all checkboxes
+                    $(".mailbox-messages input[type='checkbox']").iCheck("check");
+                    $(".fa", this).removeClass("fa-square-o").addClass('fa-check-square-o');
+                }
+                $(this).data("clicks", !clicks);
+            });
+
+        });
+    </script>
+
+
     <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
 
     <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
@@ -324,6 +391,7 @@
 
             $('#add-new-post').click(function () {
                 $('#btn-save').val("create-post");
+                $('#btn-bank-save').val("bank-store");
                 $('#post_id').val('');
                 $('#postForm').trigger("reset");
                 $('#postCrudModal').html("Add Loan");
@@ -414,6 +482,71 @@
 
         });
 
+        $('body').on('click', '#banks-post', function (e) {
+
+            e.preventDefault();
+
+            let id = $(this).data("id");
+
+            $.ajax(
+                {
+                    type: "GET",
+                    url: "{{ url('/uw/get-loan-banks') }}/"+id,
+                    beforeSend: function(){
+                        $("#loading").show();
+                        $("#filialsData").empty();
+                        $("#exp").empty();
+                    },
+                    success: function (data) {
+                        //console.log(data)
+                        $("#loading").hide();
+                        let loanName = '';
+                        let dataFilials = '';
+                        let exp = '';
+
+                        loanName+='<h4 class="modal-title text-center"><span class="fa fa-credit-card"></span> ' +
+                            data.loanName.title+', '+data.loanName.procent+' %, '+
+                            data.loanName.credit_duration+' oy, '+
+                            data.loanName.dept_procent+' %, '+
+                            '</h4>';
+
+                        for (let j = 0; j < data.checkedModel.length; j++){
+                            let res = data.checkedModel[j];
+                            exp+= '<tr>' +
+                                '<td><input type="checkbox" checked name="filial_id[]" value="'+res.id+'">' +
+                                '</td>' +
+                                '<td class="mailbox-star"><a href="#"><i class="fa fa-star text-yellow"></i></a>' +
+                                '</td>' +
+                                '<td class="mailbox-subject"><b>'+res.filial_code+'</b> - '+res.title_ru+ '</td>' +
+                                '</tr>';
+                        }
+
+                        $.each(data.model, function (index, itemData) {
+
+                            dataFilials+=
+                                '<tr>' +
+                                    '<td><input type="checkbox" name="filial_id[]" value="'+itemData.id+'">' +
+                                '</td>' +
+                                '<td class="mailbox-star"><a href="#"><i class="fa fa-star-o text-yellow"></i></a>' +
+                                '</td>' +
+                                    '<td class="mailbox-subject"><b>'+itemData.filial_code+'</b> - '+itemData.title_ru+ '</td>' +
+                                '</tr>';
+                        });
+
+                        $("#loanName").html(loanName);
+                        $("#exp").append(exp);
+                        $("#filialsData").append(dataFilials);
+                        $("#loan_id").val(id);
+                        //console.log(id);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+            $('#BanksModal').data('id', id).modal('show');
+        });
+
         if ($("#postForm").length > 0) {
             $("#postForm").validate({
                 submitHandler: function(form) {
@@ -425,12 +558,47 @@
                         url: "{{ route('uw-loan-types.store') }}",
                         type: "POST",
                         dataType: 'json',
+                        beforeSend: function(){
+                            $("#loading").show();
+                        },
                         success: function (data) {
                             $('#postForm').trigger("reset");
                             $('#ajax-crud-modal').modal('hide');
                             $('#btn-save').html('Save Changes');
                             var oTable = $('#laravel_datatable').dataTable();
                             oTable.fnDraw(false);
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                            $('#btn-save').html('Save Changes');
+                        }
+                    });
+                }
+            })
+        }
+
+        if ($("#bankForm").length > 0) {
+            $("#bankForm").validate({
+                submitHandler: function(form) {
+
+                    let actionType = $('#btn-bank-save').val();
+
+                    $('#btn-bank-save').html('Sending..');
+
+                    $.ajax({
+                        data: $('#bankForm').serialize(),
+                        url: "/uw/store-loan-banks",
+                        type: "POST",
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#loading").show();
+                        },
+                        success: function (data) {
+                            console.log(data)
+                            $("#loading").hide();
+                            $('#bankForm').trigger("reset");
+                            $('#BanksModal').modal('hide');
+                            $('#btn-bank-save').html('Save Changes');
                         },
                         error: function (data) {
                             console.log('Error:', data);

@@ -18,4 +18,9 @@ class UwLoanTypes extends Model
         'dept_procent',
         'isActive'
     ];
+
+    public function banks()
+    {
+        return $this->belongsTo(UwLoanBank::class,'id', 'loan_types_id');
+    }
 }
