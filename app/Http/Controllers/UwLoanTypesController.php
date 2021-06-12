@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Filials;
 use App\UwClients;
+use App\UwLoanBank;
 use App\UwLoanTypes;
 use Illuminate\Http\Request;
 use Redirect;
@@ -24,15 +26,75 @@ class UwLoanTypesController extends Controller
                 ->addColumn('action', function($data){
                     //$button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit btn btn-success edit-post "><i class="fa fa-pencil"></i></a>';
                     //$button .= '&nbsp;&nbsp;';
-                    $button = '<a href="javascript:void(0);" id="delete-post" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete btn btn-danger"><i class="fa fa-trash"></i></a>';
+                    $button = '<a href="javascript:void(0);" id="delete-post" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'
+                                " class="delete btn btn-danger flat"><i class="fa fa-trash"></i></a>';
                     $button .= '&nbsp;&nbsp;';
-                    $button .= '<a href="javascript:void(0);" id="passive-post" data-toggle="tooltip" data-original-title="Passive" data-id="'.$data->id.'" class="btn btn-primary"><i class="fa fa-check-circle-o"></i></a>';
+
+                    $button .= '<a href="javascript:void(0);" id="passive-post" data-toggle="tooltip" data-original-title="Passive" data-id="'.$data->id.'
+                                 " class="btn btn-primary flat"><i class="fa fa-check-circle-o"></i></a>';
+                    $button .= '&nbsp;&nbsp;';
+
+                    $button .= '<a href="javascript:void(0);" id="banks-post" data-toggle="tooltip" data-original-title="Banks" data-id="'.$data->id.' data-rent="'.$data->id.'
+                                 " class="btn btn-info flat"><i class="fa fa-bank"></i></a>';
                     return $button;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
         return view('uw/loan-types.index');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBanks($id)
+    {
+        //
+        $loanName = UwLoanTypes::find($id);
+
+        $checkedBanks = UwLoanBank::where('loan_types_id', $id)->get();
+
+        $enableBanks = $checkedBanks->implode('filials_id', ',');
+
+        $enableBanks = explode(',', $enableBanks);
+
+        $checkedModel = Filials::whereIn('id', $enableBanks)->get();
+
+        $model = Filials::whereNotIn('id', $enableBanks)->where('parent_id', 0)->get();
+
+
+        return response()->json(['model' => $model, 'checkedModel' => $checkedModel, 'enableBanks' => $enableBanks, 'loanName' => $loanName]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeBanks(Request $request)
+    {
+        //
+        $loan_id = $request->loan_id;
+        $filials = $request->filial_id;
+
+        $deleteOld = UwLoanBank::where('loan_types_id',$loan_id);
+        $deleteOld->delete();
+
+        if ($filials){
+            foreach ($filials as $filial)
+            {
+                $model = new UwLoanBank();
+                $model->loan_types_id = $loan_id;
+                $model->filials_id = $filial;
+                $model->isActive = 1;
+                $model->save();
+            }
+        }
+
+        return response()->json($request->all());
     }
 
     /**
@@ -83,10 +145,22 @@ class UwLoanTypesController extends Controller
         //
         $model = UwLoanTypes::find($id);
 
+        $modelBank = UwLoanBank::where('loan_types_id', $id)->get();
+
         if ($model->isActive == 1){
             $status = 0;
+            if ($modelBank){
+                foreach ($modelBank as $value){
+                    $value->update(['isActive' => $status]);
+                }
+            }
         } elseif ($model->isActive == 0){
             $status = 1;
+            if ($modelBank){
+                foreach ($modelBank as $value){
+                    $value->update(['isActive' => $status]);
+                }
+            }
         }
 
         $model->update(['isActive' => $status]);
