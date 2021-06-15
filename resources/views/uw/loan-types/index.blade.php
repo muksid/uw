@@ -562,6 +562,7 @@
                             $("#loading").show();
                         },
                         success: function (data) {
+                            $("#loading").hide();
                             $('#postForm').trigger("reset");
                             $('#ajax-crud-modal').modal('hide');
                             $('#btn-save').html('Save Changes');

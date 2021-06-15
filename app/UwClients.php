@@ -55,7 +55,7 @@ class UwClients extends Model
 
     public function uwUser()
     {
-        return $this->belongsTo(UwUsers::class,'user_id', 'user_id');
+        return $this->belongsTo(UwUsers::class,'user_id', 'user_id')->where('status', 1);
     }
 
     public function filial()
