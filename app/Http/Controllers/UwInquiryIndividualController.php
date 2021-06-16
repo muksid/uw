@@ -399,7 +399,7 @@ class UwInquiryIndividualController extends Controller
             $tb_9_4 = $md_array['27']['td'][5]['span'];
 
             /* -- tb 12 -- */
-            if (count($md_array[31]['td'][2]['span'][0]) > 2) {
+            if (count($md_array[31]['td'][2]['span'][0]) > 1) {
                 # code...
                 $tb_12_0 = $md_array[31]['td'][2]['span'][0]['span'];
             } else{
