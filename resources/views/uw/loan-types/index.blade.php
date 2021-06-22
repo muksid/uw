@@ -105,6 +105,7 @@
                                         <option value="I">(I) Iste`mol</option>
                                         <option value="A">(A) Avtokredit</option>
                                         <option value="P">(P) Ipoteka</option>
+                                        <option value="J">(J) Yuridik</option>
                                     </select>
                                 </div>
                             </div>
@@ -116,6 +117,7 @@
                                         <option value="21">Iste`mol</option>
                                         <option value="34">Avtokredit</option>
                                         <option value="24">Ipoteka</option>
+                                        <option value="56">Aylanma mablag`</option>
                                     </select>
                                 </div>
                             </div>

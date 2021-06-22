@@ -1223,41 +1223,101 @@
                     var id = $('#getResultINPS').data('id');
 
                     $.get('/uw/get-client-res-i/' + id, function (data) {
-                        //console.log(data);
-                        var data_inps = "";
+                        console.log(data);
 
-                        data_inps +="<div class='box-body table-responsive no-padding'>" +
-                            "<table class='tabla table-hover'>"+
-                            "<tbody>" +
-                            "<tr>" +
-                            "<th style='border: 1px solid #02497f;'>#</th>" +
-                            "<th style='border: 1px solid #02497f;'>Tashkilot INNsi</th>" +
-                            "<th style='border: 1px solid #02497f;'>Mijoz oylik daromadi</th>" +
-                            "<th style='border: 1px solid #02497f;'>Davr</th>" +
-                            "<th style='border: 1px solid #02497f;'>Davr (oy)</th>" +
-                            "<th style='border: 1px solid #02497f;'>Tashkilot nomi</th>" +
-                            "</tr>";
+                        let table = '';
+                        let salary = 0;
+                        let sum = 0;
+                        if (data[0]['isVersion'] === 2){
 
-                        var tot=0;
-                        $.each(data, function (key, val) {
-                            key++;
-                            tot += val.INCOME_SUMMA;
-                            var SUMM = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-                            data_inps +="<tr>" +
-                                "<td style='border: 1px solid #02497f;'>"+key+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.ORG_INN+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+SUMM+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.NUM+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.PERIOD+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.ORGNAME+"</td>" +
-                                "</tr>"
-                        });
-                        data_inps += "</tbody></table></div>";
-                        var total = (tot).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                            table+= '<div class="box-body no-padding">' +
+                                '<table class="table table-striped">' +
+                                '<tr>' +
+                                '<th style="width: 10px">#</th>' +
+                                '<th>Mijoz F.I.O.</th>' +
+                                '<th>M.STIR</th>' +
+                                '<th>PINFL</th>' +
+                                '<th>Davr</th>' +
+                                '<th>Summa</th>' +
+                                '<th>Other</th>' +
+                                '<th>Tashkilot</th>' +
+                                '<th>T.STIR</th>' +
+                                '</tr>';
+
+                            let key = 1;
+                            for (let i = 0; i < data.length; i++){
+                                let val = data[i];
+
+                                salary+= val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum;
+
+                                sum = (val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                table+= '<tr>' +
+                                    '<td>'+ key++ +'.</td>' +
+                                    '<td class="text-sm">'+val.client_name+'</td>' +
+                                    '<td>'+val.client_tin+'</td>' +
+                                    '<td>'+val.pinfl+'</td>' +
+                                    '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
+                                    '<td class="text-bold">'+sum+'</td>' +
+                                    '<td><span class="badge bg-info">'+val.other_income+'</span></td>' +
+                                    '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                    '<td>'+val.ORG_INN+'</td>' +
+                                    '</tr>';
+                            }
+
+                            let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                            table+= '<tr>' +
+                                '<td colspan="4"><b>Jami:</b><td>' +
+                                '<td><b>'+salaryTotal+'</b><td>' +
+                                '<td colspan="1"><td>' +
+                                '</tr>';
+                            table+= '</table>' +
+                                '</div>';
+
+                        } else {
+
+                            table+= '<div class="box-body no-padding">' +
+                                '<table class="table table-striped">' +
+                                '<tr>' +
+                                '<th style="width: 10px">#</th>' +
+                                '<th>Davr</th>' +
+                                '<th>Summa</th>' +
+                                '<th>Tashkilot</th>' +
+                                '<th>T.STIR</th>' +
+                                '</tr>';
+
+                            let key = 1;
+                            for (let i = 0; i < data.length; i++){
+                                let val = data[i];
+
+                                salary += val.INCOME_SUMMA;
+
+                                sum = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                table+= '<tr>' +
+                                    '<td>'+ key++ +'.</td>' +
+                                    '<td><span class="label label-success">'+val.PERIOD+'</span></td>' +
+                                    '<td>'+sum+'</td>' +
+                                    '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                    '<td>'+val.ORG_INN+'</td>' +
+                                    '</tr>';
+                            }
+
+                            let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                            table+= '<tr>' +
+                                '<td colspan="1"><b>Jami:</b><td>' +
+                                '<td><b>'+salaryTotal+'</b><td>' +
+                                '<td colspan="1"><td>' +
+                                '</tr>';
+                            table+= '</table>' +
+                                '</div>';
+                        }
 
                         $('#resultINPSModal').modal('show');
-                        $("#resultDataINPS").html(data_inps);
-                        $("#resultDataINPSTotal").html("Total: "+total);
+
+                        $("#resultDataINPS").html(table);
                     })
                 });
 

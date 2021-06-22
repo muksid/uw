@@ -474,18 +474,6 @@
                                             @break
                                             @case(3)
                                             <h3 class="text-green"><i class="fa fa-check-circle-o"></i> Ariza Tasdiqlandi</h3>
-                                            @foreach($modelComments as $key => $value)
-                                                @if($value->comment_type == 3)
-                                                <div class="comment-text">
-                                                          <span class="username">
-                                                              <b>{{ $key+1 }}. <i class="fa fa-desktop"></i> Anderrayter:</b>
-                                                            <span class="text-muted pull-right"><i class="fa fa-clock-o"></i>
-                                                                {{ \Carbon\Carbon::parse($value->created_at)->format('d.m.Y H:i') }}</span>
-                                                          </span>
-                                                    {{ $value->user->lname??'' }} {{ $value->user->fname??'' }}
-                                                </div>
-                                                @endif
-                                            @endforeach
                                             @break
                                             @case(0)
                                             <h3 class="text-maroon"><i class="fa fa-pencil"></i> Ariza Taxrirlashda</h3>
@@ -494,14 +482,34 @@
                                         @if($modelComments)
                                             <h4 class="text-danger"><i class="fa fa-commenting"></i> Izoxlar tarixi</h4>
                                             @foreach($modelComments as $key => $value)
-                                                <div class="comment-text">
-                                                          <span class="username">
-                                                              <b>{{ $key+1 }}.</b>
-                                                            <span class="text-muted pull-right"><i class="fa fa-clock-o"></i>
-                                                                {{ \Carbon\Carbon::parse($value->created_at)->format('d.m.Y H:i') }}</span>
-                                                          </span><!-- /.username -->
-                                                    {{ $value->title }}
-                                                </div>
+
+                                                    <div class="post" style="background-color: #03a9f412">
+                                                        <div class="user-block">
+                                                            <img class="img-circle img-bordered-sm" src="{{ '/admin-lte/dist/img/user.png' }}">
+                                                            <span class="username">
+                                                              <a href="#">{{ $value->user->lname??'' }} {{ $value->user->fname??'' }}</a>
+                                                            </span>
+                                                            <span class="description">yaratilgan vaqti - {{ \Carbon\Carbon::parse($value->created_at)->format('d M,Y H:i') }}</span>
+                                                        </div>
+
+                                                        <p>
+                                                            @if(mb_substr($value->title, 2, 8) === "model_id")
+                                                                <?php
+                                                                $arr = json_decode($value->title??'', true);
+                                                                $user_id = $arr['cs_user_id'];
+                                                                ?>
+                                                                <span class="badge bg-red-gradient"><?php echo $arr['descr']; ?></span>
+                                                            @else
+
+                                                                @if($value->title === 'Confirmed')
+                                                                    <span class="badge bg-aqua-active">Tasdiqlandi</span> <i class="fa fa-check-circle-o text-success"></i>
+                                                                @else
+                                                                    <span class="badge bg-red-gradient">{{ $value->title }}</span>
+
+                                                                @endif
+                                                            @endif
+                                                        </p>
+                                                    </div>
                                             @endforeach
 
                                         @endif
@@ -888,13 +896,33 @@
                     })
                 });
 
+                // test insert katm
+                $('#testInsertKatm').click(function () {
+
+                    var token = $('meta[name="csrf-token"]').attr('content');
+
+                    var id = $('#ConfirmModal').data('id');
+
+                    $.ajax(
+                        {
+                            type: 'get',
+                            url: "{{ url('uw/testInsertKatm') }}",
+                            success: function (data)
+                            {
+                                console.log(data);
+                            }
+                        });
+
+                    $('#ConfirmModal').modal('hide');
+                });
+
                 // BUTTON GET INPS RESULT
                 $('body').on('click', '#getResultINPS', function () {
 
                     var id = $('#getResultINPS').data('id');
 
                     $.get('/uw/get-client-res-i/' + id, function (data) {
-                        //console.log(data);
+                        console.log(data);
                         var data_inps = "";
 
                         data_inps +="<div class='box-body table-responsive no-padding'>" +
