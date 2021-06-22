@@ -102,7 +102,7 @@ class UwInquiryIndividualController extends Controller
         //
         $model = UwClients::find($id);
 
-        $isVersion = UwInpsClients::where('uw_clients_id', $id)->first();
+        $isVersion = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
         if ($isVersion->isVersion == 2) {
 
