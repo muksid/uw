@@ -12,6 +12,7 @@ use App\UwLoanTypes;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class UwInquiryIndividualController extends Controller
@@ -101,11 +102,29 @@ class UwInquiryIndividualController extends Controller
         //
         $model = UwClients::find($id);
 
-        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-            ->groupBy('claim_id')->sum('INCOME_SUMMA');
+        $isVersion = UwInpsClients::where('uw_clients_id', $id)->first();
 
-        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
-            ->groupBy('PERIOD')->get()->count();
+        if ($isVersion->isVersion == 2) {
+
+            $clientTotalSumMonthly  = DB::select(DB::raw('
+            SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a where a.claim_id =  '.$model->claim_id.' group by sum'));
+
+            $clientTotalSumMonthly = count($clientTotalSumMonthly);
+
+
+            $clientTotalSum = UwInpsClients::where('uw_clients_id', $model->claim_d)->where('status', 1)
+                ->groupBy('claim_id')
+                ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum-inps_sum'));
+
+        } else {
+
+            $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
+                ->groupBy('PERIOD')->get()->count();
+
+            $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+                ->groupBy('claim_id')->sum('INCOME_SUMMA');
+        }
+
 
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
