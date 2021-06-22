@@ -551,18 +551,14 @@
         <div class="modal fade" id="resultINPSModal" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header bg-aqua-active">
+                    <div class="modal-header bg-light-blue-active">
                         <button type="button" class="btn btn-outline pull-right" onclick="print('resultINPSModal')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
-                        <h4 class="modal-title text-center" id="success_inps">Mijoz oylik ish xaqi daromadi (INPS)</h4>
+                        <h4 class="modal-title text-center" id="success_inps">Mijoz oylik ish xaqi daromadi (Soliq)</h4>
                     </div>
                     <div class="modal-body">
-                        <h4 id="base64INPSSuccess_result" class="text-center">Mijoz:
-                            <b>{{ $model->family_name.' '.$model->name.' '.$model->patronymic }}</b>
-                        </h4>
                         <div id="resultDataINPS"></div>
-                        <div id="resultDataINPSTotal" class="text-bold"></div>
                     </div>
                 </div>
             </div>
