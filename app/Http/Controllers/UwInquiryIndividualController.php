@@ -641,15 +641,16 @@ class UwInquiryIndividualController extends Controller
 
         if ($resultCode == '200') {
 
+            $data = $resultDecode['data']['result'];
+
             $clientComment = new UwClientComments();
             $clientComment->uw_clients_id = $id;
             $clientComment->user_id = Auth::id();
             $clientComment->claim_id = $claim_id;
-            $clientComment->title = '(code:'.$resultCode.') Oylik ish haqi ma`lumotlari muvaffaqiyatli saqlandi';
+            $clientComment->title = '(code:'.$data.') Oylik ish haqi ma`lumotlari muvaffaqiyatli saqlandi';
             $clientComment->comment_type = '2';
             $clientComment->save();
 
-            $data = $resultDecode['data']['result'];
             if ($data == '05000') {
                 $message = $resultDecode['data']['resultMessage'];
                 $resultBase64 = $resultDecode['data']['reportBase64'];
