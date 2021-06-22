@@ -82,6 +82,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('uw-loan-types', 'UwLoanTypesController');
     Route::delete('uw/loan-types/{id}', 'UwLoanTypesController@destroy');
 
+    Route::get('uw/testInsertKatm', 'UwInquiryIndividualController@getClientSalary');
+
     Route::get('/uw/get-loan-banks/{id}', 'UwLoanTypesController@getBanks');
     Route::post('/uw/store-loan-banks', 'UwLoanTypesController@storeBanks');
 

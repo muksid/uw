@@ -423,24 +423,43 @@
                                             @break
                                             @case(0)
                                             <h3 class="text-maroon"><i class="fa fa-pencil"></i> Ariza Taxrirlashda</h3>
-                                            <h4 class="text-danger"><i class="fa fa-commenting"></i> Izoxlar tarixi</h4>
-                                            @if($modelComments)
-                                                @foreach($modelComments as $key => $value)
-                                                    <div class="comment-text">
-                                                          <span class="username">
-                                                              <b>{{ $key+1 }}.</b>
-                                                            <span class="text-muted pull-right"><i class="fa fa-clock-o"></i>
-                                                                {{ \Carbon\Carbon::parse($value->created_at)->format('d.m.Y H:i') }}</span>
-                                                          </span><!-- /.username -->
-                                                        {{ $value->title }}
-                                                    </div>
-                                                @endforeach
-
-                                            @endif
-
                                             <div id="send_to_admin_buttons"></div>
                                             @break
                                         @endswitch
+                                        @if($modelComments)
+                                            <h4 class="text-danger"><i class="fa fa-commenting"></i> Izoxlar tarixi</h4>
+                                            @foreach($modelComments as $key => $value)
+
+                                                <div class="post" style="background-color: #03a9f412">
+                                                    <div class="user-block">
+                                                        <img class="img-circle img-bordered-sm" src="{{ '/admin-lte/dist/img/user.png' }}">
+                                                        <span class="username">
+                                                              <a href="#">{{ $value->user->lname??'' }} {{ $value->user->fname??'' }}</a>
+                                                            </span>
+                                                        <span class="description">yaratilgan vaqti - {{ \Carbon\Carbon::parse($value->created_at)->format('d M,Y H:i') }}</span>
+                                                    </div>
+
+                                                    <p>
+                                                        @if(mb_substr($value->title, 2, 8) === "model_id")
+                                                            <?php
+                                                            $arr = json_decode($value->title??'', true);
+                                                            $user_id = $arr['cs_user_id'];
+                                                            ?>
+                                                            <span class="badge bg-red-gradient"><?php echo $arr['descr']; ?></span>
+                                                        @else
+
+                                                            @if($value->title === 'Confirmed')
+                                                                <span class="badge bg-aqua-active">Tasdiqlandi</span> <i class="fa fa-check-circle-o text-success"></i>
+                                                            @else
+                                                                <span class="badge bg-red-gradient">{{ $value->title }}</span>
+
+                                                            @endif
+                                                        @endif
+                                                    </p>
+                                                </div>
+                                            @endforeach
+
+                                        @endif
                                     </div>
 
                                 </div>
@@ -718,18 +737,14 @@
         <div class="modal fade" id="resultINPSModal" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header bg-aqua-active">
+                    <div class="modal-header bg-light-blue-active">
                         <button type="button" class="btn btn-outline pull-right" onclick="print('resultINPSModal')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
-                        <h4 class="modal-title text-center" id="success_inps">Mijoz oylik ish xaqi daromadi (INPS)</h4>
+                        <h4 class="modal-title text-center" id="success_inps">Mijoz oylik ish xaqi daromadi (Soliq)</h4>
                     </div>
                     <div class="modal-body">
-                        <h4 id="base64INPSSuccess_result" class="text-center">Mijoz:
-                            <b>{{ $model->family_name.' '.$model->name.' '.$model->patronymic }}</b>
-                        </h4>
                         <div id="resultDataINPS"></div>
-                        <div id="resultDataINPSTotal" class="text-bold"></div>
                     </div>
                 </div>
             </div>
@@ -739,7 +754,7 @@
         <div class="modal fade" id="appBlankModal" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header bg-aqua-active">
+                    <div class="modal-header bg-light-blue-active">
                         <button type="button" class="btn btn-outline pull-right" onclick="print('appBlankData')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
@@ -865,7 +880,7 @@
 
                         },
                         success: function(response){
-                            //console.log(response);
+                            console.log(response);
                             $(".inquiry-individual").prop('disabled', false);
                             $("#loading-gif").hide();
                             $('#ResultMessageModal').addClass('modal-'+response.status);
@@ -1034,53 +1049,113 @@
                     var id = $('#getResultINPS').data('id');
 
                     $.get('/uw/get-client-res-i/' + id, function (data) {
-                        //console.log(data);
-                        var data_inps = "";
+                        console.log(data);
 
-                        data_inps +="<div class='box-body table-responsive no-padding'>" +
-                            "<table class='tabla table-hover'>"+
-                            "<tbody>" +
-                            "<tr>" +
-                            "<th style='border: 1px solid #02497f;'>#</th>" +
-                            "<th style='border: 1px solid #02497f;'>Tashkilot INNsi</th>" +
-                            "<th style='border: 1px solid #02497f;'>Mijoz oylik daromadi</th>" +
-                            "<th style='border: 1px solid #02497f;'>Davr</th>" +
-                            "<th style='border: 1px solid #02497f;'>Davr (oy)</th>" +
-                            "<th style='border: 1px solid #02497f;'>Tashkilot nomi</th>" +
-                            "</tr>";
+                        let table = '';
+                        let salary = 0;
+                        let sum = 0;
+                        if (data[0]['isVersion'] === 2){
 
-                        var tot=0;
-                        $.each(data, function (key, val) {
-                            key++;
-                            tot += val.INCOME_SUMMA;
-                            var SUMM = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-                            data_inps +="<tr>" +
-                                "<td style='border: 1px solid #02497f;'>"+key+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.ORG_INN+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+SUMM+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.NUM+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.PERIOD+"</td>" +
-                                "<td style='border: 1px solid #02497f;'>"+val.ORGNAME+"</td>" +
-                                "</tr>"
-                        });
-                        data_inps += "</tbody></table></div>";
-                        var total = (tot).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                            table+= '<div class="box-body no-padding">' +
+                                '<table class="table table-striped">' +
+                                '<tr>' +
+                                '<th style="width: 10px">#</th>' +
+                                '<th>Mijoz F.I.O.</th>' +
+                                '<th>M.STIR</th>' +
+                                '<th>PINFL</th>' +
+                                '<th>Davr</th>' +
+                                '<th>Summa</th>' +
+                                '<th>Other</th>' +
+                                '<th>Tashkilot</th>' +
+                                '<th>T.STIR</th>' +
+                                '</tr>';
+
+                            let key = 1;
+                            for (let i = 0; i < data.length; i++){
+                                let val = data[i];
+
+                                salary+= val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum;
+
+                                sum = (val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                table+= '<tr>' +
+                                    '<td>'+ key++ +'.</td>' +
+                                    '<td class="text-sm">'+val.client_name+'</td>' +
+                                    '<td>'+val.client_tin+'</td>' +
+                                    '<td>'+val.pinfl+'</td>' +
+                                    '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
+                                    '<td class="text-bold">'+sum+'</td>' +
+                                    '<td><span class="badge bg-info">'+val.other_income+'</span></td>' +
+                                    '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                    '<td>'+val.ORG_INN+'</td>' +
+                                    '</tr>';
+                            }
+
+                            let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                            table+= '<tr>' +
+                                '<td colspan="4"><b>Jami:</b><td>' +
+                                '<td><b>'+salaryTotal+'</b><td>' +
+                                '<td colspan="1"><td>' +
+                                '</tr>';
+                            table+= '</table>' +
+                                '</div>';
+
+                        } else {
+
+                            table+= '<div class="box-body no-padding">' +
+                                '<table class="table table-striped">' +
+                                '<tr>' +
+                                '<th style="width: 10px">#</th>' +
+                                '<th>Davr</th>' +
+                                '<th>Summa</th>' +
+                                '<th>Tashkilot</th>' +
+                                '<th>T.STIR</th>' +
+                                '</tr>';
+
+                            let key = 1;
+                            for (let i = 0; i < data.length; i++){
+                                let val = data[i];
+
+                                salary += val.INCOME_SUMMA;
+
+                                sum = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                table+= '<tr>' +
+                                    '<td>'+ key++ +'.</td>' +
+                                    '<td><span class="label label-success">'+val.PERIOD+'</span></td>' +
+                                    '<td>'+sum+'</td>' +
+                                    '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                    '<td>'+val.ORG_INN+'</td>' +
+                                    '</tr>';
+                            }
+
+                            let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                            table+= '<tr>' +
+                                '<td colspan="1"><b>Jami:</b><td>' +
+                                '<td><b>'+salaryTotal+'</b><td>' +
+                                '<td colspan="1"><td>' +
+                                '</tr>';
+                            table+= '</table>' +
+                                '</div>';
+                        }
 
                         $('#resultINPSModal').modal('show');
-                        $("#resultDataINPS").html(data_inps);
-                        $("#resultDataINPSTotal").html("Total: "+total);
+
+                        $("#resultDataINPS").html(table);
                     })
                 });
 
                 // BUTTON GET STATUS SEND TO ADMIN
                 $('body').on('click', '#sendToAdmin', function () {
-                    //console.log('ds');
-                    var id = $('#sendToAdmin').data('id');
 
-                    var getSChType = $("input:radio[name=sch_type]:checked").val();
+                    let id = $('#sendToAdmin').data('id');
+
+                    let getSChType = $("input:radio[name=sch_type]:checked").val();
 
                     $.get('/uw/get-status-send/' + id+'/'+getSChType, function (response) {
-                        //console.log(response);
+
                         if(response.status === 1)
                         {
                             $('#btn-save-send').val("sendLoan");
@@ -1105,7 +1180,7 @@
                 // BUTTON GET STATUS SEND TO ADMIN
                 $('body').on('click', '#confirmSendToAdmin', function () {
                     //console.log('ds');
-                    var id = $('#confirmSendToAdmin').data('id');
+                    let id = $('#confirmSendToAdmin').data('id');
 
                     $.get('/uw/get-confirm-send/' + id, function (response) {
                         //console.log(response);

@@ -378,7 +378,7 @@ class UwClientsController extends Controller
         // update inps
         if ($request->reg_inps == 0){
             $modelInps = UwInpsClients::where('uw_clients_id', $row_id);
-            $modelInps->update(['status' => $request->reg_inps]);
+            $modelInps->update(['status' =>$request->reg_inps]);
         }
 
         // create comment on update
