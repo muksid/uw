@@ -114,7 +114,7 @@ class UwInquiryIndividualController extends Controller
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $model->claim_d)->where('status', 1)
                 ->groupBy('claim_id')
-                ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum-inps_sum'));
+                ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
 
         } else {
 
