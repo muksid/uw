@@ -107,7 +107,7 @@ class UwInquiryIndividualController extends Controller
         if ($isVersion->isVersion == 2) {
 
             $clientTotalSumMonthly  = DB::select(DB::raw('
-            SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a where a.claim_id =  '.$model->claim_id.' group by sum'));
+            SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a where a.status = 1 and a.claim_id =  '.$model->claim_id.' group by sum'));
 
             $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
