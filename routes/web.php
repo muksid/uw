@@ -57,11 +57,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/uw/home', 'UwClientsController@home');
     Route::get('/uw-clients/create', 'UwClientsController@create');
     Route::get('/uw/client-katm/{id}/{claim_id}', 'UwClientsController@clientKatm')->name('uw-katm');
-    Route::post('/uw/create-client','UwClientsController@store');
+    #Route::post('/uw/create-client','UwClientsController@store');
     Route::post('/get-districts','UwClientsController@getDistricts');
     Route::post('/get-reg-districts','UwClientsController@getRegDistricts');
-    Route::get('/uw/get-client-katm/{cid}','UwClientsController@getClientKatm');
-    Route::get('/uw/get-client-inps/{cid}','UwClientsController@getClientInps');
+    #Route::get('/uw/get-client-katm/{cid}','UwClientsController@getClientKatm');
+    #Route::get('/uw/get-client-inps/{cid}','UwClientsController@getClientInps');
     Route::post('uw-clients-edit','UwClientsController@storeEdit');
     Route::post('uw-risk-edit','UwClientsController@riskEdit');
     Route::post('/uw/cs-app-send', 'UwClientsController@csAppSend');

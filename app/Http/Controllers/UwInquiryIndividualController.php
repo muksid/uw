@@ -106,8 +106,9 @@ class UwInquiryIndividualController extends Controller
 
         if ($isVersion->isVersion == 2) {
 
-            $clientTotalSumMonthly  = DB::select(DB::raw('
-            SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a where a.status = 1 and a.claim_id =  '.$model->claim_id.' group by sum'));
+            $clientTotalSumMonthly  = DB::select(
+                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
+            where a.status = 1 and a.claim_id =  '.$model->claim_id.' group by sum'));
 
             $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
@@ -264,6 +265,8 @@ class UwInquiryIndividualController extends Controller
         $code = $data_decode['result']['code'];
         $message = $data_decode['result']['message'];
 
+        $katm_sir = $data_decode['response']['katm_sir'];
+
         if ($code == '05000') {
 
             // update reg
@@ -277,6 +280,9 @@ class UwInquiryIndividualController extends Controller
             $clientComment->claim_id = $modelClient->claim_id;
             $clientComment->title = '(code:'.$code.') Online Registration Success';
             $clientComment->comment_type = '1';
+            $clientComment->katm_sir = $katm_sir;
+            $clientComment->katm_type = 1;
+            $clientComment->katm_descr = $data_decode;
             $clientComment->save();
 
             return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);

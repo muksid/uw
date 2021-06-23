@@ -11,7 +11,10 @@ class UwClientComments extends Model
         'uw_clients_id',
         'claim_id',
         'title',
-        'comment_type'
+        'comment_type',
+        'katm_sir',
+        'katm_type',
+        'katm_descr',
     ];
 
     public function user()
