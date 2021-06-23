@@ -113,13 +113,13 @@ class UwInquiryIndividualController extends Controller
             $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
 
-            $clientTotalSum = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
+            $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
                 ->groupBy('claim_id')
                 ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
 
         } else {
 
-            $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
+            $clientTotalSumMonthly = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
                 ->groupBy('PERIOD')->get()->count();
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
