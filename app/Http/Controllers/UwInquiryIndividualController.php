@@ -104,7 +104,7 @@ class UwInquiryIndividualController extends Controller
 
         $isVersion = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        if ($isVersion->isVersion == 2) {
+        if ($isVersion && $isVersion->isVersion == 2) {
 
             $clientTotalSumMonthly  = DB::select(
                 DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
