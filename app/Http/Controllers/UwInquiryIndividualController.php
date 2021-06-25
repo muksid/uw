@@ -267,23 +267,23 @@ class UwInquiryIndividualController extends Controller
 
         $katm_sir = $data_decode['response']['katm_sir'];
 
+        $clientComment = new UwClientComments();
+        $clientComment->uw_clients_id = $id;
+        $clientComment->user_id = Auth::id();
+        $clientComment->claim_id = $modelClient->claim_id;
+        $clientComment->title = '(code:'.$code.') Online Registration Success';
+        $clientComment->comment_type = '1';
+        $clientComment->katm_sir = $katm_sir;
+        $clientComment->katm_type = 1;
+        $clientComment->katm_descr = '';
+        $clientComment->save();
+
         if ($code == '05000') {
 
             // update reg
             $modelClient = UwClients::find($id);
 
             $modelClient->update(['reg_status' => 1]);
-
-            $clientComment = new UwClientComments();
-            $clientComment->uw_clients_id = $id;
-            $clientComment->user_id = Auth::id();
-            $clientComment->claim_id = $modelClient->claim_id;
-            $clientComment->title = '(code:'.$code.') Online Registration Success';
-            $clientComment->comment_type = '1';
-            $clientComment->katm_sir = $katm_sir;
-            $clientComment->katm_type = 1;
-            $clientComment->katm_descr = $data_decode;
-            $clientComment->save();
 
             return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);
 
