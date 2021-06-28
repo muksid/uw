@@ -275,7 +275,7 @@ class UwInquiryIndividualController extends Controller
         $clientComment->comment_type = '1';
         $clientComment->katm_sir = $katm_sir;
         $clientComment->katm_type = 1;
-        $clientComment->katm_descr = '';
+        $clientComment->katm_descr = $result;
         $clientComment->save();
 
         if ($code == '05000') {
@@ -283,7 +283,7 @@ class UwInquiryIndividualController extends Controller
             // update reg
             $modelClient = UwClients::find($id);
 
-            $modelClient->update(['reg_status' => 1]);
+            $modelClient->update(['reg_status' => 1, 'katm_sir' => $katm_sir]);
 
             return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);
 
