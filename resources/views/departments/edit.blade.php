@@ -1,5 +1,5 @@
 <?php ?>
-@extends('layouts.table')
+@extends('layouts.uw.dashboard')
 
 @section('content')
     <section class="content-header">
@@ -65,94 +65,64 @@
                             </ul>
                         </div>
                     </div>
-                    <form role="form" method="POST" action="{{ url('/admin/departments/' . $department->id) }}">
+                    <form role="form" method="POST" action="{{ url('/departments/' . $department->id) }}">
                     {{ csrf_field() }}
                     {{ method_field('PATCH') }}
 
-                    @foreach(json_decode(Auth::user()->roles) as $role)
-                        @switch($role)
-                            @case('admin')
+                        <div class="col-md-6">
 
-                            <!-- Jamshid Choose branch -->
+                            <div class="form-group">
+                                <label>Filial</label>
+                                <select
+                                        id="filial_code"
+                                        class="form-control select2"
+                                        name="branch_code"
+                                        style="width: 100%;">
 
-                                <div class="col-md-6">
+                                    <option value="{{$department->branch_code}}" selected="selected">Filialni tanlang</option>
+                                    @foreach($filials as $value)
+                                        <option value="{{$value->branch_code}}">{{$value->branch_code. ' - ' .$value->title}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
 
-                                    <div class="form-group">
-                                        <label>Filial</label>
-                                        <select
-                                                id="filial_code"
-                                                class="form-control select2"
-                                                name="branch_code"
-                                                style="width: 100%;">
+                        <div class="col-md-6">
+                            <div class="form-group" id="departdiv" hidden>
+                                <label>Departament</label>
+                                <select
+                                        id="depart"
+                                        class="form-control select2"
+                                        name="parent_id"
+                                        style="width: 100%;">
 
-                                            <option value="{{$department->branch_code}}" selected="selected">Filialni tanlang</option>
-                                            @foreach($filials as $value)
-                                                <option value="{{$value->branch_code}}">{{$value->branch_code. ' - ' .$value->title}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
+                                    <option selected="selected" value="{{$department->parent_id}}"></option>
+                                </select>
+                            </div>
+                            <!-- Jamshid added new div for sub deps -->
+                            <div class="form-group" id="departdiv2" hidden>
+                                <label>Sub Departament</label>
+                                <select
+                                        id="sub_depart"
+                                        class="form-control select2"
+                                        name="parent_id"
+                                        style="width: 100%;">
 
-                                <div class="col-md-6">
-                                    <div class="form-group" id="departdiv" hidden>
-                                        <label>Departament</label>
-                                        <select
-                                                id="depart"
-                                                class="form-control select2"
-                                                name="parent_id"
-                                                style="width: 100%;">
+                                    <option selected="selected" value="{{$department->parent_id}}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="departdiv3" hidden>
+                                <label>Sub sub Departament</label>
+                                <select
+                                        id="sub_sub_depart"
+                                        class="form-control select2"
+                                        name="parent_id"
+                                        style="width: 100%;">
 
-                                            <option selected="selected" value="{{$department->parent_id}}"></option>
-                                        </select>
-                                    </div>
-                                    <!-- Jamshid added new div for sub deps -->
-                                    <div class="form-group" id="departdiv2" hidden>
-                                        <label>Sub Departament</label>
-                                        <select
-                                                id="sub_depart"
-                                                class="form-control select2"
-                                                name="parent_id"
-                                                style="width: 100%;">
-
-                                            <option selected="selected" value="{{$department->parent_id}}"></option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" id="departdiv3" hidden>
-                                        <label>Sub sub Departament</label>
-                                        <select
-                                                id="sub_sub_depart"
-                                                class="form-control select2"
-                                                name="parent_id"
-                                                style="width: 100%;">
-
-                                            <option selected="selected" value="{{$department->parent_id}}"></option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-
-                                @break
-                                @case('branch_admin')
-                                <div class="form-group">
-                                    <label>Filial MFO</label>
-                                    <input type="text" name="branch_code" class="form-control"
-                                           value="{{$user->branch_code}}" disabled>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Bo`limni tanlang</label>
-                                    <select class="form-control select2" name="depart_id" style="width: 100%;">
-                                        <option selected="selected"
-                                                value="{{$department->depart_id}}">{{$department->depart_id}}</option>
-                                        @foreach($departments as $department)
-                                            <option value="{{$department->id}}">{{$department->title}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                @break
-                            @endswitch
-                        @endforeach
+                                    <option selected="selected" value="{{$department->parent_id}}"></option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Title</label>
@@ -166,6 +136,15 @@
                                 <label>Title Ru</label>
                                 <input type="text" name="title_ru" class="form-control"
                                        value="{{$department->title_ru}}" >
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Local Code</label>
+                                <input type="text" name="local_code" class="form-control" maxlength="10"
+                                       value="{{$department->local_code}}" >
                             </div>
 
                         </div>
@@ -187,7 +166,7 @@
                         <div class="col-md-6" style="float: right">
                             <div class="form-group">
                                 <div class="col-md-6">
-                                    <a href="/admin/departments" class="btn btn-default">Bekor qilish </a>
+                                    <a href="/departments" class="btn btn-default">Bekor qilish </a>
                                     <button type="submit" class="btn btn-primary">O`zgartirish</button>
                                 </div>
 

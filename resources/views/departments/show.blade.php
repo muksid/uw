@@ -1,5 +1,5 @@
 <?php ?>
-@extends('layouts.table')
+@extends('layouts.uw.dashboard')
 
 @section('content')
     <section class="content-header">

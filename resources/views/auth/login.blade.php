@@ -1,20 +1,22 @@
-<!-- Bootstrap 3.3.6 -->
+
 <link rel="stylesheet" href="{{ url('admin-lte/bootstrap/css/bootstrap.min.css') }}">
-<!-- Theme style -->
+
 <link rel="stylesheet" href="{{ url('admin-lte/dist/css/AdminLTE.min.css') }}">
-<!-- iCheck -->
+
 <link rel="stylesheet" href="{{ url('admin-lte/plugins/iCheck/square/blue.css') }}">
+
 <style>
     body {
         overflow-y: hidden;
     }
 
 </style>
+
 <body class="hold-transition login-page">
 
 <div class="login-box">
     <div class="login-logo">
-        <a href="#">Андирайтинг</a>
+        <a href="#">Андеррайтинг</a>
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">

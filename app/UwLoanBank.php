@@ -10,6 +10,7 @@ class UwLoanBank extends Model
     protected $fillable = [
         'loan_types_id',
         'filials_id',
+        'depart_id',
         'startDate',
         'endDate',
         'isActive'

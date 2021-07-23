@@ -59,6 +59,7 @@ class FilialsController extends Controller
                 'title' => $request->title,
                 'title_ru' => $request->title_ru,
                 'filial_code' => $request->filial_code,
+                'local_code' => $request->local_code,
                 'parent_id' => $parent,
                 'f_sort' => $request->f_sort,
                 'status' => $request->status

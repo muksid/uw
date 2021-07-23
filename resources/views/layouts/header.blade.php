@@ -14,7 +14,7 @@
         <!-- mini logo for sidebar mini 50x50 pixels -->
         <span class="logo-mini"><b>T</b>B</span>
         <!-- logo for regular state and mobile devices -->
-        <span class="logo-lg"><b>Андирайтинг </b></span>
+        <span class="logo-lg"><b>Андеррайтинг </b></span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">
@@ -29,7 +29,7 @@
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown1">
                         <img src="{{ url('/admin-lte/dist/img/user.png') }}" class="user-image">
-                        <span class="hidden-xs">{{ mb_substr(Auth::user()->fname ??'', 0,1).'.'.Auth::user()->lname }}</span>
+                        <span class="hidden-xs">{{ mb_substr(Auth::user()->personal->f_name ??'', 0,1).'.'.Auth::user()->personal->l_name }}</span>
                     </a>
                     <ul class="dropdown-menu">
                         <!-- User image -->

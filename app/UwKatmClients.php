@@ -10,10 +10,12 @@ class UwKatmClients extends Model
     protected $fillable = [
         'uw_clients_id',
         'claim_id',
-        'katm_summ',
-        'katm_sc_ball',
+        'summa',
+        'scoring_ball',
         'status',
         'katm_score',
-        'katm_tb'
+        'katm_tb',
+        'json_data',
+        'isVersion'
     ];
 }

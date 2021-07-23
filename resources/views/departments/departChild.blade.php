@@ -2,8 +2,9 @@
 
     @foreach($childs as $child)
 
-        <li>
+        <li class="department_class text-primary text-bold" data-id="{{$child->id}}" style="list-style: none">
 
+            
             {{ $child->title }}
 
             @if(count($child->childs))

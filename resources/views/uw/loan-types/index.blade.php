@@ -519,7 +519,7 @@
                                 '</td>' +
                                 '<td class="mailbox-star"><a href="#"><i class="fa fa-star text-yellow"></i></a>' +
                                 '</td>' +
-                                '<td class="mailbox-subject"><b>'+res.filial_code+'</b> - '+res.title_ru+ '</td>' +
+                                '<td class="mailbox-subject"><b>'+res.branch_code+'</b> - '+res.title_ru+ '</td>' +
                                 '</tr>';
                         }
 
@@ -531,7 +531,7 @@
                                 '</td>' +
                                 '<td class="mailbox-star"><a href="#"><i class="fa fa-star-o text-yellow"></i></a>' +
                                 '</td>' +
-                                    '<td class="mailbox-subject"><b>'+itemData.filial_code+'</b> - '+itemData.title_ru+ '</td>' +
+                                    '<td class="mailbox-subject"><b>'+itemData.branch_code+'</b> - '+itemData.title_ru+ '</td>' +
                                 '</tr>';
                         });
 

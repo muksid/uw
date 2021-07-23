@@ -167,7 +167,8 @@ return [
         #SimpleSoftwareIO\QrCode\ServiceProvider::class,
         Yajra\DataTables\DataTablesServiceProvider::class,
         #SimpleSoftwareIO\QrCode\ServiceProvider::class,
-        
+        #Yajra\Oci8\Oci8ServiceProvider::class,
+
         /*
          * Package Service Providers...
          */

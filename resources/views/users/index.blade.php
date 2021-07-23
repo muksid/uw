@@ -1,4 +1,4 @@
-@extends('layouts.table')
+@extends('layouts.uw.dashboard')
 
 @section('content')
 
@@ -46,28 +46,6 @@
 
                 </div>
             </div>
-        @elseif($message = Session::get('deleted'))
-
-            <div class="modal fade in text-danger" id="deletedModal" role="dialog" style="display: block">
-                <div class="modal-dialog modal-sm">
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                        <div class="modal-header bg-danger">
-                            <h4 class="modal-title">
-                                @lang('blade.users') <i class="fa fa-trash"></i>
-                            </h4>
-                        </div>
-                        <div class="modal-body">
-                            <h5>{{ $message }}</h5>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger closeModal" data-dismiss="modal"><i
-                                        class="fa fa-check-circle"></i> Ok
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
         @endif
 
@@ -77,72 +55,50 @@
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
-                <div class="box box-primary">
+                <div class="box box-info">
                     <div class="box-header with-border">
-                        <a href="{{ route('users.create') }}" class="btn btn-primary btn-flat"><i
-                                    class="fa fa-plus"></i> @lang('blade.create_user')</a>
-
-                        <h3 class="box-title">@lang('blade.overall'): <b>{{ $models->total() }}</b></h3>
+                        <div class="box-header">
+                            <div class="col-md-1">
+                                <a href="{{ route('users.create') }}" class="btn btn-flat btn-info">
+                                    <i class="fa fa-plus-circle"></i> @lang('blade.create_user')</a>
+                            </div>
+                        </div>
 
                         <div class="box-body">
-                            <form action="{{route('users/search')}}" method="POST" role="search">
+
+                            <form action="{{url('/admin/users-search')}}" method="POST" role="search">
                                 {{ csrf_field() }}
+
                                 <div class="row">
-                                    @if(preg_replace('/[^A-Za-z0-9. -]/', '', Auth::user()->roles) == 'admin')
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <select name="f" class="form-control select2" style="width: 100%;">
-                                                    @if($f_title == '')
-                                                        <option selected="selected" value="{{$f}}">{{$f??'Select branch'}}</option>
-                                                    @else
-                                                        <option selected="selected"
-                                                                value="{{$f}}">{{$f.' - '.$f_title}}</option>
-                                                    @endif
-                                                    @if(!empty($filial))
-                                                        @foreach($filial as $key => $value)
-                                                            <option value="{{$value->branch_code}}">{{$value->branch_code.' - '.$value->title}}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                            </div>
-                                        </div>
-                                    @endif
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="q" value="{{$q}}"
-                                                   placeholder="Users fio">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="form-group">
-                                            <select name="s" class="form-control" style="width: 100%;">
-                                                @if($s == '')
-                                                    <option selected="selected" value="">All</option>
-                                                @elseif($s == 1)
-                                                    <option selected="selected" value="1">Active</option>
-                                                @elseif($s == 0)
-                                                    <option selected="selected" value="0">Passive</option>
-                                                @elseif($s == 2)
-                                                    <option selected="selected" value="2">Deleted</option>
-                                                @endif
-                                                <option value="">All</option>
-                                                <option value="1">Active</option>
-                                                <option value="0">Passive</option>
-                                                <option value="2">Deleted</option>
+                                            <select name="uw" class="form-control" style="width: 100%;">
+                                                <option value="" selected>
+                                                    Select type
+                                                </option>
+                                                <option value="1">is Uw</option>
+                                                <option value="0">is Hr</option>
+
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <button type="button" class="btn btn-default btn-flat"
-                                                    onclick="location.href='/admin/users';"><i
-                                                        class="fa fa-refresh"></i> @lang('blade.reset')</button>
-                                            <button type="submit" class="btn btn-primary btn-flat"><i
-                                                        class="fa fa-search"></i> @lang('blade.search')</button>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group has-success">
+                                            <input type="text" class="form-control" name="t" value="{{ $t }}"
+                                                   placeholder="% username, card, full_name, branch_code, local_code">
                                         </div>
                                     </div>
-                                    <!-- /.col -->
-                                    <div class="col-md-6">
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <a href="{{url('/admin/users/')}}" class="btn btn-flat border-success">
+                                                <i class="fa fa-refresh"></i> @lang('blade.reset')
+                                            </a>
+                                            <button type="submit" class="btn btn-success btn-flat">
+                                                <i class="fa fa-search"></i> @lang('blade.search')
+                                            </button>
+                                        </div>
                                     </div>
                                     <!-- /.col -->
                                 </div>
@@ -150,20 +106,22 @@
                             </form>
                         </div>
 
-                        <div class="box-body table-responsive no-padding">
+                        <h3 class="box-title" id="modelTotal">@lang('blade.overall'): <b>{{ $models->total() }}</b></h3>
 
-                            <table class="table table-hover table-bordered table-striped">
+                        <div id="loading" class="loading-gif" style="display: none"></div>
+
+                        <div class="box-body">
+
+                            <table class="table table-striped table-bordered" id="search_table">
                                 <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>@lang('blade.username')</th>
                                     <th>@lang('blade.full_name')</th>
+                                    <th>@lang('blade.username')</th>
                                     <th>@lang('blade.branch')</th>
-                                    <th>@lang('blade.dep')-@lang('blade.position')</th>
-                                    <th>@lang('blade.position_date')</th>
-                                    <th>@lang('blade.groups_table') #</th>
+                                    <th>Office (BXO)-@lang('blade.position')</th>
+                                    <th>Hr/Uw</th>
                                     <th>@lang('blade.role')</th>
-                                    <th><i class="fa fa-sort-numeric-asc"></i></th>
                                     <th>@lang('blade.status')</th>
                                     <th><i class="fa fa-pencil-square-o text-blue"></i></th>
                                     <th><i class="fa fa-trash-o text-red"></i></th>
@@ -174,35 +132,32 @@
                                 @foreach($models as $key => $model)
                                     <tr>
                                         <td>{{ $models->firstItem()+$key }}</td>
+                                        <td>
+                                            {{ $model->personal->l_name??'-' }} {{ $model->personal->f_name??'-' }}
+                                        </td>
                                         <td>{{ $model->username }}</td>
-                                        <td style="min-width: 170px">
-                                            {{ $model->lname.' '.$model->fname }}<br>
-                                            <span class="text-sm text-muted">{{ $model->sname }}</span>
+                                        <td>
+                                            {{ $model->currentWork->filial->title??'-' }}
                                         </td>
                                         <td>
-                                            <span class="text-sm text-muted">{{ $model->filial->title??'' }}</span><br>
-                                            {{ $model->filial->branch_code??'' }}
-                                        </td>
-                                        <td>
-                                            <span class="text-sm text-muted">{{ $model->department->title??'' }}</span>
-                                            <br>
-                                            {{ $model->job_title }}
-                                        </td>
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($model->job_date)->format('d.m.Y')}}
-                                        </td>
-                                        <td>{{ $model->card_num }}</td>
-                                        <td>
+                                            {{ $model->currentWork->department->title??'-' }}<br>
                                             <span class="text-sm text-muted">
-                                                <?php
-                                                    $string = $model->roles??'';
-                                                    $pattern = '/"/';
-                                                    $replacement = "";
-                                                    echo preg_replace($pattern, $replacement, $string);
-                                                ?>
+                                                {{ $model->currentWork->job_title??'-' }}
                                             </span>
                                         </td>
-                                        <td style="width: 50px; text-align: center; font-weight: bold">{{ $model->user_sort }}</td>
+                                        <td>@if($model->isUw == 0)
+                                                <span class="label label-danger">Hr</span>
+                                            @else
+                                                <span class="label label-info">Uw</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($model->currentWork->roleId??'')
+                                            @foreach($model->currentWork->roleId as $value)
+                                                    <span class="label label-info margin-r-5">{{ $value->getRoleName->title??'-' }}</span>
+                                                @endforeach
+                                            @endif
+                                        </td>
                                         <td>
                                             @switch($model->status)
                                                 @case(0)
@@ -218,8 +173,10 @@
                                                 <span class="label label-default">unknown</span>
                                             @endswitch
                                         </td>
-                                        <td>
-                                            <a href="{{ route('users.edit', $model->id) }}"><i class="fa fa-pencil"></i></a>
+                                        <td class="text-center">
+                                            <a href="{{ route('users.edit', $model->id) }}" class="btn btn-xs btn-info">
+                                                <i class="fa fa-pencil"></i>
+                                            </a>
                                         </td>
                                         <td>
                                             @if($model->status == 2)
@@ -238,7 +195,7 @@
 
                                         </td>
                                         <td style="min-width: 110px">
-                                            {{ \Carbon\Carbon::parse($model->created_at)->format('d.M.Y')}}
+                                            {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y')}}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -293,6 +250,77 @@
         <script>
 
             $(".select2").select2();
+
+            $('#search_refresh').click(function(){
+
+                $('#search_f').val('');
+
+                $('#search_t').val('');
+
+                let filial = $('#search_f').val();
+
+                let text = $('#search_t').val();
+
+                $.ajax({
+                    type : 'get',
+                    url : '/admin/users-search',
+                    data:{
+                        'filial':filial,
+                        'text'  :text
+                    },
+                    beforeSend: function(){
+                        $("#loading").show();
+                    },
+                    success: function(res){
+                        //console.log(res);
+                        $('#search_table').html(res);
+
+                    },
+                    complete:function(res){
+                        $("#loading").hide();
+                    }
+                });
+
+            });
+
+            $('#search_t').keydown(function(event){
+
+                var keyCode = (event.keyCode ? event.keyCode : event.which);
+                if (keyCode === 13) {
+
+                    $('#search').trigger('click');
+
+                }
+            });
+
+            $('#search').click(function(){
+
+                let filial = $('#search_f').val();
+                let text = $('#search_t').val();
+
+                $.ajax({
+                    type : 'get',
+                    url : '/admin/users-search',
+                    data:{
+                        'filial':filial,
+                        'text'  :text
+                    },
+                    beforeSend: function(){
+                        $("#loading").show();
+                    },
+                    success: function(res){
+                        console.log(res)
+                        $('#search_f').hide();
+                        $('#modelTotal').hide();
+                        $('.paginate').hide();
+                        $('#search_table').html(res);
+
+                    },
+                    complete:function(res){
+                        $("#loading").hide();
+                    }
+                });
+            });
 
             // delete model
             function deleteUrl(id) {

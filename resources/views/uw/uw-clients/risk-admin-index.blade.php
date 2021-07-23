@@ -60,7 +60,7 @@
                                         <select name="u" class="form-control select2" style="width: 100%;">
                                             @if(!empty($searchUser))
                                                 <option value="{{$searchUser->id}}" selected>
-                                                    {{$searchUser->branch_code.' - '.$searchUser->lname.' '.$searchUser->fname}}
+                                                    {{$searchUser->branch_code??''}} - {{ $searchUser->personal->l_name??'' }} {{$searchUser->personal->f_name??'-'}}
                                                 </option>
                                             @else
                                                 <option value="" selected>
@@ -70,8 +70,8 @@
 
                                             @if(!empty($users))
                                                 @foreach($users as $key => $value)
-                                                    <option value="{{$value->user_id}}">
-                                                        {{$value->user->branch_code??''}} - {{$value->user->lname??''}} {{$value->user->fname??''}}
+                                                    <option value="{{$value->currentWork->id}}">
+                                                        {{$value->currentWork->branch_code??''}} - {{$value->personal->l_name??''}} {{$value->personal->f_name??''}}
                                                     </option>
                                                 @endforeach
                                             @endif
@@ -123,36 +123,26 @@
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Kredit Turi</th>
+                                <th>Kredit</th>
                                 <th>IABS #</th>
                                 <th>Ariza #</th>
-                                <th>Mijoz nomi</th>
-                                <th>Mijoz INN</th>
-                                <th>Kredit summasi</th>
-                                <th>Sanasi</th>
+                                <th>Mijoz Nomi</th>
+                                <th>STIR</th>
+                                <th>Summa</th>
                                 <th class="text-center">@lang('blade.status')</th>
                                 <th><i class="fa fa-bank"></i> Filial Nomi</th>
-                                <th class="text-center"><i class="fa fa-user"></i> Filial Inspektor</th>
+                                <th class="text-center"><i class="fa fa-user"></i> Inspektor</th>
+                                <th>Sana</th>
                             </tr>
                             </thead>
                             <tbody id="roleTable">
                             <?php $i = 1 ?>
                             @if($models->count())
                             @foreach ($models as $key => $model)
-                                <tr id="rowId_{{ $model->id }}">
+                                <tr id="rowId_{{ $model->id }}" class="text-sm">
                                     <td>{{ $i++ }}</td>
                                     <td style="max-width: 100px;">
-                                        @php($fa = '')
-                                        @if($model->loanType->credit_type == 32)
-                                            @php($fa = 'credit-card')
-                                        @elseif($model->loanType->credit_type == 21)
-                                            @php($fa = 'desktop')
-                                        @elseif($model->loanType->credit_type == 34)
-                                            @php($fa = 'car')
-                                        @elseif($model->loanType->credit_type == 24)
-                                            @php($fa = 'home')
-                                        @endif
-                                        <span class="text-sm text-green"><i class="fa fa-{{ $fa }} text-maroon"></i> {{ $model->loanType->title??'' }}</span>
+                                        <span class="text-green">{!! \Illuminate\Support\Str::words($model->loanType->title??'', '3') !!}</span>
                                     </td>
                                     <td>{{ $model->iabs_num }}</td>
                                     <td>{{ $model->claim_id }}</td>
@@ -165,10 +155,6 @@
                                     </td>
                                     <td>{{ $model->inn }}</td>
                                     <td><b>{{ number_format($model->summa, 2) }}</b></td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
-                                        <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
-                                    </td>
 
                                     <td>
                                         @if($model->status == 0)
@@ -181,8 +167,14 @@
                                             <span class="badge bg-aqua-active">Yopilgan</span>
                                         @endif
                                     </td>
-                                    <td>{{ $model->filial->filial_code??'' }} - <span class="badge bg-red-active">{{ $model->filial->title??'' }}</span></td>
-                                    <td>{{ $model->user->lname??'' }} {{ $model->user->fname??'' }}</td>
+                                    <td><span class="badge bg-light-blue-active">{{ $model->filial->filial_code??'' }}</span>
+                                       - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
+                                    </td>
+                                    <td class="text-green">{{ $model->currentWork->personal->l_name??'' }} {{ $model->currentWork->personal->f_name??'' }}</td>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
+                                        <span class="text-maroon"> ({{$model->created_at->diffForHumans()}})</span>
+                                    </td>
                                 </tr>
                             @endforeach @else
                                 <td class="text-red text-center" colspan="12"><i class="fa fa-search"></i>

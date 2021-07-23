@@ -15,6 +15,8 @@ return [
 /* These credentials do not match our records */
 /* Too many login attempts. Please try again in :seconds seconds. */
     'failed' => 'Login yoki kalit so`z mos kelmadi!',
+    'u_passive' => 'Ushbu xodim tizimda passiv xolatda!',
+    'u_deleted' => 'Ushbu xodim tizimdan o`chirilgan!',
     'throttle' => 'Kirish urinishlari juda ko`p. Iltimos, yana bir necha soniyadan keyin urinib ko`ing.',
 
 ];

@@ -11,6 +11,7 @@ class Filials extends Model
         'title',
         'title_ru',
         'filial_code',
+        'local_code',
         'parent_id',
         'f_sort',
         'status'

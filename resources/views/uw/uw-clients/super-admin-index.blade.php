@@ -1,4 +1,5 @@
 @extends('layouts.uw.dashboard')
+<link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
 
 @section('content')
 
@@ -50,7 +51,7 @@
 
                     <div class="box-body">
 
-                        <form action="{{url('/uw/all-clients')}}" method="POST" role="search">
+                        <form action="{{url('/phy/all-clients')}}" method="POST" role="search">
                             {{ csrf_field() }}
 
                             <div class="row">
@@ -59,7 +60,7 @@
                                         <select name="u" class="form-control select2" style="width: 100%;">
                                             @if(!empty($searchUser))
                                                 <option value="{{$searchUser->id}}" selected>
-                                                    {{$searchUser->branch_code.' - '.$searchUser->lname.' '.$searchUser->fname}}
+                                                    {{$searchUser->branch_code??''}} - {{ $searchUser->personal->l_name??'' }} {{$searchUser->personal->f_name??'-'}}
                                                 </option>
                                             @else
                                                 <option value="" selected>
@@ -69,9 +70,8 @@
 
                                             @if(!empty($users))
                                                 @foreach($users as $key => $value)
-                                                    <option value="{{$value->user_id}}">
-                                                        {{$value->user->branch_code??''}}
-                                                        - {{$value->user->lname??''}} {{$value->user->fname??''}}
+                                                    <option value="{{$value->currentWork->id}}">
+                                                        {{$value->currentWork->branch_code??''}} - {{$value->personal->l_name??''}} {{$value->personal->f_name??''}}
                                                     </option>
                                                 @endforeach
                                             @endif
@@ -104,7 +104,7 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <a href="{{url('/uw/all-clients')}}" class="btn btn-default btn-flat">
+                                        <a href="{{url('/phy/all-clients')}}" class="btn btn-default btn-flat">
                                             <i class="fa fa-refresh"></i> @lang('blade.reset')
                                         </a>
                                         <button type="submit" class="btn btn-primary btn-flat">
@@ -132,7 +132,6 @@
                                 <th>Summa</th>
                                 <th>Status</th>
                                 <th>OnlineReg</th>
-                                <th>Ball</th>
                                 <th>Filial</th>
                                 <th>Inspektor</th>
                                 <th>Sana</th>
@@ -142,9 +141,9 @@
                             <?php $i = 1; $price = 0; $branch = '09011'; ?>
                             @if($models->count())
                                 @foreach ($models as $key => $model)
-                                    <tr id="rowId_{{ $model->id }}">
+                                    <tr id="rowId_{{ $model->id }}" class="text-sm">
                                         <td>{{ $i++ }}</td>
-                                        <td class="text-sm text-maroon">{{ $model->loanType->title??'' }}</td>
+                                        <td class="text-maroon">{{ $model->loanType->title??'' }}</td>
                                         <td>
                                             <button type="button" class="btn btn-flat btn-info" id="editClient"
                                                     data-id="{{ $model->id }}">
@@ -192,26 +191,12 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="text-center">
-                                            @if(isset($model->katm->katm_sc_ball))
-                                                @if($model->katm->katm_sc_ball > 199)
-                                                    <p class="text-green text-bold"><i
-                                                                class="fa fa-arrow-circle-o-up"></i> {{ $model->katm->katm_sc_ball }}
-                                                    </p>
-                                                @else
-                                                    <p class="text-maroon text-bold"><i
-                                                                class="fa fa-arrow-circle-o-down"></i> {{ $model->katm->katm_sc_ball }}
-                                                    </p>
-                                                @endif
-                                            @endif
+                                        <td><span class="badge bg-light-blue-active">{{ $model->filial->filial_code??'' }}</span>
+                                            - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
                                         </td>
+                                        <td class="text-green">{{ $model->currentWork->personal->l_name??'-' }} {{ $model->currentWork->personal->f_name??'-' }}</td>
                                         <td>
-                                            {{ $model->filial->filial_code??'' }} - {{ $model->filial->title??'' }}
-                                        </td>
-                                        <td class="text-yellow">{{ $model->user->lname??''}} {{ $model->user->fname??'' }}</td>
-                                        <td style="min-width: 170px">
                                             {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
-                                            <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
                                         </td>
                                     </tr>
                                 @endforeach

@@ -9,8 +9,9 @@ class UwClients extends Model
     //
     protected $fillable = [
         'loan_type_id',
-        'user_id',
+        'work_user_id',
         'branch_code',
+        'local_code',
         'claim_id',
         'claim_date',
         'inn',
@@ -47,6 +48,17 @@ class UwClients extends Model
         'iabs_num',
         'descr'
     ];
+
+    public function currentWork()
+    {
+        return $this->belongsTo(MWorkUsers::class,'work_user_id','id')->where('isActive', 'A');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class,'local_code','local_code')->where('status', 1);
+    }
+
 
     public function user()
     {

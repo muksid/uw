@@ -221,6 +221,50 @@
 
         <script>
             $(document).ready(function() {
+
+
+
+                $('#jur').click(function () {
+                    let user = 'muksid_iabs';
+                    let pass = 'zz0102031!@#$';
+                    let tin = '308604547';
+                    $.ajax(
+                        {
+                            type: "POST",
+                            data: { user: user, pass: pass, inn: tin },
+                            url: "https://kpi.turonbank.uz:4343/api/ora/get-client-jur",
+                            success: function (data) {
+                                console.log(data);
+
+                                let table = '';
+                                let key = 1;
+                                for (let i = 0; i < data.length; i++){
+                                    let val = data[i];
+
+                                    salary += val.INCOME_SUMMA;
+
+                                    sum = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    table+= '<tr>' +
+                                        '<td>'+ key++ +'.</td>' +
+                                        '<td><span class="label label-success">'+val.PERIOD+'</span></td>' +
+                                        '<td>'+sum+'</td>' +
+                                        '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                        '<td>'+val.ORG_INN+'</td>' +
+                                        '</tr>';
+                                }
+                                $('.calc-table').html(table);
+                            },
+                            error: function (data) {
+                                console.log('Error:', data);
+                            }
+                        });
+
+                    $('#ConfirmModal').modal('hide');
+                });
+
+
+
                 $("#credit_type").change(function() {
                     var id = $(this).val();
                     $.ajax({

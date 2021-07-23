@@ -16,9 +16,9 @@ class RoleController extends Controller
     public function index()
     {
         // count() //
-        /*@include('oracle_connect.php');
+        //@include('oracle_connect.php');
 
-        $rs = oci_parse($conn??'',
+        /*$rs = oci_parse($conn??'',
             "select count(*) from ln_card a
             join Dwh_Loan_Card d on a.loan_id = d.loan_id
             where 1=1
@@ -30,12 +30,9 @@ class RoleController extends Controller
 
         $result["total"] = $row[0];
 
-        $sql = "select a.loan_id,a.filial_code,a.client_code,a.client_name,a.claim_number,a.loan_number,a.committee_number,
-        a.currency,a.contract_code,a.summ_loan,a.contract_date,d.ln_type_code,a.product_id,d.ln_type_name,d.ln_status_name 
-        from ln_card a
-        join dwh_Loan_Card d on a.loan_id = d.loan_id
-        where 1=1 
-        order by a.loan_id desc OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY ";
+        $sql = "select * from hr_emps a
+        where 1=1
+        order by 1 desc OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY ";
 
         $rs = oci_parse($conn, $sql);
 
@@ -48,16 +45,15 @@ class RoleController extends Controller
         }
         $result["rows"] = $items;
         //echo json_encode($result);
-        oci_close($conn);*/
-
+        oci_close($conn);
+print_r($items); die;*/
 
         $roles = Role::orderBy('role_code', 'ASC')->get();
 
         // count() //
         @include('count_message.php');
 
-        return view('roles.index', compact('roles',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('roles.index', compact('roles'));
     }
 
     public function ora()
@@ -168,16 +164,10 @@ and a.rnk = 1
      */
     public function destroy($id)
     {
-        $role = Role::find($id);
-        $check = User::where('roles', 'LIKE', '%'.$role->role_code.'%')->first();
-        if ($check) {
-            $message = 'Bu rolda foydalanuvchi mavjud';
-            $code = 0;
-        } else {
-            Role::find($id)->delete();
-            $message = 'Role o`chirildi';
-            $code = 1;
-        }
+
+        Role::find($id)->delete();
+        $message = 'Role o`chirildi';
+        $code = 1;
 
         return response()->json([
             'success' => 'Role',

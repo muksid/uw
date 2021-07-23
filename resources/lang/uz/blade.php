@@ -53,7 +53,7 @@ return [
     'error_check'       => 'Маълумотларни қайтадан текширинг',
     'exist'             => 'Мавжуд',
     'to_send_choose'    => 'Хат жўнатиш учун ходимларни танлашингиз керак.',
-    'select_users'      => 'Ходимларни танланг',    
+    'select_users'      => 'Ходимларни танланг',
     'messages'          => 'Хатлар',
     'branch'            => 'Филиал',
     'from_whom'         => 'Кимдан',
@@ -84,7 +84,7 @@ return [
     'read_control'      => 'Назоратдаги хатлар',
     'senders'           => 'Хат жўнатган ходимлар',
     'receivers'         => 'Хат жўнатилган ходимлар',
-    'from_spesific_user'=> 'дан келган барча хатлар',  
+    'from_spesific_user'=> 'дан келган барча хатлар',
     'sent_to'           => 'Хат жўнатилган ходимлар',
 
 
@@ -118,7 +118,7 @@ return [
     'term_message'  => 'Муддатли хатлар',
     'archive_inbox' => 'Кирувчи архив',
     'chat'          => 'Чат',
-    'trash_message' => 'Сават', 
+    'trash_message' => 'Сават',
     'iabs'          => 'ИАБС',  // added to sidebar 2020-05-21 14:19:34
     'sidebar_dep'   => 'Департаментлар',
     'sidebar_users' => 'Фойдаланувчилар',
@@ -189,7 +189,7 @@ return [
     'messages_chat'         => 'Хабарлар',
     'not_found_chat'        => 'Ёзишмалар топилмади. Чатдан фойдаланиш учун чап томондаги ходимлардан танланг',
     'unread_chat_messages'  => 'Ўкилмаган хабарлар',
-    
+
     /*  Edit User   */
     'edit_user'             => 'Фойдаланувчини таҳрирлаш', //Редактировать пользователя
     'name'                  => 'Исм',
@@ -200,14 +200,14 @@ return [
     'enter_pass_at_least_6' => 'Парол киритинг (камида 6 та)',
     'repeat_pass'           => 'Паролни такрорланг',
 
-    /*   Group index   */ 
+    /*   Group index   */
     'groups_my_groups'      => 'Менинг гуруҳларим',
     'groups_table'          =>  'жадвал',
     'groups_nav_groups'     => 'Гуруҳлар',
     'groups_group_table'    => 'Гуруҳ жадвали',
     'groups_create_group'   => 'Гуруҳ яратиш',
     'group_table_title'     => 'Сарлавҳа',
-    'group_table_title_ru'  => 'Сарлавҳа РУ', 
+    'group_table_title_ru'  => 'Сарлавҳа РУ',
     'group_table_date'      => 'Сана',
     'group_table_user_count'=> 'Фойдаланувчилар сони',
     'group_table_status'    => 'Ҳолати',
@@ -219,7 +219,7 @@ return [
     'group_edit_add_users'  => 'Бошқа ходимларни қўшинг',
     'group_edit_status'     => 'Ҳолатни белгиланг',
 
-    
+
     /* Group create */
     'group_create_add_users' => 'Гуруҳга кирувчи ходимларни белгиланг.',
     'to_create_group_choose' => 'Гуруҳ яратиш учун ходимларни белгилашингиз керак.',
@@ -230,9 +230,14 @@ return [
     'management_members'    => 'Бошқарув аъзолари',
     'committe_members'      => 'Қўмита аъзолари',
     'select_members'        => 'Аъзоларни бириктириш',
+    'members'               => 'Аъзолар',
+    'confirming_person'     => 'Тасдиқловчи шахс',
+    'prepared_by'           => 'Тайёрланди',
+    'suggested_member'      => 'Таклиф этилган',
+    'suggested_protocol_member' => 'Таклиф этилган қўмита аъзоси',
 
     /***        EDO      ***/
-    
+
     // edo-message
     'edo'               => 'ЭДО',
     'user'              => 'Фойдаланувчи',
@@ -253,7 +258,7 @@ return [
     'inbox_doc'         => 'Келган ҳужжатлар',
     'journals'          => 'Журналлар',
     'journal'           => 'Журнал',
-    'to_resolution'     => 'Резолютсияга', 
+    'to_resolution'     => 'Резолютсияга',
     'on_process'        => 'Жараёнда',
     'sent'              => 'Юборилган',
     'dep_staff'         => 'Департамент ҳодимлари',
@@ -291,7 +296,7 @@ return [
     'sender'                => 'Юборувчи',
     'date'                  => 'Сана',
     'status'                => 'Ҳолати',
-    'direct_task'           => 'Вазифани йўналтириш', //Направь задачу              
+    'direct_task'           => 'Вазифани йўналтириш', //Направь задачу
     'add_mini_task'         => 'Устихат қўшиш',
     'execution_time'        => 'Ижро муддати', //Время исполнения
     'at_least_3_letters'    => 'Энг камида 3 та ҳарф киритинг',
@@ -361,7 +366,7 @@ return [
     'not_detected'              => 'Аниқланмади',
     'rejected_task'             => 'Рад этилган вазифа',
     'reject_task'               => 'Вазифани рад этиш',
-    // viewDirctDepartTaskProcs    
+    // viewDirctDepartTaskProcs
     'reply_doc'                 => 'Жавоб хати',
     'send_message'              => 'Хабарни юбориш',
     'approve_reply'             => 'Жавоб хатини тасдиқлаш',
@@ -371,7 +376,7 @@ return [
     //  Edo users
     'users'                     => 'Фойдаланувчилар',
     'user_create'               => 'Фойдаланувчи қўшиш',
-    // 'err_user_create'           => 'User yaratishda xatolik mavjud',  
+    // 'err_user_create'           => 'User yaratishda xatolik mavjud',
     'full_name'                 => 'Тўлиқ исми',
     'dep'                       => 'Департамент',
     // helper task index
@@ -424,7 +429,7 @@ return [
     'my_orders'                => 'Буйруқларим',
     'strategy_orders'          => 'Стратег протокол',
     'kazna_protocols'          => 'Казна протокол',
-    
+
     // 2020-09-15 10:43:20 Addition
     'incoming_num_doc'  => 'Кирувчи ҳужжат рақами',
     'incoming_date_doc' => 'Кирувчи ҳужжат санаси',
@@ -438,8 +443,8 @@ return [
 
     // 2020-09-29 10:55:07 compose
     'with_respect'      => 'Ҳурмат билан',
-  
-    
+
+
     // 2020-10-8
 
     'rejected'          => 'Рад итилди',
@@ -461,4 +466,18 @@ return [
     // UW lang
     'previous'  => 'олдинга',
     'next'  => 'кейинги',
+
+    // Are you sure you want to delete text
+    'are_you_sure_delete'   => 'Ҳақиқатан ҳам ўчиришни хоҳлайсизми?',
+    'are_you_sure_edit'     => 'Ҳақиқатдан ҳам ўзгартиришни хоҳлайсизми?',
+    'reason'                => 'Сабаби',
+    'head_role'             => 'Асосий',
+    'yes'                   => 'Ҳа',
+    'no'                    => 'Йўқ',
+
+    'administrator'         => 'Администратор',
+    'admin'                 => 'Админ',
+    'control_db'            => 'Контроль БД',
+
+
 ];

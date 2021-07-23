@@ -20,6 +20,10 @@
     <!-- DataTables -->
     <link href="{{ asset("/admin-lte/plugins/datatables/dataTables.bootstrap.css") }}" rel="stylesheet" type="text/css">
 
+    <link href="{{ asset("/css/main.css") }}" rel="stylesheet" type="text/css">
+
+    <link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+
     <!-- Theme style -->
     <link href="{{ asset("/admin-lte/dist/css/AdminLTE.css") }}" rel="stylesheet" type="text/css">
 
@@ -30,6 +34,8 @@
     <link href="{{ asset("/admin-lte/dist/css/skins/_all-skins.min.css") }}" rel="stylesheet">
 
     <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
+
+    <!--<script src="{{ asset('js/treejquery.js') }}"></script>-->
 
 <body class="skin-green">
 
@@ -60,4 +66,7 @@
 
 <!-- iCheck -->
 <script src="{{ asset("/admin-lte/plugins/iCheck/icheck.min.js") }}"></script>
+
+<link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
+<script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
 

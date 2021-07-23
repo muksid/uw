@@ -23,4 +23,9 @@ class UwLoanTypes extends Model
     {
         return $this->belongsTo(UwLoanBank::class,'id', 'loan_types_id');
     }
+
+    public function departs()
+    {
+        return $this->belongsTo(Department::class,'id')->where('depart_id', 0);
+    }
 }

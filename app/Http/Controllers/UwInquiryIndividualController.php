@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\MWorkUsers;
 use App\UwClientComments;
 use App\UwClientDebtors;
 use App\UwClientFiles;
@@ -9,6 +10,7 @@ use App\UwClients;
 use App\UwInpsClients;
 use App\UwKatmClients;
 use App\UwLoanTypes;
+use App\UwPhyKatmFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -148,8 +150,8 @@ class UwInquiryIndividualController extends Controller
         $monthlyPayAnn = 0;
         $pv = 0;
         if ($clientK){
-            $creditDebt = $clientK->katm_summ;
-            $scoringBall = $clientK->katm_sc_ball;
+            $creditDebt = $clientK->summa;
+            $scoringBall = $clientK->scoring_ball;
         }
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
@@ -159,14 +161,13 @@ class UwInquiryIndividualController extends Controller
             $creditCanBeAnn = ($totalMonthPayment + $d_pay)*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
             $monthlyPayAnn = -(($pv - $model->summa) * $model->loanType->procent*0.01/12)/ (1 - pow((1 + $model->loanType->procent*0.01/12), (-$model->loanType->credit_duration)));
         }
-
         // In CS max sum can be
-        if (Auth::user()->uwUsers() == 'credit_insp' && $creditCanBe >= $model->summa){
+        if ($creditCanBe >= $model->summa){
             $creditCanBe = $model->summa;
         }
 
         // In CS max sum can be
-        if (Auth::user()->uwUsers() == 'credit_insp' && $creditCanBeAnn >= $model->summa){
+        if ($creditCanBeAnn >= $model->summa){
             $creditCanBeAnn = $model->summa;
         }
 
@@ -185,9 +186,33 @@ class UwInquiryIndividualController extends Controller
 
     }
 
+    function ftp_file_exists(){
+
+        $ftp_server = "172.16.1.233";
+        $ftp_user = "Muksid";
+        $ftp_pass = "TuR0N09011!@#$";
+
+        $conn_id = ftp_connect($ftp_server) or die("Couldn't connect to $ftp_server");
+
+        if (@ftp_login($conn_id, $ftp_user, $ftp_pass)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     public function onlineRegistration(Request $request)
     {
         //
+        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+        if (!$currentWorkUser){
+            return response()->json(
+                [
+                    'status'=>'warning',
+                    'message'=>'Inspektor passive holatda!!! (ip:247)'
+                ]);
+        }
+
         $id = $request->id;
 
         $modelClient = UwClients::find($id);
@@ -196,7 +221,7 @@ class UwInquiryIndividualController extends Controller
 
         if ($modelClient->reg_status == 1) {
 
-            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);
+            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps, $modelClient->branch_code);
 
         }
 
@@ -264,28 +289,25 @@ class UwInquiryIndividualController extends Controller
         $data_decode = json_decode($result, true);
         $code = $data_decode['result']['code'];
         $message = $data_decode['result']['message'];
-
         $katm_sir = $data_decode['response']['katm_sir'];
-
-        $clientComment = new UwClientComments();
-        $clientComment->uw_clients_id = $id;
-        $clientComment->user_id = Auth::id();
-        $clientComment->claim_id = $modelClient->claim_id;
-        $clientComment->title = '(code:'.$code.') Online Registration Success';
-        $clientComment->comment_type = '1';
-        $clientComment->katm_sir = $katm_sir;
-        $clientComment->katm_type = 1;
-        $clientComment->katm_descr = $result;
-        $clientComment->save();
 
         if ($code == '05000') {
 
-            // update reg
-            $modelClient = UwClients::find($id);
+            $clientComment = new UwClientComments();
+            $clientComment->uw_clients_id = $id;
+            $clientComment->claim_id = $modelClient->claim_id;
+            $clientComment->code = $code;
+            $clientComment->work_user_id = $currentWorkUser->id;
+            $clientComment->katm_sir = $katm_sir;
+            $clientComment->json_data = $result;
+            $clientComment->title = $message.' - Online registratsiya muvaffaqiyatli bajarildi';
+            $clientComment->process_type = 'R';
+            $clientComment->save();
 
+            // update reg
             $modelClient->update(['reg_status' => 1, 'katm_sir' => $katm_sir]);
 
-            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);
+            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps, $modelClient->branch_code);
 
         } else {
             return response()->json(
@@ -303,13 +325,14 @@ class UwInquiryIndividualController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function creditReportK($id, $claim_id, $is_inps)
+    public function creditReportK($id, $claim_id, $is_inps, $branch_code)
     {
         //
-        $katm_client = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+        $isKATM = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        if ($katm_client){
-            return $this->getClientSalary($id, $claim_id);
+        if ($isKATM){
+
+            return $this->getClientSalary($id, $claim_id, $branch_code);
         }
 
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
@@ -321,7 +344,7 @@ class UwInquiryIndividualController extends Controller
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".Auth::user()->branch_code."",
+                "pCode" => "".$branch_code."",
                 "pLegal" => 1,
                 "pClaimId" => "".$claim_id."",
                 "pReportId" => 21,
@@ -345,8 +368,6 @@ class UwInquiryIndividualController extends Controller
         curl_close($ch);
 
         $data_decode = json_decode($result, true);
-
-        //$code = $data_decode['code'];
         $result = $data_decode['data']['result'];
         $resultMessage = $data_decode['data']['resultMessage'];
 
@@ -354,7 +375,7 @@ class UwInquiryIndividualController extends Controller
 
             $token = $data_decode['data']['token'];
 
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps);
+            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
 
         } else {
             return response()->json(
@@ -374,10 +395,12 @@ class UwInquiryIndividualController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function creditReportStatusK($token, $id, $claim_id, $is_inps)
+    public function creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code)
     {
         //
+
         $url1 = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
+
         $data1 = array(
             "security" => array(
                 "pLogin" => "turonbank",
@@ -385,7 +408,7 @@ class UwInquiryIndividualController extends Controller
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".Auth::user()->branch_code."",
+                "pCode" => "".$branch_code."",
                 "pToken" => "".$token."",
                 "pLegal" => 1,
                 "pClaimId" => "".$claim_id."",
@@ -406,204 +429,142 @@ class UwInquiryIndividualController extends Controller
         curl_setopt($ch1, CURLOPT_HTTPPROXYTUNNEL, 0);
         curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
         curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result1 = curl_exec($ch1);
+        $json_data = curl_exec($ch1);
         curl_close($ch1);
 
-        $data_decode1 = json_decode($result1, true);
+        $json_data_decode = json_decode($json_data, true);
 
-        $reportBase64 = $data_decode1['data']['reportBase64'];
+        $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
 
-        $code = $data_decode1['data']['result'];
-
-        if (!$reportBase64){
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps);
-        } else{
-
-            $base64_decode = base64_decode($reportBase64);
-
-            $models_data = json_decode($base64_decode, true);
-            $md_array = $models_data['html']['body']['div'][1]['table'][1]['tbody']['tr'];
-            $scoring_ball = $md_array[10]['td'][1]['div']['span'];
-            $score_level_info = $md_array[12]['td'][1]['span'];
-            $score_date = $md_array[13]['td'][1]['span'];
-            $score_version = $md_array[14]['td'][1]['span'];
-
-            $client_info_1 = $md_array[1]['td'][1]['span']; /*fio*/
-            $client_info_2_text = $md_array[2]['td'][1]['span']; /*den roj*/
-            $client_info_4 = $md_array[4]['td'][1]['span']; /*adres*/
-            $client_info_5 = $md_array[5]['td'][1]['span']; /*pinfl*/
-            $client_info_6 = $md_array[6]['td'][1]['span']; /*pinfl*/
-            $client_info_7 = $md_array[7]['td'][1]['span']; /*passport*/
-            $client_info_8 = $md_array[8]['td'][1]['span']; /*telephone*/
-
-            /**/
-            $score_img = $md_array[10]['td'][1]['img']['src'];
-            $file_name = $claim_id.'.php';
-            $file_path = public_path().'/katm_files/'.$file_name;
-
-            //$file_path = "//172.16.1.123/T$/OSPanel/domains/edo.turonbank.uz/public/katm_files/".$file_name;
-            $score_img_file = fopen($file_path, "w+") or die("Unable to open file!");
-            fwrite($score_img_file, $score_img);
-            fclose($score_img_file);
-
-            /* -- tb 1 -- */
-            $tb_1_1 = $md_array['19']['td'][2]['span'];
-            $tb_1_2 = $md_array['19']['td'][3]['span'];
-            $tb_1_3 = $md_array['19']['td'][4]['span'];
-            $tb_1_4 = $md_array['19']['td'][5]['span'];
-
-            /* -- tb 2 -- */
-            $tb_2_1 = $md_array['20']['td'][2]['span'];
-            $tb_2_2 = $md_array['20']['td'][3]['span'];
-            $tb_2_3 = $md_array['20']['td'][4]['span'];
-            $tb_2_4 = $md_array['20']['td'][5]['span'];
-
-            /* -- tb 3 -- */
-            $tb_3_1 = $md_array['21']['td'][2]['span'];
-            $tb_3_2 = $md_array['21']['td'][3]['span'];
-            $tb_3_3 = $md_array['21']['td'][4]['span'];
-            $tb_3_4 = $md_array['21']['td'][5]['span'];
-
-            /* -- tb 4 -- */
-            $tb_4_1 = $md_array['22']['td'][2]['span'];
-            $tb_4_2 = $md_array['22']['td'][3]['span'];
-            $tb_4_3 = $md_array['22']['td'][4]['span'];
-            $tb_4_4 = $md_array['22']['td'][5]['span'];
-
-            /* -- tb 5 -- */
-            $tb_5_1 = $md_array['23']['td'][2]['span'];
-            $tb_5_2 = $md_array['23']['td'][3]['span'];
-            $tb_5_3 = $md_array['23']['td'][4]['span'];
-            $tb_5_4 = $md_array['23']['td'][5]['span'];
-
-            /* -- tb 6 -- */
-            $tb_6_1 = $md_array['24']['td'][2]['span'];
-            $tb_6_2 = $md_array['24']['td'][3]['span'];
-            $tb_6_3 = $md_array['24']['td'][4]['span'];
-            $tb_6_4 = $md_array['24']['td'][5]['span'];
-
-            /* -- tb 7 -- */
-            $tb_7_1 = $md_array['25']['td'][2]['span'];
-            $tb_7_2 = $md_array['25']['td'][3]['span'];
-            $tb_7_3 = $md_array['25']['td'][4]['span'];
-            $tb_7_4 = $md_array['25']['td'][5]['span'];
-
-            /* -- tb 8 -- */
-            $tb_8_1 = $md_array['26']['td'][2]['span'];
-            $tb_8_2 = $md_array['26']['td'][3]['span'];
-            $tb_8_3 = $md_array['26']['td'][4]['span'];
-            $tb_8_4 = $md_array['26']['td'][5]['span'];
-
-            /* -- tb 9 -- */
-            $tb_9_1 = $md_array['27']['td'][2]['span'];
-            $tb_9_2 = $md_array['27']['td'][3]['span'];
-            $tb_9_3 = $md_array['27']['td'][4]['span'];
-            $tb_9_4 = $md_array['27']['td'][5]['span'];
-
-            /* -- tb 12 -- */
-            if (count($md_array[31]['td'][2]['span'][0]) > 1) {
-                # code...
-                $tb_12_0 = $md_array[31]['td'][2]['span'][0]['span'];
-            } else{
-                $tb_12_0 = 0;
-            }
-
-            if (count($md_array[31]['td'][2]['span'][1]) > 2) {
-                $tb_12_1 = $md_array[31]['td'][2]['span'][1]['span'];
-            } else {
-                $tb_12_1 = '';
-            }
-
-            if (count($md_array[31]['td'][2]['span'][2]) > 2) {
-                $tb_12_2 = $md_array[31]['td'][2]['span'][2]['span'];
-            } else {
-                $tb_12_2 = '';
-            }
-
-            if (count($md_array[31]['td'][2]['span'][3]) > 2) {
-                $tb_12_3 = $md_array[31]['td'][2]['span'][3]['span'];
-            } else {
-                $tb_12_3 = '';
-            }
-
-            if (count($md_array[31]['td'][2]['span'][4]) > 2) {
-                $tb_12_4 = $md_array[31]['td'][2]['span'][4]['span'];
-            } else {
-                $tb_12_4 = '';
-            }
-
-            $md_array_ft = $models_data['html']['body']['div'][1]['table'][2]['tbody']['tr'];
-            $ft_claim_id = $md_array_ft[2]['td']['span']['span'];
-            $ft_katm_id = $md_array_ft[3]['td']['span']['span'];
-
-            $arr_scoring = array(
-                'sc_ball' => $scoring_ball,
-                'sc_level_info' => $score_level_info,
-                'score_date' => $score_date,
-                'sc_version' => $score_version,
-                'client_info_1' => $client_info_1,
-                'client_info_2_text' => $client_info_2_text,
-                'client_info_4' => $client_info_4,
-                'client_info_5' => $client_info_5,
-                'client_info_6' => $client_info_6,
-                'client_info_7' => $client_info_7,
-                'client_info_8' => $client_info_8,
-                'ft_claim_id' => $ft_claim_id,
-                'ft_katm_id' => $ft_katm_id,
-            );
-            $arr_scoring_json = json_encode($arr_scoring);
-
-            $arr_tb = array(
-                'row_1' => array('open_total' => $tb_1_1, 'open_summ' => $tb_1_2, 'close_total' => $tb_1_3, 'close_summ' => $tb_1_4) ,
-                'row_2' => array('open_total' => $tb_2_1, 'open_summ' => $tb_2_2, 'close_total' => $tb_2_3, 'close_summ' => $tb_2_4) ,
-                'row_3' => array('open_total' => $tb_3_1, 'open_summ' => $tb_3_2, 'close_total' => $tb_3_3, 'close_summ' => $tb_3_4) ,
-                'row_4' => array('open_total' => $tb_4_1, 'open_summ' => $tb_4_2, 'close_total' => $tb_4_3, 'close_summ' => $tb_4_4) ,
-                'row_5' => array('open_total' => $tb_5_1, 'open_summ' => $tb_5_2, 'close_total' => $tb_5_3, 'close_summ' => $tb_5_4) ,
-                'row_6' => array('open_total' => $tb_6_1, 'open_summ' => $tb_6_2, 'close_total' => $tb_6_3, 'close_summ' => $tb_6_4) ,
-                'row_7' => array('open_total' => $tb_7_1, 'open_summ' => $tb_7_2, 'close_total' => $tb_7_3, 'close_summ' => $tb_7_4) ,
-                'row_8' => array('open_total' => $tb_8_1, 'open_summ' => $tb_8_2, 'close_total' => $tb_8_3, 'close_summ' => $tb_8_4) ,
-                'row_9' => array('open_total' => $tb_9_1, 'open_summ' => $tb_9_2, 'close_total' => $tb_9_3, 'close_summ' => $tb_9_4) ,
-                'row_12' => array('agr_summ' => $tb_12_0, 'agr_date' => $tb_12_1, 'agr_comm2' => $tb_12_2,
-                    'agr_comm3' => $tb_12_3, 'agr_comm4' => $tb_12_4));
-            $arr_tb_json = json_encode($arr_tb);
-
-            $summ = preg_replace('/[^0-9]/', '', $tb_12_0);
-
-            $katm = UwKatmClients::updateOrCreate(['uw_clients_id' => $id],
+        if ($this->ftp_file_exists() == 0){
+            return response()->json(
                 [
-                    'uw_clients_id' => $id,
-                    'claim_id' => $claim_id,
-                    'katm_summ' => $summ,
-                    'katm_sc_ball' => $scoring_ball,
-                    'status' => 1,
-                    'katm_score' => $arr_scoring_json,
-                    'katm_tb' => $arr_tb_json
+                    'status'=>'error',
+                    'message'=>'FTP SERVER ga ulanishda muammo bor!!! (ip:153)'
                 ]);
-
-            $clientComment = new UwClientComments();
-            $clientComment->uw_clients_id = $id;
-            $clientComment->user_id = Auth::id();
-            $clientComment->claim_id = $claim_id;
-            $clientComment->title = '(code:'.$code.') KATM Mijoz kredit scoring muvaffaqiyatli saqlandi';
-            $clientComment->comment_type = '2';
-            $clientComment->save();
-
-            if ($is_inps == 1 && $scoring_ball > 199){
-
-                return $this->getClientSalary($id, $claim_id);
-
-            } else {
-
-                return response()->json(
-                    [
-                        'status'=>'success',
-                        'message'=>'KATM Mijoz kredit tarixi muvaffaqiyatli saqlandi',
-                        'is_inps'=> 1,
-                        'data'=> $katm,
-                        'credit_results' => $this->clientCreditResults($id),
-                    ]);
-            }
         }
+
+        if ($base64_decode){
+            $code = $json_data_decode['code'];
+            //print_r($code); die;
+            if ($code == 200) {
+                // code...
+                $result_code = $json_data_decode['data']['result'];
+                if ($result_code == '05000') {
+                    // code...
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+
+                    $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
+                    $json_decode_arr = json_decode($base64_decode, true);
+                    $base_arr = $json_decode_arr['html']['body']['div'][1]['table'];
+                    $arr1 = $base_arr[1]['tbody']['tr'];
+                    $arr2 = $base_arr[2]['tbody']['tr'];
+                    $arr_merge = array_merge($arr1,$arr2);
+                    $txt_base64 = base64_encode(json_encode($arr_merge)); // for save all data base64
+
+                    $hash_filename = md5(time().$claim_id);
+
+                    $path_txt = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.txt';
+
+                    Storage::disk('ftp_nas')->put($path_txt, $txt_base64);
+
+                    /*$img_scoring_ball = $arr1[10]['td'][1]['img']['src']; // save img scoring ball
+
+                    if (preg_match('/^data:image\/(\w+);base64,/', $img_scoring_ball)) {
+                        $data = substr($img_scoring_ball, strpos($img_scoring_ball, ',') + 1);
+
+                        $data = base64_decode($data);
+
+                        $path_img = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.png';
+
+                        Storage::disk('ftp_nas')->put($path_img, $data);
+                    }*/
+
+                    $scoring_ball = $arr1[10]['td'][1]['div']['span']; // scoring ball
+
+                    $arr_summa = $arr1[31]['td'][2]['span'][0]; // exit summa
+
+                    if (count($arr_summa) > 1) {
+                        # code...
+                        $summa = $arr1[31]['td'][2]['span'][0]['span'];
+                        $summa = preg_replace('/[^0-9]/', '', $summa);
+                    } else{
+                        $summa = 0;
+                    }
+
+                    // json_data table
+                    for ($i=17; $i < 32; $i++) {
+                        // code...
+                        $arr_table[$i] = array_merge($arr1[$i]);
+
+                    }
+                    $jon_data = base64_encode(json_encode($arr_table)); // table
+
+                    $katm = UwKatmClients::updateOrCreate(['uw_clients_id' => $id],
+                        [
+                            'uw_clients_id' => $id,
+                            'claim_id' => $claim_id,
+                            'summa' => $summa,
+                            'scoring_ball' => $scoring_ball,
+                            'json_data' => $jon_data,
+                            'isVersion' => 2,
+                            'status' => 1
+                        ]);
+
+                    $clientComment = new UwClientComments();
+                    $clientComment->uw_clients_id = $id;
+                    $clientComment->claim_id = $claim_id;
+                    $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
+                    $clientComment->code = $result_code;
+                    $clientComment->title = 'KATM Scoring KIAS muvaffaqiyatli saqlandi';
+                    $clientComment->json_data = '';
+                    $clientComment->process_type = 'KS';
+                    $clientComment->save();
+
+                    // save katm file (base64 txt)
+                    $katmFile = new UwPhyKatmFile();
+                    $katmFile->uw_clients_id = $id;
+                    $katmFile->uw_katm_id = $katm->id;
+                    $katmFile->file_path = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/';
+                    $katmFile->file_hash = $hash_filename.'.txt';
+                    $katmFile->file_type = 'B64';
+                    $katmFile->save();
+
+                    // save katm file (scoring ball png)
+                    /*$katmFile = new UwPhyKatmFile();
+                    $katmFile->uw_clients_id = $id;
+                    $katmFile->uw_katm_id = $katm->id;
+                    $katmFile->file_path = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/';
+                    $katmFile->file_hash = $hash_filename.'.png';
+                    $katmFile->file_type = 'IMG';
+                    $katmFile->save();*/
+
+                    if ($is_inps == 1 && $scoring_ball > 199){
+
+                        return $this->getClientSalary($id, $claim_id, $branch_code);
+
+                    } else {
+
+                        return response()->json(
+                            [
+                                'status'=>'success',
+                                'message'=>'KATM Scoring KIAS muvaffaqiyatli saqlandi',
+                                'is_inps'=> 1,
+                                'data'=> $katm,
+                                'credit_results' => $this->clientCreditResults($id),
+                            ]);
+                    }
+                }
+            }
+
+        } else{
+            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
+        }
+
+
     }
 
 
@@ -613,8 +574,9 @@ class UwInquiryIndividualController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getClientSalary($id, $claim_id)
+    public function getClientSalary($id, $claim_id, $branch_code)
     {
+        //
         $inps_client = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
         if ($inps_client) {
@@ -636,7 +598,7 @@ class UwInquiryIndividualController extends Controller
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".Auth::user()->branch_code."",
+                "pCode" => "".$branch_code."",
                 "pLegal" => 1,
                 "pClaimId" => "".$claim_id."",
                 "pReportId" => '048',
@@ -661,27 +623,31 @@ class UwInquiryIndividualController extends Controller
 
         $resultDecode = json_decode($result_post, true);
 
-        $resultCode = $resultDecode['code'];
+        $code = $resultDecode['code'];
         //print_r($resultCode); die;
 
-        if ($resultCode == '200') {
+        if ($code == '200') {
 
-            $data = $resultDecode['data']['result'];
+            $result_code = $resultDecode['data']['result'];
 
-            $clientComment = new UwClientComments();
-            $clientComment->uw_clients_id = $id;
-            $clientComment->user_id = Auth::id();
-            $clientComment->claim_id = $claim_id;
-            $clientComment->title = '(code:'.$data.') Oylik ish haqi ma`lumotlari muvaffaqiyatli saqlandi';
-            $clientComment->comment_type = '2';
-            $clientComment->save();
-
-            if ($data == '05000') {
+            if ($result_code == '05000') {
                 $message = $resultDecode['data']['resultMessage'];
                 $resultBase64 = $resultDecode['data']['reportBase64'];
                 $base64_decode = base64_decode($resultBase64);
                 $models_decode = json_decode($base64_decode, true);
                 $models_status = $models_decode['report']['success'];
+
+
+                $clientComment = new UwClientComments();
+                $clientComment->uw_clients_id = $id;
+                $clientComment->claim_id = $claim_id;
+                $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
+                $clientComment->code = $result_code;
+                $clientComment->title = 'Oylik ish haqi ma`lumotlari muvaffaqiyatli saqlandi';
+                $clientComment->json_data = '';
+                $clientComment->process_type = 'SAL';
+                $clientComment->save();
+
                 if ($models_status == 1) {
                     // code...
                     $models = $models_decode['report']['data'];
@@ -728,7 +694,7 @@ class UwInquiryIndividualController extends Controller
                         return response()->json(
                             [
                                 'status' => 'success',
-                                'message' => '('.$message.') KATM va INPS ma`lumotlari muvaffaqiyatli saqlandi',
+                                'message' => '('.$message.') KATM KIAS Scoring va ISH HAQI ma`lumotlari muvaffaqiyatli saqlandi',
                                 'credit_results' => $this->clientCreditResults($id),
                                 'models' => $models
                             ]);
@@ -736,13 +702,14 @@ class UwInquiryIndividualController extends Controller
                     }
                 }
 
+
             } else {
                 $message = $resultDecode['data']['resultMessage'];
 
                 return response()->json(
                     [
                         'status' => 'success',
-                        'message' => '11('.$message.$resultDecode.')',
+                        'message' => '('.$message.$resultDecode.')',
                         'credit_results' => $this->clientCreditResults($id)
                     ]);
 
@@ -763,212 +730,6 @@ class UwInquiryIndividualController extends Controller
         }
 
     }
-
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function creditReportI($id, $claim_id)
-    {
-        //
-        $inps_client = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
-
-        if ($inps_client) {
-
-            return response()->json(
-                [
-                    'status' => 'success',
-                    'message' => 'KATM va INPS natijasi muvaffaqiyatli saqlandi',
-                    'credit_results' => $this->clientCreditResults($id)
-                ]);
-        }
-
-        $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
-
-        $data = array(
-            "security" => array(
-                "pLogin" => "turonbank",
-                "pPassword" => "!trB&GkL@200130"
-            ),
-            "data" => array(
-                "pHead" => "011",
-                "pCode" => "".Auth::user()->branch_code."",
-                "pLegal" => 1,
-                "pClaimId" => "".$claim_id."",
-                "pReportId" => 25,
-                "pReportFormat" => 1
-            ),
-        );
-
-        $postdata = json_encode($data);
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8001');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result = curl_exec($ch);
-        curl_close($ch);
-
-        $data_decode = json_decode($result, true);
-
-        $code = $data_decode['code'];
-        $result = $data_decode['data']['result'];
-        $resultMessage = $data_decode['data']['resultMessage'];
-
-        if ($code == '200'){
-            if ($result == '05050'){
-
-                $tokenI = $data_decode['data']['token'];
-
-                return $this->creditReportStatusI($tokenI, $id, $claim_id);
-
-            } else {
-                return response()->json(
-                    [
-                        'status'=>'warning',
-                        'message'=>'('.$code.') Сведения о доходах по ИНПС не найдены',
-                        'data'=> $result.''.$resultMessage,
-                        'credit_results' => $this->clientCreditResults($id)
-                    ]);
-            }
-
-        } else {
-            $errorMessage = $data_decode['data']['errorMessage'];
-
-            return response()->json(
-                [
-                    'status'=>'warning',
-                    'message'=>'('.$code.') Сведения о доходах по ИНПС не найдены',
-                    'data'=> $result.''.$errorMessage,
-                    'credit_results' => $this->clientCreditResults($id)
-                ]);
-
-        }
-    }
-
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function creditReportStatusI($tokenI, $id, $claim_id)
-    {
-        //
-        $urlI = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
-
-        $dataI = array(
-            "security" => array(
-                "pLogin" => "turonbank",
-                "pPassword" => "!trB&GkL@200130"
-            ),
-            "data" => array(
-                "pHead" => "011",
-                "pCode" => "".Auth::user()->branch_code."",
-                "pToken" => "".$tokenI."",
-                "pLegal" => 1,
-                "pClaimId" => "".$claim_id."",
-                "pReportId" => 25,
-                "pReportFormat" => 1
-            ),
-        );
-
-        $postdata1 = json_encode($dataI);
-
-        $ch1 = curl_init($urlI);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch1, CURLOPT_POST, 1);
-        curl_setopt($ch1, CURLOPT_POSTFIELDS, $postdata1);
-        curl_setopt($ch1, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch1, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
-        curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result1 = curl_exec($ch1);
-        curl_close($ch1);
-
-        $data_decode1 = json_decode($result1, true);
-        //$result = $data_decode1['data']['result'];
-        $reportBase64 = $data_decode1['data']['reportBase64'];
-        if (!$reportBase64){
-
-            return $this->creditReportStatusI($tokenI, $id, $claim_id);
-
-        } else{
-
-            $base64_decode = base64_decode($reportBase64);
-
-            $models = json_decode($base64_decode, true);
-
-            if ($models['report']['incomes']) {
-                $old_inps = UwInpsClients::where('uw_clients_id', $id)->where('status', 1);
-                $old_inps->delete();
-
-                $models_array = $models['report']['incomes']['INCOME'];
-                if (array_filter($models_array, 'is_array')) {
-                    # code...
-                    foreach ($models_array as $key => $value) {
-                        # code...
-                        $inps = new UwInpsClients();
-
-                        $inps->uw_clients_id = $id;
-                        $inps->claim_id = $claim_id;
-                        $inps->ORG_INN = $value['ORG_INN'];
-                        $inps->INCOME_SUMMA = $value['INCOME_SUMMA'];
-                        $inps->NUM = $value['NUM'];
-                        $inps->PERIOD = $value['PERIOD'];
-                        $inps->ORGNAME = $value['ORGNAME'];
-                        $inps->status = 1;
-                        $inps->save();
-                    }
-
-                } else {
-                    $inps = new UwInpsClients();
-
-                    $inps->uw_clients_id = $id;
-                    $inps->claim_id = $claim_id;
-                    $inps->ORG_INN = $models_array['ORG_INN'];
-                    $inps->INCOME_SUMMA = $models_array['INCOME_SUMMA'];
-                    $inps->NUM = $models_array['NUM'];
-                    $inps->PERIOD = $models_array['PERIOD'];
-                    $inps->ORGNAME = $models_array['ORGNAME'];
-                    $inps->status = 1;
-                    $inps->save();
-                }
-
-                return response()->json(
-                    [
-                        'status'=>'success',
-                        'message'=>'KATM va INPS ma`lumotlari muvaffaqiyatli saqlandi',
-                        'credit_results' => $this->clientCreditResults($id)
-                    ]);
-
-            } else {
-                $old_inps = UwInpsClients::where('uw_clients_id', $id)->where('status', 1);
-
-                $old_inps->delete();
-
-                return response()->json(
-                    [
-                        'status'=>'warning',
-                        'message'=>'('.$models.') Сведения о доходах по ИНПС не найдены',
-                        'credit_results' => $this->clientCreditResults($id),
-                    ]);
-            }
-
-        }
-
-    }
-
 
     /**
      * Display a listing of the resource.
@@ -992,9 +753,36 @@ class UwInquiryIndividualController extends Controller
             ]);
     }
 
-    public function getClientKatm($id)
+    public function getClientKatm(Request $request)
     {
+        $id = $request->id;
+
         $model = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
+        $katmBase64 = UwPhyKatmFile::where('uw_clients_id', $id)->where('file_type', 'B64')->orderBy('id', 'desc')->first();
+
+        $katm_data = '';
+        $scoring_img = '';
+        if ($katmBase64){
+            $path = $katmBase64->file_path.$katmBase64->file_hash;
+
+            if ($model->isVersion == 1) {
+
+                $scoring_img = Storage::disk('ftp_nas')->get($path.".php");
+
+            }
+
+            if (Storage::disk('ftp_nas')->exists($path)){
+
+                $data = Storage::disk('ftp_nas')->get($path);
+
+                $base64 = base64_decode($data);
+
+                $katm_data = json_decode($base64, true);
+
+            }
+
+        }
 
         $modelClient = UwClients::find($id);
 
@@ -1011,16 +799,17 @@ class UwInquiryIndividualController extends Controller
             $image = 'null';
 
         }
+
         $getFile = file_get_contents("uw/scoring_page.php");
-        $getFileScoringImg = file_get_contents("katm_files/".$modelClient->claim_id.".php");
-        //$getFileScoringImg = Storage::disk('disk_edo_123')->get("/katm_files/".$modelClient->claim_id.".php");
 
         return response()->json([
+            'data'  => $model,
+            'katm_data'  => $katm_data,
             'summ'   => number_format($summ),
             'scoring' => $scoring,
             'table'  => $table,
             'scoring_page'  => $getFile,
-            'scoring_page1'  => $getFileScoringImg,
+            'scoring_img'  => $scoring_img,
             'client'  => $modelClient,
             'image'  => $image
         ]);
@@ -1067,8 +856,8 @@ class UwInquiryIndividualController extends Controller
         $creditDebt = 0;
         $creditCanBe = 0;
         if ($clientK){
-            $creditDebt = $clientK->katm_summ;
-            $scoringBall = $clientK->katm_sc_ball;
+            $creditDebt = $clientK->summa;
+            $scoringBall = $clientK->scoring_ball;
         }
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
