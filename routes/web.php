@@ -175,11 +175,6 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('uw/client-view/{q}','UwJuridicalClientsController@uwShow');
         Route::post('agr-confirm', 'UwJuridicalClientsController@agrConfirm');
         Route::post('agr-cancel', 'UwJuridicalClientsController@agrCancel');
-        //Route::get('create','UwJuridicalClientsController@create');
-        //Route::post('view-form','UwJuridicalClientsController@store');
-        //Route::get('edit-client/{id}/{cid}','UwJuridicalClientsController@edit');
-        //Route::get('view-client/{id}/{cid}','UwJuridicalClientsController@show');
-        //Route::post('edit-form/{id}','UwJuridicalClientsController@show');
 
         Route::get('online-reg','UwInquiryEntityController@onlineRegistration');
         Route::get('get-scoring-kias','UwInquiryEntityController@creditReportScoring');
@@ -188,8 +183,13 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('get-kias-modal','UwJuridicalClientsController@getKiasModal');
         Route::get('get-balance-modal','UwJurBalanceFormsController@getBalanceModal');
         Route::get('get-jur-saldo','UwJuridicalClientsController@getOraSaldo');
+        Route::get('get-jur-k2','UwJuridicalClientsController@getOraK2');
+        Route::get('get-jur-leads','UwJuridicalClientsController@getOraLeads');
 
         Route::get('get-select','UwJuridicalClientsController@getSelect');
+
+
+        Route::resource('client-personal','UwJurClientPersonalController');
 
         Route::get('get-hr_emps','UwJuridicalClientsController@getHrEmps');
 
@@ -198,6 +198,10 @@ Route::group(['middleware' => ['auth']], function() {
     // DEBTORS
     Route::resource('uw-debtors', 'UwClientDebtorsController');
     Route::get('get-uw-debtor/{id}', 'UwClientDebtorsController@onlineDebtorsRegistration');
+
+    // GUAR TYPES
+    Route::resource('uw-guar-type', 'UwGuarTypesController');
+    Route::get('get-guar-types', 'UwGuarTypesController@getModel');
 
     // Laravel log
     Route::get('/storage/log', 'HomeController@storageLog')->name('storage-log');

@@ -100,7 +100,7 @@
                                     <div class="box-body">
                                         <div class="form-group {{ $errors->has('oked') ? 'has-error' : '' }}">
                                             <label>ОКЭД</label>
-                                            <input type="text" name="oked" class="form-control" value="{{ $model->oked }}" maxlength="10" required>
+                                            <input type="text" name="oked" class="form-control" value="{{ $model->oked }}" maxlength="10">
 
                                         </div>
                                     </div>
@@ -110,7 +110,7 @@
                                     <div class="box-body">
                                         <div class="form-group {{ $errors->has('okpo') ? 'has-error' : '' }}">
                                             <label>ОКПО</label>
-                                            <input type="text" name="okpo" class="form-control" value="{{ $model->okpo }}" maxlength="10" required>
+                                            <input type="text" name="okpo" class="form-control" value="{{ $model->okpo }}" maxlength="10">
 
                                         </div>
                                     </div>
@@ -429,61 +429,6 @@
         <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.js') }}"></script>
         <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.extensions.js') }}"></script>
         <script>
-            $("#loading").hide();
-            $("#search").click(function () {
-
-                let tin = $('#search_tin').val();
-
-                $.ajax({
-                    url: '/jur/ora-search',
-                    type: 'GET',
-                    data: {tin: tin},
-                    dataType: 'json',
-                    beforeSend: function(){
-                        $("#loading").show();
-                    },
-                    success: function(res){
-                        console.log(res)
-                        let table = '';
-                        let key = 1;
-                        for (let i = 0; i < res.length; i++){
-                            let val = res[i];
-
-                            table+=
-                                '<tr>' +
-                                '<td>'+ key++ +'.</td>' +
-                                '<td>'+val.code_filial+'</td>' +
-                                '<td>'+val.code+'</td>' +
-                                '<td><a href="view-form/'+val.inn+'">'+val.name+'</a></td>' +
-                                '<td>'+val.inn+'</td>' +
-                                '<td>'+val.director_name+'</td>' +
-                                '<td class="text-sm">'+val.reg_name+'</td>' +
-                                '<td class="text-sm">'+val.dis_name+'</td>' +
-                                '<td class="text-sm">'+val.address+'</td>' +
-                                '<td>'+formatDate(val.date_open)+'</td>' +
-                                '</tr>';
-                        }
-                        $('.data-table').html(table);
-
-                    },
-                    complete:function(res){
-                        $("#loading").hide();
-                    }
-
-                });
-
-            });
-
-            $('#search_tin').keydown(function(event){
-
-                var keyCode = (event.keyCode ? event.keyCode : event.which);
-                if (keyCode === 13) {
-
-                    $('#search').trigger('click');
-
-                }
-            });
-
             function formatDate(date) {
                 var d = new Date(date),
                     month = '' + (d.getMonth() + 1),
@@ -699,8 +644,6 @@
                     if(theEvent.preventDefault) theEvent.preventDefault();
                 }
             }
-
-
 
         </script>
     </section>

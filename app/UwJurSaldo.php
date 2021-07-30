@@ -15,6 +15,7 @@ class UwJurSaldo extends Model
         'all_credit',
         'credit',
         'debit',
+        'k2',
         'all_debit',
         'saldo_month',
         'lead_last_date'

@@ -160,7 +160,7 @@
                                             </a>
                                         </td>
                                         <td>{{ $model->inn }}</td>
-                                        <td><b>{{ number_format($model->summa, 2) }}</b></td>
+                                        <td><b>{{ number_format($model->summa) }}</b></td>
 
                                         <td>
                                             @if($model->status == 0)
@@ -183,7 +183,7 @@
                                         <td class="text-sm text-center text-bold text-blue">
                                             {{ $model->user->personal->l_name??'-' }}
                                             {{ mb_substr($model->user->personal->f_name??'-', 0, 1) }}.</td>
-                                        <td class="text-sm">
+                                        <td class="text-sm" style="min-width: 50px">
                                             {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                             <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
                                         </td>

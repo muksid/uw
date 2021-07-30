@@ -10,6 +10,7 @@ use App\UwClientComments;
 use App\UwClientFiles;
 use App\UwClientGuars;
 use App\UwClients;
+use App\UwGuarType;
 use App\UwLoanTypes;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -147,7 +148,7 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-'.$blade.'-step-one',compact('model','regions', 'districts', 'loan'));
+        return view('uw.create-clients.create-i-step-one',compact('model','regions', 'districts', 'loan'));
     }
 
     /**
@@ -209,7 +210,7 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-'.$blade.'-step-two',compact('model', 'id', 'loan'));
+        return view('uw.create-clients.create-i-step-two',compact('model', 'id', 'loan'));
     }
 
     /**
@@ -245,7 +246,7 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-'.$blade.'-step-three',compact('model', 'id', 'loan'));
+        return view('uw.create-clients.create-i-step-three',compact('model', 'id', 'loan'));
     }
 
     /**
@@ -315,7 +316,7 @@ class UwCreateClientsController extends Controller
             return back()->with(
                 [
                     'status' => 'warning',
-                    'message' => 'Mijoz tizimda mavjud Risk Adminstratorga murojaat qiling!!! (ip:247)',
+                    'message' => 'Mijoz tizimda mavjud Anderrayterga murojaat qiling!!! (ip:247,268,246)',
                     'data' => $checkModel,
                 ]);
         }
@@ -342,7 +343,7 @@ class UwCreateClientsController extends Controller
         //
         $model = UwClients::find($id);
 
-        $blade = mb_strtolower($model->loanType->short_code);
+        $blade = mb_strtolower($model->loanType->short_code??'');
 
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
@@ -357,7 +358,7 @@ class UwCreateClientsController extends Controller
             $sch_type_a = 'checked';
         }
 
-        return view('uw.create-clients.create-'.$blade.'-step-result',compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
+        return view('uw.create-clients.create-i-step-result',compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
     }
 
     /**
@@ -379,7 +380,7 @@ class UwCreateClientsController extends Controller
 
             return datatables()->of(UwClientGuars::where('uw_clients_id', $id)->get())
                 ->addColumn('action', function($data) use ($disabled) {
-                    $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-post '.$disabled.'">
+                    $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-guar '.$disabled.'">
 <span class="glyphicon glyphicon-pencil"></span></a>';
                     $button .= '&nbsp;&nbsp;';
                     $button .= ' | <a href="javascript:void(0);" id="delete-post" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
@@ -400,16 +401,19 @@ class UwCreateClientsController extends Controller
     public function createClientGuar(Request $request)
     {
         //
+        $id = $request->model_id;
         $postId = $request->post_id;
+
+        $model = UwClients::find($id);
 
         $post = UwClientGuars::updateOrCreate(['id' => $postId],
             [
-                'uw_clients_id' => $request->model_id,
-                'claim_id' => $request->claim_id,
+                'uw_clients_id' => $model->id,
+                'claim_id' => $model->claim_id,
                 'guar_type' => $request->guar_type,
                 'title' => $request->title,
-                'address' => $request->address,
-                'guar_owner' => $request->guar_owner,
+                //'address' => $request->address,
+                //'guar_owner' => $request->guar_owner,
                 'guar_sum' => $request->guar_sum
             ]);
 
@@ -429,9 +433,11 @@ class UwCreateClientsController extends Controller
     public function editClientGuar($id)
     {
         //
-        $post  = UwClientGuars::find($id);
+        $model  = UwClientGuars::find($id);
 
-        return response()->json($post);
+        $guarTypes = UwGuarType::where('isActive', 1)->get();
+
+        return response()->json(['model' => $model, 'guarTypes' => $guarTypes]);
 
     }
 

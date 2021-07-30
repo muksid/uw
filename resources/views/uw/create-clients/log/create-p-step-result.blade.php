@@ -952,8 +952,8 @@
             <div class="modal-dialog modal-lg" role="document" style="width: 1100px">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn btn-outline pull-right" onclick="print('tableModal')">
+                            <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
                     </div>
                     <div id="ckoring_k" style=" margin: auto; width: 1000px; line-height: normal; background-color: #fff; padding: 10px;">
@@ -1029,6 +1029,25 @@
         </style>
 
         <script>
+            function print(elem)
+            {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+
+                mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+                mywindow.document.write('</head><body >');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('<link rel="stylesheet" href="/admin-lte/dist/css/AdminLTE.min.css" type="text/css" />');
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+
             var resultButton = $("#katm_inps_buttons");
             var sendToAdminButton = $("#send_to_admin_buttons");
             var id = "{{ $model->id }}";

@@ -6,13 +6,13 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Kredit natijasi
+            Mijoz yaratish
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">underwriter</a></li>
-            <li class="active">underwriter</li>
+            <li><a href="#">juridical</a></li>
+            <li class="active">create</li>
         </ol>
 
     </section>
@@ -29,10 +29,10 @@
                                 <div class="form-group">
                                     <div class="col-sm-2">
                                     </div>
-                                    <label for="inputName" class="col-sm-2 control-label">Yurudik shaxs STIR</label>
+                                    <label for="inputName" class="col-sm-2 control-label">Код клиента (IABS#)</label>
 
                                     <div class="col-sm-3">
-                                        <input type="text" class="form-control" id="search_tin" maxlength="9" onkeypress='validate(event)' placeholder="STIR ni kiriting">
+                                        <input type="text" class="form-control" id="client_code" maxlength="8" onkeypress='validate(event)' placeholder="Код клиента">
                                     </div>
 
                                     <div class="col-sm-2">
@@ -103,12 +103,12 @@
             $("#loading").hide();
             $("#search").click(function () {
 
-                let tin = $('#search_tin').val();
+                let client_code = $('#client_code').val();
 
                 $.ajax({
                     url: '/jur/ora-search',
                     type: 'GET',
-                    data: {tin: tin},
+                    data: {client_code: client_code},
                     dataType: 'json',
                     beforeSend: function(){
                         $("#loading").show();
@@ -125,7 +125,7 @@
                                     '<td>'+ key++ +'.</td>' +
                                     '<td>'+val.code_filial+'</td>' +
                                     '<td>'+val.code+'</td>' +
-                                    '<td><a href="/jur/view-form/'+val.inn+'">'+val.name+'</a></td>' +
+                                    '<td><a href="/jur/view-form/'+val.id+'">'+val.name+'</a></td>' +
                                     '<td>'+val.inn+'</td>' +
                                     '<td>'+val.director_name+'</td>' +
                                     '<td class="text-sm">'+val.reg_name.trim()+'</td>' +

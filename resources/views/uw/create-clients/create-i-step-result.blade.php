@@ -9,8 +9,8 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">underwriter</a></li>
-            <li class="active">underwriter</li>
+            <li><a href="#">Jismoniy shaxslar</a></li>
+            <li class="active">view</li>
         </ol>
 
         @if (Session::has('message'))
@@ -41,11 +41,11 @@
                                             <tbody>
                                             <tr>
                                                 <th style="width: 10px">#</th>
-                                                <th colspan="3"><i class="fa fa-user"></i> Mijoz pasport ma`lumotlari</th>
+                                                <th colspan="3"><i class="fa fa-user"></i> Mijoz passport ma`lumotlari</th>
                                             </tr>
                                             <tr>
                                                 <td>1.</td>
-                                                <td>FIO</td>
+                                                <td>F.I.O.</td>
                                                 <td>{{ $model->family_name ?? ''}} {{ $model->name ?? ''}} {{ $model->patronymic??'' }}</td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>
@@ -73,12 +73,12 @@
                                             </tr>
                                             <tr>
                                                 <td>4.</td>
-                                                <td>Pasport ma`lumotlari</td>
+                                                <td>Passport ma`lumotlari</td>
                                                 <td><i class="fa fa-user"></i>
-                                                    Pasport turi: <b>@if($model->document_type == 0)
+                                                    Hujjat turi: <b>@if($model->document_type == 0)
                                                             ID karta
                                                         @elseif($model->document_type == 6)
-                                                            Pasport
+                                                            Passport
                                                         @endif
                                                     </b>
                                                     {{ $model->document_serial ?? ''}} {{ $model->document_number ?? ''}}
@@ -91,7 +91,7 @@
                                             <tr>
                                                 <td>5.</td>
                                                 <td>Pasport berilgan joyi</td>
-                                                <td><i class="fa fa-globe"></i>
+                                                <td><i class="fa fa-map-marker"></i>
                                                     {{ \Carbon\Carbon::parse($model->document_date)->format('d.m.Y') }} yilda
                                                     {{ $model->region1->name?? '' }} {{ $model->docDistrict->name?? '1'}}  <br>
                                                     IIB tomonidan berilgan
@@ -103,7 +103,7 @@
                                             <tr>
                                                 <td>6.</td>
                                                 <td>Yashash joy ma`lumotlari</td>
-                                                <td><i class="fa fa-globe"></i>
+                                                <td><i class="fa fa-map-marker"></i>
                                                     {{ $model->region->name?? ''}}, {{ $model->district->name?? ''}}
                                                     {{ $model->registration_address ?? ''}}
                                                 </td>
@@ -113,9 +113,9 @@
                                             </tr>
                                             <tr>
                                                 <td>7.</td>
-                                                <td>Telefon raqam</td>
+                                                <td>Telefon raqami</td>
                                                 <td><i class="fa fa-phone"></i>
-                                                    {{ $model->phone }}
+                                                    +{{ $model->phone }}
                                                 </td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>
@@ -123,16 +123,9 @@
                                             </tr>
                                             <tr>
                                                 <td>8.</td>
-                                                <td>Mijoz INPS</td>
+                                                <td>PINFL</td>
                                                 <td><i class="fa fa-user"></i>
                                                     {{ $model->pin }}
-                                                    <span class="text-danger text-bold">
-                                                        @if($model->is_inps == 1)
-                                                            Tashkilot xodimi (INPS bor)
-                                                        @else
-                                                            Nafaqada || Organ xodimi (INPS yo`q)
-                                                        @endif
-                                                    </span>
                                                 </td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>
@@ -140,7 +133,7 @@
                                             </tr>
                                             <tr>
                                                 <td>9.</td>
-                                                <td>Mijoz INN</td>
+                                                <td>STIR</td>
                                                 <td>
                                                     {{ $model->inn }}
                                                 </td>
@@ -153,6 +146,22 @@
                                                 <td>Mijoz ish joy manzili</td>
                                                 <td><i class="fa fa-map-marker"></i>
                                                     {{ $model->job_address }}
+                                                </td>
+                                                <td>
+                                                    <i class="fa fa-check-circle text-info"></i>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>11.</td>
+                                                <td>Oylik daromadi</td>
+                                                <td><i class="fa fa-credit-card"></i>
+                                                    <span class="text-danger text-bold">
+                                                        @if($model->is_inps == 1)
+                                                            Bor
+                                                        @else
+                                                            Yo`q
+                                                        @endif
+                                                    </span>
                                                 </td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>
@@ -237,7 +246,7 @@
                                             </tr>
                                             <tr>
                                                 <td>7.</td>
-                                                <td>IABS unikal kodi</td>
+                                                <td>Client Code</td>
                                                 <td class="text-bold"><i class="fa fa-internet-explorer"></i>
                                                     {{ $model->iabs_num ?? ''}}
                                                 </td>
@@ -256,7 +265,7 @@
                                         <div class="box-header with-border">
                                             <div class="col-md-12">
                                                 @if($model->status == 0 || $model->status == 1)
-                                                    <a href="javascript:void(0)" class="btn btn-danger" id="add-new-debtor"><i class="fa fa-plus-circle"></i> Qo`shimcha qarzdor kiriting</a>
+                                                    <a href="javascript:void(0)" class="btn btn-danger" id="add-new-debtor"><i class="fa fa-plus-circle"></i> Qo`shimcha qarzdor</a>
                                                 @else
                                                     Qo`shimcha qarzdor ma`lumotlari
                                                 @endif
@@ -267,10 +276,10 @@
                                             <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Qo`shimcha qarzdor FIO</th>
+                                                <th>F.I.O.</th>
                                                 <th>STIR</th>
                                                 <th>Ish joy manzili</th>
-                                                <th>Jami oylik daromadi</th>
+                                                <th>Oylik daromadi</th>
                                                 <th>Jami (Oy)da</th>
                                                 <th>To`lov qobiliyati</th>
                                                 <th>Action</th>
@@ -292,9 +301,9 @@
                                         <div class="box-header with-border">
                                             <div class="col-md-12">
                                                 @if($model->status == 0 || $model->status == 1)
-                                                    <a href="javascript:void(0)" class="btn btn-warning" id="add-new-post"><i class="fa fa-plus-circle"></i> Ta`minot kiriting</a>
+                                                    <a href="javascript:void(0)" class="btn btn-warning" id="add-guar"><i class="fa fa-plus-circle"></i> Ta`minot</a>
                                                 @else
-                                                    Kafil ma`lumotlari
+                                                    Ta`minot ma`lumotlari
                                                 @endif
                                             </div>
                                         </div>
@@ -303,14 +312,20 @@
                                             <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Ta`minot turi</th>
+                                                <th>Turi</th>
                                                 <th>Nomi</th>
                                                 <th>Ta`minot egasi</th>
-                                                <th>Ta`minot summasi</th>
+                                                <th>Summa</th>
                                                 <th>Manzil</th>
                                                 <th>Action</th>
                                             </tr>
                                             </thead>
+                                            <tfoot align="right" class="bg-danger">
+                                            <tr>
+                                                <th colspan="4">Jami:</th>
+                                                <th colspan="3"></th>
+                                            </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div>
@@ -320,7 +335,7 @@
                                         <div class="box-header with-border">
                                             <div class="col-md-12">
                                                 @if($model->status == 0 || $model->status == 1)
-                                                    <a href="javascript:void(0)" class="btn btn-info" id="add-new-file"><i class="fa fa-plus-circle"></i> Ilova kiriting</a>
+                                                    <a href="javascript:void(0)" class="btn btn-info" id="add-new-file"><i class="fa fa-plus-circle"></i> Ilova hujjatlar</a>
                                                 @else
                                                     Ilova hujjatlari
                                                 @endif
@@ -468,7 +483,7 @@
                                                         <span class="username">
                                                               <a href="#">{{ $value->currentUser->personal->l_name??'-' }} {{ $value->currentUser->personal->f_name??'' }}</a>
                                                             </span>
-                                                        <span class="description">yaratilgan vaqti - {{ \Carbon\Carbon::parse($value->created_at)->format('d M,Y H:i') }}</span>
+                                                        <span class="description pull-right"><i class="fa fa-clock-o"></i> {{ \Carbon\Carbon::parse($value->created_at)->format('d M,Y H:i') }}</span>
                                                     </div>
 
                                                     <p>
@@ -550,6 +565,15 @@
                                 </div>
                                 <div class="col-sm-3">
                                     <div class="form-group">
+                                        <label>Hujjat turi <span class="text-red">*</span></label>
+                                        <select name="document_type" id="document_type" class="form-control">
+                                            <option value="6" SELECTED>Pasport</option>
+                                            <option value="0">ID karta</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
                                         <label>Pas.Ser</label>
                                         <input type="text" class="form-control" id="document_serial" name="document_serial" minlength="2" maxlength="2" value="" required=""
                                                onkeydown="return alphaOnly(event);"
@@ -571,7 +595,7 @@
                                 <div class="col-sm-3">
                                     <div class="form-group">
                                         <label>STIR</label>
-                                        <input type="number" class="form-control" id="inn" name="inn" value="" minlength="9" maxlength="9" required="">
+                                        <input type="number" class="form-control" id="inn" name="inn" value="" minlength="9" maxlength="9">
                                     </div>
                                 </div>
                                 <div class="col-sm-2">
@@ -684,7 +708,7 @@
         </div>
 
         <!-- create / update GUAR modal -->
-        <div class="modal fade" id="ajax-crud-modal" aria-hidden="true">
+        <div class="modal fade" id="guar-modal" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -694,45 +718,27 @@
                         <form id="postForm" name="postForm">
                             <input type="hidden" name="post_id" id="post_id">
                             <input type="hidden" name="model_id" id="model_id" value="{{ $model->id }}">
-                            <input type="hidden" name="claim_id" id="claim_id" value="{{ $model->claim_id }}">
-                            <input type="hidden" name="branch_code" id="claim_id" value="{{ $model->branch_code }}">
                             <div class="row">
-                                <div class="col-sm-6">
+                                <div class="col-sm-12">
                                     <!-- text input -->
                                     <div class="form-group">
-                                        <label>Kafil turi</label>
-                                        <select class="form-control" name="guar_type" id="guar_type">
-                                            <option value="K" SELECTED>Kafillik</option>
-                                            <option value="S">Sug`urta</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <!-- text input -->
-                                    <div class="form-group">
-                                        <label>Kafillik nomi</label>
+                                        <label>Ta`minot nomi</label>
                                         <input type="text" class="form-control" id="title" name="title" value="" required="">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <!-- text input -->
                                     <div class="form-group">
-                                        <label>Kafillik egasi</label>
-                                        <input type="text" class="form-control" id="guar_owner" name="guar_owner" value="" required="">
+                                        <label>Ta`minot turi</label>
+                                        <select class="form-control" name="guar_type" id="guar_type">
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <!-- text input -->
                                     <div class="form-group">
-                                        <label>Kafillik summasi</label>
+                                        <label>Summasi</label>
                                         <input type="number" class="form-control" id="guar_sum" name="guar_sum" value="" required="">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <!-- text input -->
-                                    <div class="form-group">
-                                        <label>Manzil</label>
-                                        <input type="text" class="form-control" id="address" name="address" value="" required="">
                                     </div>
                                 </div>
                             </div>
@@ -947,8 +953,8 @@
             <div class="modal-dialog modal-lg" role="document" style="width: 1100px">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn btn-outline pull-right" onclick="print('tableModal')">
+                            <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
                     </div>
                     <div id="ckoring_k" style=" margin: auto; width: 1000px; line-height: normal; background-color: #fff; padding: 10px;">
@@ -990,7 +996,7 @@
                         <button type="button" class="btn btn-outline pull-right" onclick="print('resultINPSModal')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
-                        <h4 class="modal-title text-center" id="success_inps">Mijoz oylik ish xaqi daromadi (Soliq)</h4>
+                        <h4 class="modal-title text-center" id="success_inps">Mijoz Oylik daromadi</h4>
                     </div>
                     <div class="modal-body">
                         <div id="resultDataINPS"></div>
@@ -1024,12 +1030,32 @@
         </style>
 
         <script>
+
+            function print(elem)
+            {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+
+                mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+                mywindow.document.write('</head><body >');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('<link rel="stylesheet" href="/admin-lte/dist/css/AdminLTE.min.css" type="text/css" />');
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+
             var resultButton = $("#katm_inps_buttons");
             var sendToAdminButton = $("#send_to_admin_buttons");
             var id = "{{ $model->id }}";
             var is_inps = "{{ $model->is_inps }}";
             var button_res_k = "<button class='btn btn-flat btn-bitbucket margin' id='getResultKATM' data-id='"+id+"'><i class='fa fa-history'></i> KATM natijasi</button>";
-            var button_res_i = "<button class='btn btn-flat btn-bitbucket margin' id='getResultINPS' data-id='"+id+"'><i class='fa fa-credit-card'></i> INPS natijasi</button>";
+            var button_res_i = "<button class='btn btn-flat btn-bitbucket margin' id='getResultINPS' data-id='"+id+"'><i class='fa fa-credit-card'></i> Oylik daromadi</button>";
             var button_send_a = "<button class='btn btn-flat btn-bitbucket margin' id='sendToAdmin' data-id='"+id+"'><i class='fa fa-send-o'></i> Adminstratorga yuborish</button>";
             function ResultButtons(res){
                 //console.log(res);
@@ -1587,12 +1613,13 @@
                     paginate: false,
                     searching: false,
                     bInfo: false,
+                    scrollX: false,
                     ajax: {
                         url: "{{ url('uw-debtors', ['id' => $model->id]) }}",
                         type: 'GET',
                     },
                     columns: [
-                        { data: 'id', name: 'id', 'visible': true, "searchable": false},
+                        { data: 'id', name: 'id', 'visible': false, "searchable": false},
                         { data: null,
                             render: function ( data, type, row ) {
                                 return data.family_name +' '+ data.name;
@@ -1652,6 +1679,7 @@
                         $('#patronymic').val(data.patronymic);
                         $('#inn').val(data.inn);
                         $('#resident').val(data.resident);
+                        $('#document_type').val(data.document_type);
                         $('#document_serial').val(data.document_serial);
                         $('#document_number').val(data.document_number);
                         $('#document_date').val(data.document_date);
@@ -1711,37 +1739,89 @@
                         type: 'GET',
                     },
                     columns: [
-                        { data: 'id', name: 'id', 'visible': true, "searchable": false},
+                        { data: 'id', name: 'id', 'visible': false, "searchable": false},
                         { data: 'guar_type', name: 'guar_type' },
                         { data: 'title', name: 'title' },
-                        { data: 'guar_owner', name: 'guar_owner' },
-                        { data: 'guar_sum', name: 'guar_sum' },
-                        { data: 'address', name: 'guar_sum' },
+                        { data: 'guar_owner', name: 'guar_owner', 'visible': false },
+                        { data: null,
+                            render: function ( data, type, row ) {
+                                return formatCurrency(data.guar_sum);
+                            }
+                        },
+                        { data: 'address', name: 'address', 'visible': false },
                         { data: 'action', name: 'action', orderable: false},
                     ],
+                    footerCallback: function (row, data, start, end, display) {
+                    console.log(data)
+                    var totalPayment = 0;
+                    for (var j = 0; j < data.length; j++) {
+                        totalPayment += parseFloat(data[j]['guar_sum']);
+                    }
+                    var api = this.api();
+                    $(api.column(5).footer()).html(formatCurrency(totalPayment));
+                },
                     order: [[0, 'desc']]
                 });
 
-                $('#add-new-post').click(function () {
-                    $('#btn-save').val("create-post");
-                    $('#post_id').val('');
-                    $('#postForm').trigger("reset");
-                    $('#postCrudModal').html("Add Guard");
-                    $('#ajax-crud-modal').modal('show');
+                $('#add-guar').click(function () {
+                    $.get('/get-guar-types', function (res) {
+                        console.log(res)
+                        let data = '';
+                        data+= '<select name="guar_type">';
+                        if (res.length !== 0){
+                            for (let i = 0; i < res.length; i++) {
+                                let val = res[i];
+                                data+=
+                                    '<option value="'+val.code+'">'+val.title+'</option>';
+                            }
+                        } else {
+                            data+=
+                                '<option value="">Ta`minot turi topilmadi!!!</option>';
+                        }
+                        data+= '</select>';
+
+                        $("#guar_type").html(data);
+
+                        $('#btn-save').val("create-post");
+                        $('#post_id').val('');
+                        $('#postForm').trigger("reset");
+                        $('#postCrudModal').html("Ta`minot kiriting");
+                        $('#guar-modal').modal('show');
+                    });
                 });
 
-                $('body').on('click', '.edit-post', function () {
+                $('body').on('click', '.edit-guar', function () {
                     var post_id = $(this).data('id');
                     $.get('/uw/edit-client-guar/'+post_id, function (data) {
-                        $('#postCrudModal').html("Edit Guard");
-                        $('#btn-save').val("edit-post");
-                        $('#ajax-crud-modal').modal('show');
-                        $('#post_id').val(data.id);
-                        $('#title').val(data.title);
-                        $('#guar_type').val(data.guar_type);
-                        $('#guar_owner').val(data.guar_owner);
-                        $('#guar_sum').val(data.guar_sum);
-                        $('#address').val(data.address);
+                        $('#postCrudModal').html("Ta`minot ma`lumotlarini yangilash");
+                        $('#btn-save').val("edit-guar");
+                        $('#guar-modal').modal('show');
+                        $('#post_id').val(data.model.id);
+                        $('#title').val(data.model.title);
+                            let arr = '';
+                            arr+= '<select name="guar_type">';
+                            if (data.guarTypes.length !== 0){
+                                for (let i = 0; i < data.guarTypes.length; i++) {
+                                    let val = data.guarTypes[i];
+                                    if (val.code === data.model.guar_type){
+                                        arr+='<option value="'+val.code+'" selected>'+val.title+'</option>';
+                                    } else {
+
+                                        arr+='<option value="'+val.code+'">'+val.title+'</option>';
+
+                                    }
+                                }
+                            } else {
+                                arr+=
+                                    '<option value="">Ta`minot turi topilmadi!!!</option>';
+                            }
+                            arr+= '</select>';
+
+                        $("#guar_type").html(arr);
+                        //$('#guar_type').val(data.guar_type);
+                        $('#guar_sum').val(data.model.guar_sum);
+                        //$('#guar_owner').val(data.guar_owner);
+                        //$('#address').val(data.address);
                     })
                 });
 
@@ -1807,7 +1887,7 @@
                     $('#btn-save').val("create-file");
                     $('#post_file_id').val('');
                     $('#postFileForm').trigger("reset");
-                    $('#postCrudFileModal').html("Add File");
+                    $('#postCrudFileModal').html("Ilova Hujjatlar kiriting");
                     $('#ajax-crud-file-modal').modal('show');
                 });
 
@@ -1921,7 +2001,7 @@
                                 //console.log(data);
                                 $("#loading-gif").hide();
                                 $('#postForm').trigger("reset");
-                                $('#ajax-crud-modal').modal('hide');
+                                $('#guar-modal').modal('hide');
                                 $('#btn-save').html('Save Changes');
                                 var oTable = $('#guar_datatable').dataTable();
                                 oTable.fnDraw(false);

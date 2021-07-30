@@ -14,6 +14,7 @@ class UwClientDebtors extends Model
         'claim_number',
         'inn',
         'resident',
+        'document_type',
         'document_serial',
         'document_number',
         'document_date',

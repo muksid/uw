@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@lang('blade.title') | @lang('blade.webEdo')</title>
+    <title>@lang('blade.title') | @lang('blade.webUw')</title>
 
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -53,16 +53,16 @@
 
 @include('layouts.footer')
 
-<!-- DataTables -->
-<script src="{{ asset("/admin-lte/plugins/datatables/jquery.dataTables.min.js") }}"></script>
-
-<script src="{{ asset("/admin-lte/plugins/datatables/dataTables.bootstrap.min.js") }}"></script>
-
 <!-- AdminLTE App -->
 <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
 
 <!-- Bootstrap 3.3.6 button logOut -->
 <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap.min.js") }}"></script>
+
+<!-- DataTables -->
+<script src="{{ asset("/admin-lte/plugins/datatables/jquery.dataTables.min.js") }}"></script>
+
+<script src="{{ asset("/admin-lte/plugins/datatables/dataTables.bootstrap.min.js") }}"></script>
 
 <!-- iCheck -->
 <script src="{{ asset("/admin-lte/plugins/iCheck/icheck.min.js") }}"></script>

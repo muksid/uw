@@ -9,8 +9,8 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">anderrayting</a></li>
-            <li class="active">anderrayting</li>
+            <li><a href="#">underwriter</a></li>
+            <li class="active">underwriter</li>
         </ol>
 
         @if (Session::has('message'))
@@ -36,10 +36,6 @@
 
                             <div class="col-md-6">
                                 <div class="col-md-12 bg-gray">
-                                    <button type="button" data-id="{{ $model->id }}"
-                                            class="btn btn-info btn-flat pull-right margin" id="getUwAppBlank">
-                                        <i class="fa fa-print"></i> Ariza blank
-                                    </button>
                                     <div class="box-body">
                                         <table class="table table-bordered">
                                             <tbody>
@@ -80,10 +76,10 @@
                                                 <td>Pasport ma`lumotlari</td>
                                                 <td><i class="fa fa-user"></i>
                                                     Pasport turi: <b>@if($model->document_type == 0)
-                                                        ID karta
-                                                    @elseif($model->document_type == 6)
-                                                        Pasport
-                                                    @endif
+                                                            ID karta
+                                                        @elseif($model->document_type == 6)
+                                                            Pasport
+                                                        @endif
                                                     </b>
                                                     {{ $model->document_serial ?? ''}} {{ $model->document_number ?? ''}}
                                                     {{ \Carbon\Carbon::parse($model->document_date)->format('d.m.Y') }} yil.
@@ -178,7 +174,7 @@
                                             <tr>
                                                 <td>1.</td>
                                                 <td>Kredit turi</td>
-                                                <td class="text-bold"><i class="fa fa-credit-card"></i> {{ $model->loanType->title ?? '' }}</td>
+                                                <td class="text-bold"><i class="fa fa-car"></i> {{ $model->loanType->title ?? '' }}</td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>
                                                 </td>
@@ -255,6 +251,41 @@
 
                                 </div>
 
+                                <div class="col-md-12">
+                                    <div class="box-body">
+                                        <div class="box-header with-border">
+                                            <div class="col-md-12">
+                                                @if($model->status == 0 || $model->status == 1)
+                                                    <a href="javascript:void(0)" class="btn btn-danger" id="add-new-debtor"><i class="fa fa-plus-circle"></i> Qo`shimcha qarzdor kiriting</a>
+                                                @else
+                                                    Qo`shimcha qarzdor ma`lumotlari
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <!-- /.box-header -->
+                                        <table class="table table-striped table-bordered" id="debtors_datatable">
+                                            <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>F.I.O.</th>
+                                                <th>STIR</th>
+                                                <th>Ish joy manzili</th>
+                                                <th>Ish haqi</th>
+                                                <th>Oy</th>
+                                                <th>To`lov qob.</th>
+                                                <th>Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tfoot align="right" class="bg-danger">
+                                            <tr>
+                                                <th colspan="4">Jami:</th>
+                                                <th colspan="2"></th>
+                                                <th colspan="2"></th>
+                                            </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
 
                                 <div class="col-md-12">
                                     <div class="box-body">
@@ -281,9 +312,7 @@
                                             </tr>
                                             </thead>
                                         </table>
-
                                     </div>
-
                                 </div>
 
                                 <div class="col-md-12">
@@ -337,26 +366,26 @@
                                         </div>
                                         <div class="box-footer no-padding">
                                             <ul class="nav nav-stacked">
-                                                <li><a href="#">1. Mijozning kredit qarzdorligi:
+                                                <li><a href="#">1. Kredit qarzdorligi:
                                                         <span class="pull-right badge bg-red-active" style="font-size: large">
                                                             <span id="credit_debt"></span> so`m
                                                         </span>
                                                     </a>
                                                 </li>
-                                                <li><a href="#">2. Mijozning jami oylik ish xaqi:
+                                                <li><a href="#">2. Jami oylik ish xaqi:
                                                         <span class="pull-right badge bg-light-blue">
                                                             <span id="total_month_salary"></span> so`m <span id="total_monthly"></span> oyda
                                                         </span>
                                                     </a>
                                                 </li>
-                                                <li><a href="#">3. Mijozning xar oy to`lov qobiliyati:
+                                                <li><a href="#">3. Xar oy to`lov qobiliyati:
                                                         <span class="pull-right badge bg-danger" style="font-size: large">
                                                             <span id="total_month_payment"></span> so`m
                                                         </span>
                                                     </a>
                                                 </li>
-                                                <li><a href="#">4. Mijoz so`ragan kredit miqdori:
-                                                        <span class="pull-right badge bg-gray-active" style="font-size: large">
+                                                <li><a href="#">4. Mijoz so`ragan kredit:
+                                                        <span class="pull-right badge bg-gray-active">
                                                             <span id="credit_sum"></span> so`m
                                                         </span>
                                                     </a>
@@ -419,20 +448,23 @@
                                             <h3 class="text-primary"><i class="fa fa-clock-o"></i> Ariza Yuborilgan</h3>
                                             @break
                                             @case(3)
-                                            <h3 class="text-green"><i class="fa fa-check-circle-o"></i> Ariza Tasdiqlandi</h3>
+                                            <h3 class="text-green"><i class="fa fa-check-circle-o"></i> Ariza
+                                                Tasdiqlandi</h3>
                                             @break
                                             @case(0)
                                             <h3 class="text-maroon"><i class="fa fa-pencil"></i> Ariza Taxrirlashda</h3>
                                             <div id="send_to_admin_buttons"></div>
                                             @break
                                         @endswitch
+
                                         @if($modelComments)
                                             <h4 class="text-danger"><i class="fa fa-commenting"></i> Izoxlar tarixi</h4>
                                             @foreach($modelComments as $key => $value)
 
                                                 <div class="post" style="background-color: #03a9f412">
                                                     <div class="user-block">
-                                                        <img class="img-circle img-bordered-sm" src="{{ '/admin-lte/dist/img/user.png' }}">
+                                                        <img class="img-circle img-bordered-sm"
+                                                             src="{{ '/admin-lte/dist/img/user.png' }}">
                                                         <span class="username">
                                                               <a href="#">{{ $value->currentUser->personal->l_name??'-' }} {{ $value->currentUser->personal->f_name??'' }}</a>
                                                             </span>
@@ -442,14 +474,15 @@
                                                     <p>
                                                         @if(mb_substr($value->title, 2, 8) === "model_id")
                                                             <?php
-                                                            $arr = json_decode($value->title??'', true);
+                                                            $arr = json_decode($value->title ?? '', true);
                                                             $user_id = $arr['cs_user_id'];
                                                             ?>
                                                             <span class="badge bg-red-gradient"><?php echo $arr['descr']; ?></span>
                                                         @else
 
                                                             @if($value->title === 'Confirmed')
-                                                                <span class="badge bg-aqua-active">Tasdiqlandi</span> <i class="fa fa-check-circle-o text-success"></i>
+                                                                <span class="badge bg-aqua-active">Tasdiqlandi</span> <i
+                                                                        class="fa fa-check-circle-o text-success"></i>
                                                             @else
                                                                 <span class="badge bg-red-gradient">{{ $value->title }}</span>
 
@@ -476,6 +509,182 @@
 
         </div>
 
+        <!-- create / update DEBTOR modal -->
+        <div class="modal fade" id="ajax-debtor-modal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="debtorModal"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="debtorForm" name="debtorForm">
+                            <input type="hidden" name="debtor_id" id="debtor_id">
+                            <input type="hidden" name="model_id" id="model_id" value="{{ $model->id }}">
+                            <input type="hidden" name="branch_code" id="branch_code" value="{{ $model->branch_code }}">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Familiyasi</label>
+                                        <input type="text" class="form-control" id="family_name" name="family_name" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Ismi</label>
+                                        <input type="text" class="form-control" id="name" name="name" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Otasining ismi</label>
+                                        <input type="text" class="form-control" id="patronymic" name="patronymic" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Jinsi</label>
+                                        <select class="form-control" name="gender" id="gender">
+                                            <option value="1" SELECTED>Erkak</option>
+                                            <option value="2">Ayol</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Pas.Ser</label>
+                                        <input type="text" class="form-control" id="document_serial" name="document_serial" minlength="2" maxlength="2" value="" required=""
+                                               onkeydown="return alphaOnly(event);"
+                                               oninput="this.value = this.value.toUpperCase()">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Pas.Raq</label>
+                                        <input type="number" class="form-control" id="document_number" name="document_number" minlength="7" maxlength="7" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Berilgan vaqti</label>
+                                        <input type="date" class="form-control" id="document_date" name="document_date" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>STIR</label>
+                                        <input type="number" class="form-control" id="inn" name="inn" value="" minlength="9" maxlength="9" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Resident</label>
+                                        <select class="form-control" name="resident" id="resident">
+                                            <option value="1" SELECTED>XA</option>
+                                            <option value="2">YO`Q</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Tug`ilgan yili</label>
+                                        <input type="date" class="form-control" id="birth_date" name="birth_date" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Viloyat</label>
+                                        <select class="form-control" name="document_region" id="document_region">
+                                            @foreach($regions as $key => $value)
+
+                                                <option value="{{ $value->code }}">{{ $value->name }}</option>
+
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Tuman</label>
+                                        <select class="form-control" name="document_district" id="document_district">
+                                            @foreach($districts as $key => $value)
+
+                                                <option value="{{ $value->code }}">{{ $value->name }}</option>
+
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Yashash manzili</label>
+                                        <input type="text" class="form-control" id="live_address" name="live_address" maxlength="255" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Ish joy manzili</label>
+                                        <input type="text" class="form-control" id="job_address" name="job_address" maxlength="255" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>PINFL</label>
+                                        <input type="number" class="form-control" id="pin" name="pin" minlength="14" maxlength="14" value="" required="">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Jami oylik daromadi</label>
+                                        <input type="number" class="form-control" id="total_sum" name="total_sum" value="" required="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Jami (Oy) da</label>
+                                        <input type="number" class="form-control" id="total_month" name="total_month" maxlength="2" value="" required="">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i class="fa fa-close"></i> Bekor qilish</button>
+                                <button type="submit" class="btn btn-primary" id="btn-debtor-save" value="create"><i class="fa fa-save"></i> Saqlash</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELETE DEBTOR modal -->
+        <div id="ConfirmDebtorModal" class="modal fade modal-danger" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title text-center">O`chirishni tasdiqlash</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <h4 class="text-center"><span class="glyphicon glyphicon-info-sign"></span> Qo`shimcha qarzdor serverdan o`chiriladi!</h4>
+                    </div>
+
+                    <div class="modal-footer">
+                        <center>
+                            <button type="button" class="btn btn-outline pull-left"
+                                    data-dismiss="modal">@lang('blade.cancel')</button>
+                            <button type="button" class="btn btn-outline" id="yesDebtorDelete"
+                                    value="create">Ha, O`chirish
+                            </button>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- create / update GUAR modal -->
         <div class="modal fade" id="ajax-crud-modal" aria-hidden="true">
             <div class="modal-dialog">
@@ -488,6 +697,7 @@
                             <input type="hidden" name="post_id" id="post_id">
                             <input type="hidden" name="model_id" id="model_id" value="{{ $model->id }}">
                             <input type="hidden" name="claim_id" id="claim_id" value="{{ $model->claim_id }}">
+                            <input type="hidden" name="branch_code" id="claim_id" value="{{ $model->branch_code }}">
                             <div class="row">
                                 <div class="col-sm-6">
                                     <!-- text input -->
@@ -688,6 +898,7 @@
                     </div>
                     <form id="sendForm" name="sendForm">
                         <input type="hidden" name="uw_clients_id" id="uw_clients_id" value="{{ $model->id }}">
+                        <input type="hidden" name="sch_type" id="sch_type" value="">
                         <div class="col-md-10">
                             <div class="box-body">
                                 <div class="form-group">
@@ -738,8 +949,8 @@
             <div class="modal-dialog modal-lg" role="document" style="width: 1100px">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn btn-outline pull-right" onclick="print('tableModal')">
+                            <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
                     </div>
                     <div id="ckoring_k" style=" margin: auto; width: 1000px; line-height: normal; background-color: #fff; padding: 10px;">
@@ -790,21 +1001,6 @@
             </div>
         </div>
 
-        <!-- app Blank -->
-        <div class="modal fade" id="appBlankModal" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-light-blue-active">
-                        <button type="button" class="btn btn-outline pull-right" onclick="print('appBlankData')">
-                            <i class="fa fa-print"></i> @lang('blade.print')
-                        </button>
-                        <h4 class="modal-title text-center" id="success_inps">Mijoz Ariza blanki</h4>
-                    </div>
-                    <div id="appBlankData" class="text-justify" onmousedown='return false;' onselectstart='return false;'></div>
-                </div>
-            </div>
-        </div>
-
         <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
         <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
         <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
@@ -831,17 +1027,32 @@
 
         <script>
 
+            function print(elem)
+            {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+
+                mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+                mywindow.document.write('</head><body >');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('<link rel="stylesheet" href="/admin-lte/dist/css/AdminLTE.min.css" type="text/css" />');
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+
             var resultButton = $("#katm_inps_buttons");
             var sendToAdminButton = $("#send_to_admin_buttons");
             var id = "{{ $model->id }}";
             var is_inps = "{{ $model->is_inps }}";
-
             var button_res_k = "<button class='btn btn-flat btn-bitbucket margin' id='getResultKATM' data-id='"+id+"'><i class='fa fa-history'></i> KATM natijasi</button>";
-
             var button_res_i = "<button class='btn btn-flat btn-bitbucket margin' id='getResultINPS' data-id='"+id+"'><i class='fa fa-credit-card'></i> INPS natijasi</button>";
-
             var button_send_a = "<button class='btn btn-flat btn-bitbucket margin' id='sendToAdmin' data-id='"+id+"'><i class='fa fa-send-o'></i> Adminstratorga yuborish</button>";
-
             function ResultButtons(res){
                 //console.log(res);
                 $('#credit_debt').empty().append(formatCurrency(res.credit_results.credit_debt));
@@ -895,6 +1106,11 @@
                 return (neg ? "-" : '') + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
             }
 
+            function alphaOnly(event) {
+                var key = event.keyCode;
+                return ((key >= 65 && key <= 90) || key == 8);
+            }
+
             $(document).ready( function () {
                 $.ajaxSetup({
                     headers: {
@@ -920,7 +1136,7 @@
 
                         },
                         success: function(response){
-                            console.log(response);
+                            //console.log(response);
                             $(".inquiry-individual").prop('disabled', false);
                             $("#loading-gif").hide();
                             $('#ResultMessageModal').addClass('modal-'+response.status);
@@ -1331,13 +1547,13 @@
 
                 // BUTTON GET STATUS SEND TO ADMIN
                 $('body').on('click', '#sendToAdmin', function () {
+                    //console.log('ds');
+                    var id = $('#sendToAdmin').data('id');
 
-                    let id = $('#sendToAdmin').data('id');
-
-                    let getSChType = $("input:radio[name=sch_type]:checked").val();
+                    var getSChType = $("input:radio[name=sch_type]:checked").val();
 
                     $.get('/uw/get-status-send/' + id+'/'+getSChType, function (response) {
-
+                        //console.log(response);
                         if(response.status === 1)
                         {
                             $('#btn-save-send').val("sendLoan");
@@ -1360,11 +1576,13 @@
                 });
 
                 // BUTTON GET STATUS SEND TO ADMIN
-                $('body').on('click', '#confirmSendToAdmin', function () {
+                /*$('body').on('click', '#confirmSendToAdmin', function () {
                     //console.log('ds');
-                    let id = $('#confirmSendToAdmin').data('id');
+                    var id = $('#confirmSendToAdmin').data('id');
 
-                    $.get('/uw/get-confirm-send/' + id, function (response) {
+                    var getSChType = $("input:radio[name=sch_type]:checked").val();
+
+                    $.get('/uw/get-confirm-send/'+id, function (response) {
                         //console.log(response);
                         if(response.status === 1)
                         {
@@ -1384,6 +1602,132 @@
                         }
                     });
 
+                });*/
+
+                // request DEBTORS
+                $('#debtors_datatable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    paginate: false,
+                    searching: false,
+                    bInfo: false,
+                    ajax: {
+                        url: "{{ url('uw-debtors', ['id' => $model->id]) }}",
+                        type: 'GET',
+                    },
+                    columns: [
+                        { data: 'id', name: 'id', 'visible': true, "searchable": false},
+                        { data: null,
+                            render: function ( data, type, row ) {
+                                return data.family_name +' '+ data.name;
+                            }
+                        },
+                        { data: 'inn', name: 'inn', "visible": false },
+                        { data: 'live_address', name: 'live_address', "visible": false },
+                        { data: null,
+                            render: function ( data, type, row ) {
+                                return formatCurrency(data.total_sum);
+                            }
+                        },
+                        { data: 'total_month', name: 'total_month' },
+                        { data: null,name: 'total',
+                            render: function ( data, type, row ) {
+                                var payment = (data.total_sum/data.total_month*0.87)*0.5;
+                                return formatCurrency(payment);
+                            }
+                        },
+                        { data: 'action', name: 'action', orderable: false},
+                    ],
+                    footerCallback: function (row, data, start, end, display) {
+                        console.log(data)
+                        var totalAmount = 0;
+                        for (var i = 0; i < data.length; i++) {
+                            totalAmount += parseFloat(data[i]['total_sum']);
+                        }
+                        var totalPayment = 0;
+                        for (var j = 0; j < data.length; j++) {
+                            totalPayment += (parseFloat(data[j]['total_sum'])*0.87)/parseFloat(data[j]['total_month'])*0.5;
+                        }
+                        var api = this.api();
+                        $(api.column(4).footer()).html(formatCurrency(totalAmount));
+                        $(api.column(6).footer()).html(formatCurrency(totalPayment));
+                    },
+                    order: [[0, 'desc']]
+                });
+
+                $('#add-new-debtor').click(function () {
+                    $('#btn-debtor-save').val("create-debtor");
+                    $('#debtor_id').val('');
+                    $('#debtorForm').trigger("reset");
+                    $('#debtorModal').html("Add Debtor");
+                    $('#ajax-debtor-modal').modal('show');
+                });
+
+                $('body').on('click', '.edit-debtor', function () {
+                    var debtor_id = $(this).data('id');
+                    $.get('/uw-debtors/'+debtor_id+'/edit', function (data) {
+                        console.log(data);
+                        $('#debtorModal').html("Edit Debtor");
+                        $('#btn-debtor-save').val("edit-debtor");
+                        $('#ajax-debtor-modal').modal('show');
+                        $('#debtor_id').val(data.id);
+                        $('#family_name').val(data.family_name);
+                        $('#name').val(data.name);
+                        $('#patronymic').val(data.patronymic);
+                        $('#inn').val(data.inn);
+                        $('#resident').val(data.resident);
+                        $('#document_serial').val(data.document_serial);
+                        $('#document_number').val(data.document_number);
+                        $('#document_date').val(data.document_date);
+                        $('#gender').val(data.gender);
+                        $('#birth_date').val(data.birth_date);
+                        $('#document_region').val(data.document_region);
+                        $('#document_district').val(data.document_district);
+                        $('#pin').val(data.pin);
+                        $('#claim_id').val(data.claim_id); // added Javlon
+                        $('#live_address').val(data.live_address);
+                        $('#job_address').val(data.job_address);
+                        $('#total_sum').val(data.total_sum);
+                        $('#total_month').val(data.total_month);
+                    })
+                });
+
+                $('body').on('click', '#reg-debtor', function () {
+                    var debtor_id = $(this).data('id');
+                    $.get('/get-uw-debtor/'+debtor_id, function (data) {
+                        console.log(data);
+                    })
+                });
+
+                $('body').on('click', '#delete-debtor', function (e) {
+
+                    e.preventDefault();
+                    var id = $(this).data("id");
+
+                    $('#ConfirmDebtorModal').data('id', id).modal('show');
+                });
+
+                $('#yesDebtorDelete').click(function () {
+                    var id = $('#ConfirmDebtorModal').data('id');
+                    $.ajax(
+                        {
+                            type: "DELETE",
+                            url: "{{ url('uw-debtors') }}/"+id,
+                            beforeSend: function(){
+                                $("#loading-gif").show();
+                            },
+                            success: function (data) {
+                                //console.log(data);
+                                $("#loading-gif").hide();
+                                var oTable = $('#debtors_datatable').dataTable();
+                                oTable.fnDraw(false);
+                            },
+                            error: function (data) {
+                                console.log('Error:', data);
+                            }
+                        });
+
+                    $('#ConfirmDebtorModal').modal('hide');
                 });
 
                 // request Guards
@@ -1413,14 +1757,14 @@
                     $('#btn-save').val("create-post");
                     $('#post_id').val('');
                     $('#postForm').trigger("reset");
-                    $('#postCrudModal').html("Ta`minot kiritish");
+                    $('#postCrudModal').html("Add Guard");
                     $('#ajax-crud-modal').modal('show');
                 });
 
                 $('body').on('click', '.edit-post', function () {
                     var post_id = $(this).data('id');
                     $.get('/uw/edit-client-guar/'+post_id, function (data) {
-                        $('#postCrudModal').html("Ta`minotni o`zgartirish");
+                        $('#postCrudModal').html("Edit Guard");
                         $('#btn-save').val("edit-post");
                         $('#ajax-crud-modal').modal('show');
                         $('#post_id').val(data.id);
@@ -1494,7 +1838,7 @@
                     $('#btn-save').val("create-file");
                     $('#post_file_id').val('');
                     $('#postFileForm').trigger("reset");
-                    $('#postCrudFileModal').html("Ilova(lar) kiriting");
+                    $('#postCrudFileModal').html("Add File");
                     $('#ajax-crud-file-modal').modal('show');
                 });
 
@@ -1556,6 +1900,38 @@
                 });
 
             });
+
+            // Debtor form
+            if ($("#debtorForm").length > 0) {
+                $("#debtorForm").validate({
+                    submitHandler: function(form) {
+                        var actionType = $('#btn-debtor-save').val();
+                        $('#btn-debtor-save').html('Sending..');
+                        $.ajax({
+                            data: $('#debtorForm').serialize(),
+                            url: "{{ url('uw-debtors') }}",
+                            type: "POST",
+                            dataType: 'json',
+                            beforeSend: function(){
+                                $("#loading-gif").show();
+                            },
+                            success: function (data) {
+                                console.log(data);
+                                $("#loading-gif").hide();
+                                $('#debtorForm').trigger("reset");
+                                $('#ajax-debtor-modal').modal('hide');
+                                $('#btn-debtor-save').html('Save Changes');
+                                var oTable = $('#debtors_datatable').dataTable();
+                                oTable.fnDraw(false);
+                            },
+                            error: function (data) {
+                                console.log('Error:', data);
+                                $('#btn-debtor-save').html('Save Changes');
+                            }
+                        });
+                    }
+                })
+            }
 
             // Guar form
             if ($("#postForm").length > 0) {
@@ -1647,6 +2023,7 @@
                                 $("#loading-gif").show();
                             },
                             success: function (data) {
+                                console.log(data);
                                 $("#loading-gif").hide();
                                 $('#sendForm').trigger("reset");
                                 $('#modalFormSend').modal('hide');
@@ -1663,15 +2040,44 @@
                 })
             }
 
-            $('body').on('click', '#getUwAppBlank', function () {
 
-                var claim_id = $('#getUwAppBlank').data('id');
+            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
-                $.get('/uw/get-app-blank/' + claim_id, function (data) {
+            $("#document_region").change(function () {
+                var region_code = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: "/get-districts",
+                    data: {_token: CSRF_TOKEN, region_code: region_code},
+                    dataType: 'JSON',
+                    success: function (res) {
+                        var districtData = "";
+                        var obj = res;
+                        if (res) {
+                            $("#document_district").empty();
 
-                    $('#appBlankModal').modal('show');
-                    $("#appBlankData").html(data);
-                })
+                            if (obj['msg'] != 0) {
+
+                                $('#document_district').show();
+
+                                $("#document_district").append('<option value="" disabled selected>Tumanni tanlang</option>');
+
+                                $.each(obj['msg'], function (key, val) {
+                                    districtData += '<option value="' + val.code + '">' + val.name + '</option>';
+                                });
+
+                            } else {
+                                $('#document_district').hide();
+                            }
+
+                            $("#document_district").append(districtData); //// For Append
+                        }
+                    },
+
+                    error: function () {
+                        console.log('error');
+                    }
+                });
             });
 
             function print(id)

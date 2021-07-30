@@ -17,7 +17,7 @@
                 <h3 class="text-maroon">{{ Session::get('message') }}</h3>
                 <h3>
                     @foreach(Session::get('data') as $key => $val)
-                        {{ $key+=1 }}. <b>Inspektor:</b> {{ $val->user->lname??'' }} {{ $val->user->fname??'' }} (MFO: {{ $val->branch_code }})
+                        {{ $key+=1 }}. <b>Inspektor:</b> {{ $val->currentWork->personal->l_name??'-' }} {{ $val->currentWork->personal->f_name??'-' }} (MFO: {{ $val->branch_code }})
                         <b>Ariza raqami:</b> {{ $val->claim_id }}<br>
                     @endforeach
                 </h3>

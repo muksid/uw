@@ -10,7 +10,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">juridical client</a></li>
+            <li><a href="#">client</a></li>
             <li class="active">view</li>
         </ol>
         @if(session('success'))
@@ -101,6 +101,49 @@
                                 </div>
                             </div>
 
+                            @if($model->client_type == '11')
+                            <div class="box-body no-padding">
+                                <table class="table table-striped">
+                                    <tbody>
+                                    <tr>
+                                        <td colspan="4" class="text-bold bg-gray-active">Карточка Индивидуального предпринимателя #{{ $model->client_code }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>FIO:</strong></td>
+                                        <td>{{ $personal->family_name??'-'}} {{ $personal->name??''}} {{ $personal->patronymic??'' }}</td>
+                                        <td><strong>Passport:</strong></td>
+                                        <td>{{ $personal->document_serial??'-'}} {{ $personal->document_number??'-'}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tug'ilgan sana:</strong></td>
+                                        <td>{{  date('d.m.Y', strtotime($personal->birth_date??'-'))}}</td>
+                                        <td><strong>Passport ber.joy:</strong></td>
+                                        <td>{{ $personal->registration_address??'-'}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Yiloyat,Tuman:</strong></td>
+                                        <td>{{ $personal->region->name??'-'}}, {{ $personal->district->name??'-'}}</td>
+                                        <td><strong>Yashash manzili:</strong></td>
+                                        <td>{{ $personal->live_address??'-'}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>PINFL:</strong></td>
+                                        <td>{{ $personal->pin??'-'}}</td>
+                                        <td><strong>Telefon:</strong></td>
+                                        <td>{{ $personal->phone??'-'}}</td>
+                                    </tr>
+                                    </tbody></table>
+                            </div>
+                            <!-- /.box-body -->
+                            <div class="box-footer">
+                                <div class="form-group pull-right">
+                                    <a href="{{ route('client-personal.edit', ['id' => $model->id]) }}" class="btn btn-sm btn-success btn-flat">
+                                        <i class="fa fa-pencil"></i> @lang('blade.update')
+                                    </a>
+                                </div>
+                            </div>
+                            @endif
+
                             <div class="row">
                                 <div class="col-md-12">
                                     <!-- DIRECT CHAT PRIMARY -->
@@ -141,13 +184,63 @@
                                                         @endforeach
                                                         </tbody>
                                                     </table>
+
+
                                                 @endif
+                                            </div>
+
+                                            <div class="form-group pull-right">
+                                                <button type="submit" class="btn btn-sm bg-purple margin" id="getLeads" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Oborotka</button>
                                             </div>
                                         </div>
                                         <!-- /.box-body -->
                                         <div class="box-footer">
                                             <div class="form-group pull-right">
                                                 <button type="submit" class="btn btn-sm btn-primary btn-flat" id="getSaldo" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Yangilash</button>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-footer-->
+                                    </div>
+                                    <!--/.direct-chat -->
+                                </div>
+                                <div class="col-md-12">
+                                    <!-- DIRECT CHAT PRIMARY -->
+                                    <div class="box box-primary box-solid">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">Kartoteka 2</h3>
+                                        </div>
+                                        <!-- /.box-header -->
+                                        <div class="overlay" id="overlayK2">
+                                            <i class="fa fa-refresh fa-spin"></i>
+                                        </div>
+                                        <div class="box-body no-padding">
+                                            <div id="data_k2">
+                                                @if($k2)
+                                                    <table class="table table-striped table-bordered">
+                                                        <tbody>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>X/R</th>
+                                                            <th>K2 Summasi</th>
+                                                            <th>Yang.Sana</th>
+                                                        </tr>
+                                                        @foreach($k2 as $key => $k)
+                                                            <tr class="text-center">
+                                                                <td>{{ $key++ }}</td>
+                                                                <td>{{ $k->client_acc }}</td>
+                                                                <td class="text-maroon">{{ number_format($k->k2) }}</td>
+                                                                <td>{{ \Carbon\Carbon::parse($saldo->lead_last_date)->format('d.m.Y') }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <!-- /.box-body -->
+                                        <div class="box-footer">
+                                            <div class="form-group pull-right">
+                                                <button type="submit" class="btn btn-sm btn-primary btn-flat" id="getK2" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Yangilash</button>
                                             </div>
                                         </div>
                                         <!-- /.box-footer-->
@@ -189,88 +282,136 @@
                                         </div>
                                         <div class="box-body no-padding">
                                             <div class="row">
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <div id="data_t">
                                                         @if($kias)
                                                             <table class="table no-padding no-border">
                                                                 <tbody>
                                                                 <tr>
-                                                                    <td><strong>Kredit qarzdorligi:</strong></td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><strong>Kredit qarzdorlik:</strong></td>
                                                                     <td class="text-maroon">{{ number_format($kias->summa) }} so`m</td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td><strong>Scoring bali:</strong></td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><strong>Scoring ball:</strong></td>
                                                                     <td class="text-green"><i class="fa fa-line-chart"></i> <span id="scoring_ball">{{ $kias->scoring_ball }}</span></td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td><strong>Yangilangan vaqti:</strong></td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><strong>Sana:</strong></td>
                                                                     <td>{{ \Carbon\Carbon::parse($kias->updated_at)->format('d.m.Y')  }}</td>
                                                                 </tr>
                                                                 </tbody>
                                                             </table>
-                                                            <button type="button" class="btn btn-sm bg-purple margin" id="getKIASModal" value="{{ $model->id }}">
+                                                            <div class="form-group pull-left margin">
+                                                            <span id="clientType" hidden>{{ $model->client_type }}</span>
+                                                            <button type="button" class="btn btn-sm bg-purple" id="getKIASModal" value="{{ $model->id }}">
                                                                 Batafsil..
                                                             </button>
-
+                                                            </div>
                                                         @else
                                                             <h5 class="text-center text-maroon">Scoring KIAS ma`lumotlari topilmadi!!!</h5>
                                                         @endif
                                                     </div>
                                                 </div>
-                                                <div class="col-md-9">
+                                                <div class="col-md-8">
                                                     @if($kias_table)
-                                                    <table>
-                                                        <tbody>
-                                                        <tr>
-                                                            <td class="text-muted" style="text-align: center; background-color: #bdd6ee; padding: 5px 0px; border: 1px solid #02497f; width: 971px;" colspan="7">
-                                                                ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ
-                                                            </td>
-                                                        </tr>
-                                                        @foreach($kias_table as $key => $value)
-                                                            @if($key == 15 || $key == 16)
-                                                                <tr>
-                                                                    @foreach($value['td'] as $key1 => $value1)
-                                                                        <td rowspan="{{ $value1['rowspan']??1 }}" colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
-                                                                            {{ $value1['content']??'-' }}
-                                                                        </td>
-                                                                    @endforeach
-                                                                </tr>
-                                                            @elseif($key > 16 && $key < 28)
-                                                                <tr>
-                                                                    @foreach($value['td'] as $key1 => $value1)
-                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}" id="{{ $value1['id']??'' }}">
-                                                                            @if($key1 < 2)
-                                                                                {{ $value1['content']??'-' }}
-                                                                            @else
-                                                                                {{ $value1['span']??'-' }}
+                                                        <div class="box box-default collapsed-box">
+                                                            <div class="box-header with-border">
+                                                                <h3 class="box-title">ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ</h3>
+
+                                                                <div class="box-tools pull-right">
+                                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
+                                                                    </button>
+                                                                </div>
+                                                                <!-- /.box-tools -->
+                                                            </div>
+                                                            <!-- /.box-header -->
+                                                            <div class="box-body">
+                                                                <table>
+                                                                    <tbody>
+                                                                    @foreach($kias_table as $key => $value)
+                                                                        @if($model->client_type == 11)
+
+                                                                            @if($key == 17 || $key == 18)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td rowspan="{{ $value1['rowspan']??1 }}" colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            {{ $value1['content']??'-' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key > 18 && $key < 31)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}" id="{{ $value1['id']??'' }}">
+                                                                                            @if($key1 < 2)
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @else
+                                                                                                {{ $value1['span']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key = 31)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            @if($key1 == 2)
+                                                                                                @foreach($value1['span'] as $key2 => $value2)
+                                                                                                    <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
+                                                                                                @endforeach
+                                                                                            @else
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
                                                                             @endif
-                                                                        </td>
-                                                                    @endforeach
-                                                                </tr>
-                                                            @elseif($key = 28)
-                                                                <tr>
-                                                                    @foreach($value['td'] as $key1 => $value1)
-                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
-                                                                            @if($key1 == 2)
-                                                                                @foreach($value1['span'] as $key2 => $value2)
-                                                                                    <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
-                                                                                @endforeach
-                                                                            @else
-                                                                                {{ $value1['content']??'-' }}
+
+                                                                        @else
+                                                                            @if($key == 15 || $key == 16)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td rowspan="{{ $value1['rowspan']??1 }}" colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            {{ $value1['content']??'-' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key > 16 && $key < 28)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}" id="{{ $value1['id']??'' }}">
+                                                                                            @if($key1 < 2)
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @else
+                                                                                                {{ $value1['span']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key = 28)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            @if($key1 == 2)
+                                                                                                @foreach($value1['span'] as $key2 => $value2)
+                                                                                                    <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
+                                                                                                @endforeach
+                                                                                            @else
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
                                                                             @endif
-                                                                        </td>
+
+                                                                        @endif
                                                                     @endforeach
-                                                                </tr>
-                                                            @endif
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <!-- /.box-body -->
+                                                        </div>
+
                                                     @endif
 
                                                 </div>
@@ -288,7 +429,7 @@
                                     <!--/.direct-chat -->
                                 </div>
                                 <!-- /.col -->
-
+                                @if($model->client_type != '11')
                                 <div class="col-md-6">
                                     <!-- DIRECT CHAT PRIMARY -->
                                     <div class="box box-danger box-solid">
@@ -473,6 +614,7 @@
                                     <!--/.direct-chat -->
                                 </div>
                                 <!-- /.col -->
+                                @endif
                                 <div class="col-md-12">
                                     <div class="box box-success direct-chat">
                                         <div class="box-header with-border">
@@ -762,6 +904,30 @@
                 </div>
             </div>
 
+            <!-- Modal oborotka -->
+            <div class="modal fade modal-info" id="leadsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document" style="width: 1100px">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div style=" margin: auto; width: 1000px; line-height: normal; background-color: #fff; padding: 10px;">
+                        <h3>Xisob raqam pul aylanmasi</h3>
+                            <table style="width: 1000px;" id="main_info">
+                                <tbody>
+                                    <div id="l_data_table"></div>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Modal -->
             <div class="modal fade modal-info" id="tableBalanceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -803,17 +969,12 @@
         <script>
 
             $("#overlayOnlineReg").hide();
-
             $("#overlayKias").hide();
-
             $("#overlaySaldo").hide();
-
+            $("#overlayK2").hide();
             $("#overlayBalance").hide();
-
             $(".showBalanceForm").hide();
-
             $("#overlayFBalance").hide();
-
             $(".showFBalanceForm").hide();
 
             $("#sendToUwAdmin").click(function () {
@@ -909,7 +1070,7 @@
 
                             data+='<tr>' +
                                     '<td colspan="2"><strong>Kredit qarzdorligi:</strong></td>' +
-                                    '<td colspan="2" class="text-maroon">'+formatPrice(res.data.summa)+'</td>' +
+                                    '<td colspan="2" class="text-maroon">'+res.data.summa+'</td>' +
                                     '</tr>' +
                                 '<tr>' +
                                 '<td colspan="2"><strong>Scoring bali:</strong></td>' +
@@ -942,6 +1103,7 @@
             $("#getKIASModal").click(function () {
 
                 let id = $('#getKIASModal').val();
+                let clientType = $('#clientType').html();
 
                 $.ajax({
                     url: '/jur/get-kias-modal',
@@ -955,6 +1117,12 @@
                         console.log(res);
 
                         let data = '';
+                        let i8 = 8;
+                        let i28 = 28;
+                        if (clientType === '11'){
+                            i8 = 10;
+                            i28 = 31;
+                        }
                         data+= '<table style="width: 1000px;"><tbody>';
                         for (let i = 0; i < res.length; i++) {
 
@@ -987,7 +1155,7 @@
                                             '<span>'+res[i]['td'][1]['span']+'</span>' +
                                         '</td>' +
                                     '</tr>';
-                            } else if (i === 8 && res[i]['td'].length === 3){
+                            } else if (i === i8 && res[i]['td'].length === 3){
                                 data+= '<tr>';
                                 for (let j = 0; j < res[i]['td'].length; j++) {
                                     let sc = res[i]['td'][j];
@@ -1045,7 +1213,7 @@
                                 }
                                 data+= '</tr>';
 
-                            } else if (i === 28 && res[i]['td'].length === 3){
+                            } else if (i === i28 && res[i]['td'].length === 3){
                                 data+= '<tr>';
                                 for (let l = 0; l < res[i]['td'].length; l++) {
                                     let row_l = res[i]['td'][l];
@@ -1237,8 +1405,6 @@
                 });
 
             });
-
-
 
             $('#showFBalanceForm').click(function () {
                 $('.showFBalanceForm').toggle();
@@ -1460,6 +1626,116 @@
                         data+= '</tbody></table>';
 
                         $("#data_saldo").prepend(data);
+
+                    },
+                    complete:function(){
+                        $("#overlaySaldo").hide();
+                    }
+
+                });
+
+            });
+
+            $("#getK2").click(function () {
+
+                let id = $('#getK2').val();
+
+                $.ajax({
+                    url: '/jur/get-jur-k2',
+                    type: 'GET',
+                    data: {id: id},
+                    dataType: 'json',
+                    beforeSend: function(){
+                        $("#overlayK2").show();
+                        $("#data_k2").empty();
+                    },
+                    success: function(res){
+                        console.log(res);
+
+                        let data = '';
+                        data+= '<table class="table table-striped table-bordered"><tbody>' +
+                                '<tr>' +
+                                    '<th>#</th>' +
+                                    '<th>X/R</th>' +
+                                    '<th>K2 Summasi</th>' +
+                                    '<th>Yang.Sana</th>' +
+                                '</tr>';
+                        if (res.length !== 0){
+                            for (let i = 0; i < res.length; i++) {
+                                let val = res[i];
+                                data+=
+                                    '<tr>' +
+                                    '<td>'+i+'</td>' +
+                                    '<td>'+val['code_coa']+'</td>' +
+                                    '<td class="text-maroon">-'+formatPrice(val['saldo_unlead']/100)+'</td>' +
+                                    '<td>'+formatDate(val['lead_last_date'])+'</td>' +
+                                    '</tr>';
+                            }
+                        } else {
+                            data+=
+                                '<tr>' +
+                                '<td colspan="5" class="text-maroon text-center">Mijoz Kartoteka 2  topilmadi!!!</td>' +
+                                '</tr>';
+                        }
+                        data+= '</tbody></table>';
+
+                        $("#data_k2").prepend(data);
+
+                    },
+                    complete:function(){
+                        $("#overlayK2").hide();
+                    }
+
+                });
+
+            });
+
+            $("#getLeads").click(function () {
+
+                let id = $('#getLeads').val();
+
+                $.ajax({
+                    url: '/jur/get-jur-leads',
+                    type: 'GET',
+                    data: {id: id},
+                    dataType: 'json',
+                    beforeSend: function(){
+                        $("#overlaySaldo").show();
+                        $("#l_data_table").empty();
+                    },
+                    success: function(res){
+                        console.log(res);
+
+                        let data = '';
+                        data+= '<table class="table table-striped table-bordered"><tbody>' +
+                                '<tr>' +
+                                    '<th>#</th>' +
+                                    '<th>X/R</th>' +
+                                    '<th>Summa</th>' +
+                                    '<th>Davr</th>' +
+                                '</tr>';
+                        if (res.length !== 0){
+                            for (let i = 0; i < res.length; i++) {
+                                let val = res[i];
+                                data+=
+                                    '<tr>' +
+                                    '<td>'+i+'</td>' +
+                                    '<td>'+val['acc']+'</td>' +
+                                    '<td class="text-green">'+formatPrice(val['credit']/100)+'</td>' +
+                                    '<td>'+val['l_date']+'</td>' +
+                                    '</tr>';
+                            }
+                        } else {
+                            data+=
+                                '<tr>' +
+                                '<td colspan="5" class="text-maroon text-center">Mijoz Pul aylanmasi  topilmadi!!!</td>' +
+                                '</tr>';
+                        }
+                        data+= '</tbody></table>';
+
+                        $("#l_data_table").html(data);
+
+                        $('#leadsModal').modal('show');
 
                     },
                     complete:function(){

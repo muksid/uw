@@ -463,12 +463,12 @@
                         $('#cs_user_id').empty();
 
                         $.each( data.csUsers, function(k, v) {
-                            if (v.user_id == data.model.user_id)
+                            if (v.work_user_id == data.model.work_user_id)
                             {
-                                $('#cs_user_id').append('<option value="'+v.user_id+'" selected>'+v.full_name+' - '+v.filial_code+' - '+v.filial_name+ '</option>');
+                                $('#cs_user_id').append('<option value="'+v.work_user_id+'" selected>'+v.full_name+' - '+v.filial_code+' - '+v.filial_name+ '</option>');
                             } else
                             {
-                                $('#cs_user_id').append($('<option>', {value:v.user_id, text:v.filial_code+' - '+v.full_name+' - '+v.filial_name}));
+                                $('#cs_user_id').append($('<option>', {value:v.work_user_id, text:v.filial_code+' - '+v.full_name+' - '+v.filial_name}));
                             }
                         });
 

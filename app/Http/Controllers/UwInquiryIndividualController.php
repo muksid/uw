@@ -10,6 +10,7 @@ use App\UwClients;
 use App\UwInpsClients;
 use App\UwKatmClients;
 use App\UwLoanTypes;
+use App\UwPhyInpsBaseFile;
 use App\UwPhyKatmFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -110,13 +111,13 @@ class UwInquiryIndividualController extends Controller
 
             $clientTotalSumMonthly  = DB::select(
                 DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
-            where a.status = 1 and a.claim_id =  '.$model->claim_id.' group by sum'));
+            where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum'));
 
             $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-                ->groupBy('claim_id')
+                ->groupBy('uw_clients_id')
                 ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
 
         } else {
@@ -125,7 +126,7 @@ class UwInquiryIndividualController extends Controller
                 ->groupBy('PERIOD')->get()->count();
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-                ->groupBy('claim_id')->sum('INCOME_SUMMA');
+                ->groupBy('uw_clients_id')->sum('INCOME_SUMMA');
         }
 
 
@@ -584,7 +585,7 @@ class UwInquiryIndividualController extends Controller
             return response()->json(
                 [
                     'status' => 'success',
-                    'message' => 'KATM va INPS natijasi muvaffaqiyatli saqlandi',
+                    'message' => 'KATM va Oylik daromadi natijasi muvaffaqiyatli saqlandi',
                     'credit_results' => $this->clientCreditResults($id)
                 ]);
         }
@@ -636,7 +637,6 @@ class UwInquiryIndividualController extends Controller
                 $base64_decode = base64_decode($resultBase64);
                 $models_decode = json_decode($base64_decode, true);
                 $models_status = $models_decode['report']['success'];
-
 
                 $clientComment = new UwClientComments();
                 $clientComment->uw_clients_id = $id;
@@ -694,7 +694,7 @@ class UwInquiryIndividualController extends Controller
                         return response()->json(
                             [
                                 'status' => 'success',
-                                'message' => '('.$message.') KATM KIAS Scoring va ISH HAQI ma`lumotlari muvaffaqiyatli saqlandi',
+                                'message' => '('.$message.') KATM KIAS Scoring va Oylik daromadi ma`lumotlari muvaffaqiyatli saqlandi',
                                 'credit_results' => $this->clientCreditResults($id),
                                 'models' => $models
                             ]);
@@ -717,7 +717,9 @@ class UwInquiryIndividualController extends Controller
         }
         else {
 
-            $message = $resultDecode['errorMessage'];
+            return $this->getClientSalaryInps($id, $claim_id, $branch_code);
+
+            /*$message = $resultDecode['errorMessage'];
 
             $code = $resultDecode['code'];
 
@@ -726,6 +728,262 @@ class UwInquiryIndividualController extends Controller
                     'status'=>'danger',
                     'message'=> $message,
                     'code' => $code
+                ]);*/
+        }
+
+    }
+
+    public function getClientSalaryInps($id, $claim_id, $branch_code)
+    {
+
+        $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
+
+        $data = array(
+            "security" => array(
+                "pLogin" => "turonbank",
+                "pPassword" => "!trB&GkL@200130"
+            ),
+            "data" => array(
+                "pHead" => "011",
+                "pCode" => "".$branch_code."",
+                "pLegal" => 1,
+                "pClaimId" => "".$claim_id."",
+                "pReportId" => 25,
+                "pReportFormat" => 1
+            ),
+        );
+
+        $postdata = json_encode($data);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
+        curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8001');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        $data_decode = json_decode($result, true);
+
+        $code = $data_decode['code'];
+        $result = $data_decode['data']['result'];
+        $resultMessage = $data_decode['data']['resultMessage'];
+
+        if ($code == '200'){
+            if ($result == '05050'){
+                $token = $data_decode['data']['token'];
+                return $this->getClientSalaryInpsStatus($token, $id, $claim_id, $branch_code);
+
+            } else {
+                return response()->json(
+                    [
+                        'status'=>'danger',
+                        'message'=> $resultMessage,
+                        'code' => $code
+                    ]);
+            }
+
+        } else {
+
+            return response()->json(
+                [
+                    'status'=>'danger',
+                    'message'=> $resultMessage,
+                    'code' => $code
+                ]);
+        }
+
+    }
+
+    public function getClientSalaryInpsStatus($token, $id, $claim_id, $branch_code){
+        $url1 = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
+        $data1 = array(
+            "security" => array(
+                "pLogin" => "turonbank",
+                "pPassword" => "!trB&GkL@200130"
+            ),
+            "data" => array(
+                "pHead" => "011",
+                "pCode" => "".$branch_code."",
+                "pToken" => "".$token."",
+                "pLegal" => 1,
+                "pClaimId" => "".$claim_id."",
+                "pReportId" => 25,
+                "pReportFormat" => 1
+            ),
+        );
+
+        $postdata1 = json_encode($data1);
+
+        $ch1 = curl_init($url1);
+        curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch1, CURLOPT_POST, 1);
+        curl_setopt($ch1, CURLOPT_POSTFIELDS, $postdata1);
+        curl_setopt($ch1, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch1, CURLOPT_HTTPPROXYTUNNEL, 0);
+        curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
+        curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $json = curl_exec($ch1);
+        curl_close($ch1);
+
+        $data_decode = json_decode($json, true);
+        $result = $data_decode['data']['result'];
+        $reportBase64 = $data_decode['data']['reportBase64'];
+        $code = $data_decode['code'];
+
+        if ($code == '200') {
+
+            if ($result == '05000') {
+
+                $clientComment = new UwClientComments();
+                $clientComment->uw_clients_id = $id;
+                $clientComment->claim_id = $claim_id;
+                $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
+                $clientComment->code = $result;
+                $clientComment->title = 'Oylik ish haqi ma`lumotlari muvaffaqiyatli saqlandi. (XB)';
+                $clientComment->json_data = '';
+                $clientComment->process_type = 'SAL';
+                $clientComment->save();
+
+                if ($reportBase64) {
+                    $base64_decode = base64_decode($reportBase64);
+                    $array = json_decode($base64_decode, true);
+                    $array_client = $array['report']['client'];
+                    $array_incomes_period = $array['report']['incomes_period'];
+                    $array_sysinfo = $array['report']['sysinfo'];
+                    $array_presence_reports = $array['report']['presence_reports'];
+                    $array_notifications = $array['report']['notifications'];
+
+                    $array_merge = array_merge([
+                        'client' => $array_client,
+                        'incomes_period' => $array_incomes_period,
+                        'sysinfo' => $array_sysinfo,
+                        'presence_reports' => $array_presence_reports,
+                        'array_notifications' => $array_notifications
+                    ]);
+                    $base_json = json_encode($array_merge);
+                    $base_file = base64_decode($base_json);
+                    // base64 save
+                    $baseFile = new UwPhyInpsBaseFile();
+                    $baseFile->uw_clients_id = $id;
+                    $baseFile->base_file = $base_file;
+                    $baseFile->save();
+
+                    if ($array['report']['incomes']) {
+
+                        $array_income = $array['report']['incomes']['INCOME'];
+                        if (array_filter($array_income, 'is_array')) {
+
+                            $old_salary = UwInpsClients::where('uw_clients_id', $id);
+                            $old_salary->delete();
+
+                            foreach ($array_income as $key => $value) {
+                                $inps = new UwInpsClients();
+
+                                $year = substr($value['PERIOD'], 0,4);
+                                $month = substr($value['PERIOD'], 5,6);
+
+                                $inps->uw_clients_id = $id;
+                                $inps->claim_id = $claim_id;
+                                $inps->client_name = $array_client['name'];
+                                $inps->client_tin = $array_client['inn'];
+                                $inps->pinfl = $array_client['pinfl'];
+                                $inps->ns10_code = 0;
+                                $inps->ns11_code = 0;
+                                $inps->ORG_INN = $value['ORG_INN'];
+                                $inps->INCOME_SUMMA = $value['INCOME_SUMMA'];
+                                $inps->salary_tax_sum = 0;
+                                $inps->series_passport = $array_client['document_serial'];
+                                $inps->number_passport = $array_client['document_number'];
+                                $inps->NUM = $month;
+                                $inps->PERIOD = $year;
+                                $inps->ORGNAME = $value['ORGNAME'];
+                                $inps->status = 1;
+                                $inps->isVersion = 1;
+                                $inps->save();
+                            }
+
+                        } else {
+
+                            $inps = new UwInpsClients();
+
+                            $year = substr($array_income['PERIOD'], 0,4);
+                            $month = substr($array_income['PERIOD'], 5,6);
+
+                            $inps->uw_clients_id = $id;
+                            $inps->claim_id = $claim_id;
+                            $inps->client_name = $array_client['name'];
+                            $inps->client_tin = $array_client['inn'];
+                            $inps->pinfl = $array_client['pinfl'];
+                            $inps->ns10_code = 0;
+                            $inps->ns11_code = 0;
+                            $inps->ORG_INN = $array_income['ORG_INN'];
+                            $inps->INCOME_SUMMA = $array_income['INCOME_SUMMA'];
+                            $inps->salary_tax_sum = 0;
+                            $inps->series_passport = $array_client['document_serial'];
+                            $inps->number_passport = $array_client['document_number'];
+                            $inps->NUM = $month;
+                            $inps->PERIOD = $year;
+                            $inps->ORGNAME = $array_income['ORGNAME'];
+                            $inps->status = 1;
+                            $inps->isVersion = 1;
+                            $inps->save();
+                        }
+
+                    } else {
+
+                        $inps = new UwInpsClients();
+                        $inps->uw_clients_id = $id;
+                        $inps->claim_id = $claim_id;
+                        $inps->client_name = $array_client['name'];
+                        $inps->client_tin = $array_client['inn'];
+                        $inps->pinfl = $array_client['pinfl'];
+                        $inps->ns10_code = 0;
+                        $inps->ns11_code = 0;
+                        $inps->ORG_INN = '';
+                        $inps->INCOME_SUMMA = 0;
+                        $inps->salary_tax_sum = 0;
+                        $inps->series_passport = $array_client['document_serial'];
+                        $inps->number_passport = $array_client['document_number'];
+                        $inps->NUM = date('m');
+                        $inps->PERIOD = date('Y');
+                        $inps->ORGNAME = '';
+                        $inps->status = 1;
+                        $inps->isVersion = 1;
+                        $inps->save();
+
+                    }
+
+                    return response()->json(
+                        [
+                            'status' => 'success',
+                            'message' => '('.$result.') KATM KIAS Scoring va Oylik daromadi ma`lumotlari 
+                                    muvaffaqiyatli saqlandi',
+                            'credit_results' => $this->clientCreditResults($id)
+                        ]);
+
+                } else {
+                    return $this->getClientSalaryInps($id, $claim_id, $branch_code);
+                }
+
+            }
+
+        } else {
+
+            $message = $data_decode['errorMessage'];
+
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => '('.$code.')'.$message,
+                    'credit_results' => $this->clientCreditResults($id)
                 ]);
         }
 
@@ -833,12 +1091,34 @@ class UwInquiryIndividualController extends Controller
         $model = UwClients::find($id);
 
         $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
+        $isVersion = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-            ->groupBy('claim_id')->sum('INCOME_SUMMA');
+        if ($isVersion && $isVersion->isVersion == 2) {
 
-        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)
-            ->groupBy('PERIOD')->get()->count();
+            $clientTotalSumMonthly  = DB::select(
+                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
+            where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum'));
+
+            $clientTotalSumMonthly = count($clientTotalSumMonthly);
+
+            $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+                ->groupBy('uw_clients_id')
+                ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
+
+        } else {
+
+            $clientTotalSumMonthly = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+                ->groupBy('PERIOD')->get()->count();
+
+            $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+                ->groupBy('uw_clients_id')->sum('INCOME_SUMMA');
+        }
+
+        /*$clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+            ->groupBy('uw_clients_id')->sum('INCOME_SUMMA-salary_tax_sum');
+
+        $clientTotalSumMonthly = UwInpsClients::where('uw_clients_id', $id)->where('INCOME_SUMMA', '>', 0)->where('status', 1)
+            ->groupBy('NUM')->get()->count();*/
 
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
@@ -884,7 +1164,7 @@ class UwInquiryIndividualController extends Controller
             $modal_style = 'warning';
             $message = 'Skoring bali (200 ball) dan yuqori emas!!!';
         }
-        elseif ($model->is_inps == 1 && $model->summa >= $creditCanBe){
+        elseif ($model->is_inps == 1 && $model->summa >= intval($creditCanBe)){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
@@ -892,9 +1172,9 @@ class UwInquiryIndividualController extends Controller
         elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 2){
             $status = 0;
             $modal_style = 'warning';
-            $message = 'Mijozning Oylik ish xaqqi davri yetarli emas (3 oydan kam)!!!';
+            $message = 'Mijozning Oylik daromadi davri yetarli emas (3 oydan kam)!!!';
         }
-        elseif ($model->is_inps == 1 && $scoringBall < 200 && $model->summa >= $creditCanBe){
+        elseif ($model->is_inps == 1 && $scoringBall < 200 && $model->summa >= intval($creditCanBe)){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
@@ -913,7 +1193,7 @@ class UwInquiryIndividualController extends Controller
         return response()->json([
             'status'   => $status,
             'modal_style'   => $modal_style,
-            'message' => $message,
+            'message' => $message
         ]);
 
     }

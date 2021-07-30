@@ -91,7 +91,7 @@ return [
 
     /* dashboard */
     'title'     => 'TuronBank',
-    'webEdo'    => 'Web Pochta',
+    'webUw'    => 'Anderrayting',
 
     /* login */
     'login_seans'   => 'Seansni boshlash uchun tizimga kiring',
@@ -460,7 +460,7 @@ return [
     // UW lang
     'previous'  => 'oldingi',
     'next'  => 'keyingi',
-    
+
     // Are you sure you want to delete text
     'are_you_sure_delete'   => 'Haqiqatan ham o`chirishni xohlaysizmi?',
     'are_you_sure_edit'     => 'Haqiqatdan ham o`zgartirishni xohlaysizmi?',

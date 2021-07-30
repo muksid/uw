@@ -6,6 +6,7 @@ use App\MWorkUsers;
 use App\UwJurBalanceChild;
 use App\UwJurBalanceForm;
 use App\UwJurClientComment;
+use App\UwJurClientPersonal;
 use App\UwJurFinancialChild;
 use App\UwJurFinancialForm;
 use App\UwJuridicalClient;
@@ -39,45 +40,98 @@ class UwInquiryEntityController extends Controller
 
         }
 
-        $url = 'http://10.22.50.3:8000/inquiry/entity';
+        if ($modelClient->client_type == '11'){
+            $url = 'http://10.22.50.3:8000/inquiry/individual';
 
-        $data = array(
-            "header" => array(
-                "type" => "B",
-                "code" => "".$modelClient->branch_code.""
-            ),
-            "request" => array(
-                "claim_id" => "".$modelClient->claim_id."",
-                "claim_date" => "".date("d.m.Y", strtotime($modelClient->claim_date))."",
-                "inn" => "".$modelClient->inn."",
-                "claim_number" => "".$modelClient->claim_number."",
-                "agreement_number" => "".$modelClient->claim_number."",
-                "agreement_date" => "".date("d.m.Y", strtotime($modelClient->claim_date))."",
-                "resident" => "".$modelClient->resident."",
-                "juridical_status" => "1",
-                "nibbd" => "".$modelClient->client_code."",
-                "client_type" => "".$modelClient->client_type."",
-                "name" => "".$modelClient->jur_name."",
-                "owner_form" => "".$modelClient->owner_form."",
-                "goverment" => "".$modelClient->goverment."",
-                "registration_region" => "".$modelClient->registration_region."",
-                "registration_district" => "".$modelClient->registration_district."",
-                "registration_address" => "".$modelClient->registration_address."",
-                "phone" => "".$modelClient->phone."",
-                "hbranch" => "",
-                "oked" => "".$modelClient->oked."",
-                "katm_sir" => "".$modelClient->katm_sir."",
-                "okpo" => "".$modelClient->code_juridical_person."",// code_juridical_person
-                "credit_type" => "".$modelLoanType->credit_type."",
-                "summa" => "".$modelClient->summa."",
-                "procent" => "".$modelLoanType->procent."",
-                "credit_duration" => "".$modelLoanType->credit_duration."",
-                "credit_exemtion" => "".$modelLoanType->credit_exemtion."",
-                "currency" => "".$modelLoanType->currency."",
-                "live_cadastr" => "",
-                "registration_cadastr" => ""
-            ),
-        );
+            $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
+
+            $data = array(
+                "header" => array(
+                    "type" => "B",
+                    "code" => "".$modelClient->branch_code.""
+                ),
+                "request" => array(
+                    "claim_id" => "".$modelClient->claim_id."",
+                    "claim_date" => "".date("d.m.Y", strtotime($modelClient->claim_date))."",
+                    "inn" => "",
+                    "claim_number" => "".$modelClient->claim_number."",
+                    "agreement_number" => "".$modelClient->claim_number."",
+                    "agreement_date" => "".date("d.m.Y", strtotime($modelClient->claim_date))."",
+                    "resident" => "".$personal->resident."",
+                    "document_type" => "".$personal->document_type."",
+                    "document_serial" => "".$personal->document_serial."",
+                    "document_number" => "".$personal->document_number."",
+                    "document_date" => "".date("d.m.Y", strtotime($personal->document_date))."",
+                    "gender" => "".$personal->gender."",
+                    "client_type" => "".$personal->client_type."",
+                    "birth_date" => "".date("d.m.Y", strtotime($personal->birth_date))."",
+                    "document_region" => "".$personal->document_region."",
+                    "document_district" => "".$personal->document_district."",
+                    "nibbd" => "",
+                    "family_name" => "".$personal->family_name."",
+                    "name" => "".$personal->name."",
+                    "patronymic" => "".$personal->patronymic."",
+                    "registration_region" => "".$personal->registration_region."",
+                    "registration_district" => "".$personal->registration_district."",
+                    "registration_address" => "".$personal->registration_address."",
+                    "phone" => "".$modelClient->phone."",
+                    "pin" => "".$personal->pin."",
+                    "katm_sir" => "",
+                    "credit_type" => "".$modelLoanType->credit_type."",
+                    "summa" => "".$modelClient->summa."",
+                    "procent" => "".$modelLoanType->procent."",
+                    "credit_duration" => "".$modelLoanType->credit_duration."",
+                    "credit_exemtion" => "".$modelLoanType->credit_exemtion."",
+                    "currency" => "".$modelLoanType->currency."",
+                    "live_address" => "".$personal->live_address."",
+                    "live_cadastr" => "",
+                    "registration_cadastr" => ""
+                ),
+            );
+
+        } else {
+
+            $url = 'http://10.22.50.3:8000/inquiry/entity';
+
+            $data = array(
+                "header" => array(
+                    "type" => "B",
+                    "code" => "".$modelClient->branch_code.""
+                ),
+                "request" => array(
+                    "claim_id" => "".$modelClient->claim_id."",
+                    "claim_date" => "".date("d.m.Y", strtotime($modelClient->claim_date))."",
+                    "inn" => "".$modelClient->inn."",
+                    "claim_number" => "".$modelClient->claim_number."",
+                    "agreement_number" => "".$modelClient->claim_number."",
+                    "agreement_date" => "".date("d.m.Y", strtotime($modelClient->claim_date))."",
+                    "resident" => "".$modelClient->resident."",
+                    "juridical_status" => "1",
+                    "nibbd" => "".$modelClient->client_code."",
+                    "client_type" => "".$modelClient->client_type."",
+                    "name" => "".$modelClient->jur_name."",
+                    "owner_form" => "".$modelClient->owner_form."",
+                    "goverment" => "".$modelClient->goverment."",
+                    "registration_region" => "".$modelClient->registration_region."",
+                    "registration_district" => "".$modelClient->registration_district."",
+                    "registration_address" => "".$modelClient->registration_address."",
+                    "phone" => "".$modelClient->phone."",
+                    "hbranch" => "",
+                    "oked" => "".$modelClient->oked."",
+                    "katm_sir" => "".$modelClient->katm_sir."",
+                    "okpo" => "".$modelClient->code_juridical_person."",// code_juridical_person
+                    "credit_type" => "".$modelLoanType->credit_type."",
+                    "summa" => "".$modelClient->summa."",
+                    "procent" => "".$modelLoanType->procent."",
+                    "credit_duration" => "".$modelLoanType->credit_duration."",
+                    "credit_exemtion" => "".$modelLoanType->credit_exemtion."",
+                    "currency" => "".$modelLoanType->currency."",
+                    "live_cadastr" => "",
+                    "registration_cadastr" => ""
+                ),
+            );
+
+        }
 
         $postdata = json_encode($data);
 
@@ -99,16 +153,16 @@ class UwInquiryEntityController extends Controller
         $message = $data_decode['result']['message'];
         $katm_sir = $data_decode['response']['katm_sir'];
 
-        $clientComment = new UwJurClientComment();
-        $clientComment->jur_clients_id = $id;
-        $clientComment->code = $code;
-        $clientComment->work_user_id = Auth::user()->currentWork->id??0;
-        $clientComment->json_data = $result;
-        $clientComment->title = $message;
-        $clientComment->process_type = 'R';
-        $clientComment->save();
-
         if ($code == '05000') {
+
+            $clientComment = new UwJurClientComment();
+            $clientComment->jur_clients_id = $id;
+            $clientComment->code = $code;
+            $clientComment->work_user_id = Auth::user()->currentWork->id??0;
+            $clientComment->json_data = $result;
+            $clientComment->title = $message;
+            $clientComment->process_type = 'R';
+            $clientComment->save();
 
             // update reg
             $modelClient = UwJuridicalClient::find($id);
@@ -126,8 +180,7 @@ class UwInquiryEntityController extends Controller
                 [
                     'status'=>'warning',
                     'code'=>$code,
-                    'message'=>'code: ('.$code.') Jur KATM ro`yhatga olishda xatolik mavjud!',
-                    'data'=> $message,
+                    'message'=>'KATM ro`yhatga olishda xatolik mavjud! code: ('.$code.') '.$message.''
                 ]);
         }
 
@@ -198,14 +251,15 @@ class UwInquiryEntityController extends Controller
 
             $token = $data_decode['data']['token'];
 
-            return $this->creditReportStatusK($id, $model->branch_code, $token, $model->claim_id);
+            return $this->creditReportStatusK($id, $model->branch_code, $token, $model->claim_id, $model->client_type);
 
         } else {
+            $errorMessage = $data_decode['errorMessage'];
             return response()->json(
                 [
                     'status'=>'warning',
                     'message'=>'('.$result.') KATM Mijoz kredit tarixini olishda xatolik mavjud!',
-                    'data'=> $resultMessage
+                    'data'=> $errorMessage
                 ]);
         }
 
@@ -233,9 +287,10 @@ class UwInquiryEntityController extends Controller
      * * @param  int  $id
      * * @param  int  $branch_code
      * * @param  int  $claim_id
+     * * @param  int  $client_type
      * @return \Illuminate\Http\JsonResponse
      */
-    public function creditReportStatusK($id, $branch_code, $token, $claim_id)
+    public function creditReportStatusK($id, $branch_code, $token, $claim_id, $client_type)
     {
         //
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
@@ -321,22 +376,45 @@ class UwInquiryEntityController extends Controller
                         Storage::disk('ftp_nas')->put($path_img, $data);
                     }*/
 
-                    $scoring_ball = $arr1[8]['td'][1]['div']['span']; // scoring ball
+                    if ($client_type == '11'){
+                        $scoring_ball = $arr1[10]['td'][1]['div']['span']; // scoring ball
 
-                    $arr_summa = $arr1[28]['td'][2]['span'][0]; // exit summa
+                        $arr_summa = $arr1[31]['td'][2]['span'][0]; // exit summa
 
-                    if (count($arr_summa) > 1) {
-                        # code...
-                        $summa = $arr1[28]['td'][2]['span'][0]['span'];
-                        $summa = preg_replace('/[^0-9]/', '', $summa);
-                    } else{
-                        $summa = 0;
-                    }
+                        if (count($arr_summa) > 1) {
+                            # code...
+                            $summa = $arr1[31]['td'][2]['span'][0]['span'];
+                            $summa = preg_replace('/[^0-9]/', '', $summa);
+                        } else{
+                            $summa = 0;
+                        }
 
-                    // json_data table
-                    for ($i=15; $i < 29; $i++) {
-                        // code...
-                        $arr_table[$i] = array_merge($arr1[$i]);
+                        // json_data table
+                        for ($i=17; $i < 32; $i++) {
+                            // code...
+                            $arr_table[$i] = array_merge($arr1[$i]);
+
+                        }
+
+                    } else {
+                        $scoring_ball = $arr1[8]['td'][1]['div']['span']; // scoring ball
+
+                        $arr_summa = $arr1[28]['td'][2]['span'][0]; // exit summa
+
+                        if (count($arr_summa) > 1) {
+                            # code...
+                            $summa = $arr1[28]['td'][2]['span'][0]['span'];
+                            $summa = preg_replace('/[^0-9]/', '', $summa);
+                        } else{
+                            $summa = 0;
+                        }
+
+                        // json_data table
+                        for ($i=15; $i < 29; $i++) {
+                            // code...
+                            $arr_table[$i] = array_merge($arr1[$i]);
+
+                        }
 
                     }
                     $jon_data = base64_encode(json_encode($arr_table)); // table
@@ -383,13 +461,14 @@ class UwInquiryEntityController extends Controller
                             'status'=>'success',
                             'code'=>'05000',
                             'message'=>'KATM Scoring KIAS muvaffaqiyatli saqlandi',
+                            'data'=> $katm,
                             'json_data'=> $json_data
                         ]);
                 }
             }
 
         } else{
-            return $this->creditReportStatusK($id, $branch_code, $token, $claim_id);
+            return $this->creditReportStatusK($id, $branch_code, $token, $claim_id, $client_type);
         }
 
     }

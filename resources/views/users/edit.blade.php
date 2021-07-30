@@ -37,6 +37,118 @@
         @endif
     </section>
 
+    @if ($user->id == Auth::user()->id)
+
+        <!-- Main content -->
+        <section class="content">
+
+            <!-- SELECT2 EXAMPLE -->
+            <div class="box box-success">
+                <div class="box-header with-border">
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                    class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="row">
+                        <!-- Message Succes -->
+                        @if ($message = Session::get('success'))
+                            <div class="alert alert-success">
+                                {{ $message }}
+                            </div>
+                        @endif
+                    <!-- Display Validation Errors -->
+                        @if (count($errors) > 0)
+                            <div class="alert alert-danger">
+                                <strong>Xatolik!</strong> Ma`lumotlarni qaytadan tekshiring.<br><br>
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <form role="form" method="POST" action="{{ url('/admin/users/' . $user->id) }}">
+                            {{ csrf_field() }}
+                            {{ method_field('PATCH') }}
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('blade.name') <span style="color:red">*</span></label>
+                                    <input type="text" name="fname" class="form-control" value="{{$user->personal->f_name??'-' }}"
+                                           placeholder="Enter first name" required>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('blade.surname') <span style="color:red">*</span></label>
+                                    <input type="text" name="lname" class="form-control" value="{{$user->personal->l_name??'-' }}"
+                                           placeholder="Enter last name" required>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('blade.fathers_name') <span style="color:red">*</span></label>
+                                    <input type="text" name="sname" class="form-control" value="{{$user->personal->m_name??'-'}}"
+                                           placeholder="Enter middle name" required>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('blade.username') <span style="color:red">*</span></label>
+                                    <input type="text" name="username" class="form-control" value="{{$user->username}}"
+                                           disabled>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+                            <div class="col-md-6">
+
+                                <div class="col-md-6">
+                                    <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+                                        <label for="exampleInputPassword1">@lang('blade.password') <span
+                                                    style="color:red">*</span></label>
+                                        <input type="password" name="password" class="form-control" id="inputError"
+                                               placeholder="@lang('blade.password')" required>
+                                        <span class="help-block">@lang('blade.enter_pass_at_least_6')</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
+                                        <label for="exampleInputPassword1">@lang('blade.confirm_pass') <span
+                                                    style="color:red">*</span></label>
+                                        <input type="password" name="password_confirmation" class="form-control"
+                                               id="inputError" placeholder="@lang('blade.password')" required>
+                                        <span class="help-block">@lang('blade.repeat_pass')</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <a href="/home" class="btn btn-default">@lang('blade.cancel')</a>
+                                        <button type="submit" class="btn btn-primary">@lang('blade.save')</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- /.col -->
+                        </form>
+                        <!-- /.form-group -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+        </section>
+
+
+    @else
     <!-- Main content -->
     <section class="content">
 
@@ -1115,5 +1227,5 @@
 
     </section>
     <!-- /.content -->
-
+    @endif
 @endsection

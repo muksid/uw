@@ -41,7 +41,7 @@ class UwClientDebtorsController extends Controller
     public function store(Request $request)
     {
         //
-        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
         if (!$currentWorkUser){
             return response()->json([
@@ -65,6 +65,7 @@ class UwClientDebtorsController extends Controller
                 'uw_clients_id' => $request->model_id,
                 'inn' => $request->inn,
                 'resident' => $request->resident,
+                'document_type' => $request->document_type,
                 'document_serial' => $request->document_serial,
                 'document_number' => $request->document_number,
                 'document_date' => $request->document_date,
@@ -82,7 +83,7 @@ class UwClientDebtorsController extends Controller
                 'total_month' => $request->total_month,
                 'claim_id'=>$claim_id,
                 'claim_number'=>$claim_number,
-                'branch_code'=>$request->branch_code,
+                'branch_code'=>$lastModelId->branch_code,
                 'isActive' => 1,
             ]);
         return response()->json([

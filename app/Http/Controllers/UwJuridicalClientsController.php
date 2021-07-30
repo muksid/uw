@@ -9,6 +9,7 @@ use App\UwJurBalanceForm;
 use App\UwJurClientComment;
 use App\UwJurClientFiles;
 use App\UwJurClientGuars;
+use App\UwJurClientPersonal;
 use App\UwJurFinancialForm;
 use App\UwJuridicalClient;
 use App\UwJurKatmClient;
@@ -75,7 +76,7 @@ class UwJuridicalClientsController extends Controller
 
         $searchUser = MWorkUsers::find($u);
 
-        return view('uw.jur-clients.ins.clients',
+        return view('jur.ins.clients',
             compact('models','u','t','d','users','searchUser','status'));
 
     }
@@ -126,7 +127,7 @@ class UwJuridicalClientsController extends Controller
 
         $searchUser = MWorkUsers::find($u);
 
-        return view('uw.jur-clients.uw.clients',
+        return view('jur.uw.clients',
             compact('models','u','t','d','users','searchUser','status'));
 
     }
@@ -176,7 +177,7 @@ class UwJuridicalClientsController extends Controller
 
         $searchUser = MWorkUsers::find($u);
 
-        return view('uw.jur-clients.ins.all-clients',
+        return view('jur.ins.all-clients',
             compact('models','u','t','d','users','searchUser'));
 
     }
@@ -213,34 +214,88 @@ class UwJuridicalClientsController extends Controller
         return response()->json($models);
     }
 
-    public function curlHttpPost($filial, $p1, $type)
+    public function curlHttpPost($array)
     {
         $user = 'muksid_iabs';
         $pass = 'zz0102031!@#$';
+        $type = $array['type'];
 
-        if ($type == 'c'){
-            $data = array('user' => $user, 'pass' => $pass, 'inn' => $p1);
-            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-jur';
+        if ($type == 'cc'){
+            $client_code = $array['client_code'];
+            $query = "
+            select a.code,a.name,a.typeof,a.inn,a.address,a.resident_code,a.country_code,a.tax_organization_code,
+                a.property_form_code,a.phone,a.date_validate,a.code_filial,a.id,a.region_code,c.name as reg_name,a.district_code,d.name as dis_name,a.date_open,
+                b.director_name,b.accounter_chief_name,b.sector_code,b.organ_directive_code,b.registration_place_code,
+                b.organization_legal_form,b.address_code,b.code_juridical_person,b.main_filial,b.main_account,b.oked,
+                b.organization_head_code,b.registration_document_number
+                from client_current a
+                left join client_juridical_current b on a.id = b.id
+                left join ref_region c on a.region_code = c.code
+                left join ref_district d on a.district_code = d.code
+                where a.subject = 'J' and a.condition = 'A' and c.version_id = 40 and d.version_id = 40 and a.code = '".$client_code."'
+            ";
 
-        } elseif ($type == 's'){
-            $data = array('user' => $user, 'pass' => $pass, 'code_filial' => $filial, 'client_code' => $p1);
-            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-jur-saldo';
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
 
-        } elseif ($type == 'saldo'){
-            $now = Carbon::now();
-            $y = $now->year-1;
-            $m = $now->month;
-            $d = $now->day;
-            $year = Carbon::create($y, $m, $d)->format('d-m-Y');
+        } elseif ($type == 'id'){
+            $id = $array['id'];
+            $query = "
+            select a.code,a.name,a.typeof,a.inn,a.address,a.resident_code,a.country_code,a.tax_organization_code,
+                a.property_form_code,a.phone,a.date_validate,a.code_filial,a.id,a.region_code,c.name as reg_name,a.district_code,d.name as dis_name,a.date_open,
+                b.director_name,b.accounter_chief_name,b.sector_code,b.organ_directive_code,b.registration_place_code,
+                b.organization_legal_form,b.address_code,b.code_juridical_person,b.main_filial,b.main_account,b.oked,
+                b.organization_head_code,b.registration_document_number
+                from client_current a
+                left join client_juridical_current b on a.id = b.id
+                left join ref_region c on a.region_code = c.code
+                left join ref_district d on a.district_code = d.code
+                where a.subject = 'J' and a.condition = 'A' and c.version_id = 40 and d.version_id = 40 and a.id = '".$id."'
+            ";
 
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+
+        }
+        elseif ($type == 'saldo'){
+            $last_year = date('d.m.Y', strtotime('-1 year'));
+            $filial = $array['filial'];
+            $client_code = $array['client_code'];
+            $coa = $array['coa'];
             $query = "
             select a.code_filial, a.acc_external,a.name,a.turnover_all_credit as all_credit, b.turnover_all_credit as credit,
             a.turnover_all_debit as all_debit, b.turnover_all_debit as debit,a.lead_last_date as l_date,
             b.lead_last_date as f_date, a.code_currency 
             from accounts a
             left join saldo b on a.id = b.id
-            where a.code_filial = '".$filial."' and a.client_code = '".$p1."' and a.code_coa = '20208' and a.code_currency = '000' and b.lead_last_date >= to_date('".$year."', 'dd.MM.yyyy')
-            order by a.lead_last_date asc OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY
+            where a.code_filial = '".$filial."' and a.client_code = '".$client_code."' and a.code_coa = '".$coa."' and a.code_currency = '000' and b.lead_last_date >= to_date('".$last_year."', 'dd.MM.yyyy')
+            order by b.lead_last_date asc OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY
+            ";
+
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'leads'){
+            $last_3_m = date('d.m.Y', strtotime('-3 month'));
+            $filial = $array['filial'];
+            $client_code = $array['client_code'];
+            $coa = $array['coa'];
+            $query = "
+            select max(a.acc_external) as acc, to_char(b.lead_last_date, 'MM.yyyy') as l_date, max(b.lead_last_date),sum(a.turnover_all_credit) as all_credit, 
+            sum(b.turnover_credit) as credit from accounts a
+            left join saldo b on a.id = b.id
+            where a.code_filial = '".$filial."' and a.client_code = '".$client_code."' and a.code_coa = '".$coa."' and a.code_currency = '000'
+            and b.lead_last_date > to_date('".$last_3_m."', 'dd.MM.yyyy')
+            group by to_char(b.lead_last_date, 'MM.yyyy')
+            order by to_char(b.lead_last_date, 'MM.yyyy')
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'k2'){
+            $filial = $array['filial'];
+            $client_code = $array['client_code'];
+            $query = "
+            select * from accounts a
+            where 1=1 and a.code_filial = '".$filial."' and a.client_code = '".$client_code."' and a.code_coa = '90963'
             ";
 
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
@@ -293,13 +348,13 @@ class UwJuridicalClientsController extends Controller
     public function getOraSearch(Request $request)
     {
         //
-        $filial = $request->input('filial');
+        $client_code = $request->input('client_code');
 
-        $tin = $request->input('tin');
+        $type = 'cc';
 
-        $type = 'c';
+        $array = array('client_code' => $client_code, 'type' => $type);
 
-        $data = $this->curlHttpPost($filial, $tin, $type);
+        $data = $this->curlHttpPost($array);
 
         $models = json_decode($data);
 
@@ -309,23 +364,24 @@ class UwJuridicalClientsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  integer $tin
+     * @param  integer $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function getOraData($tin)
+    public function getOraData($id)
     {
         //
-        $type = 'c';
-        $filial = '';
-        $data = $this->curlHttpPost($filial, $tin, $type);
+        $type = 'id';
+
+        $array = array('id' => $id, 'type' => $type);
+
+        $data = $this->curlHttpPost($array);
 
         $models = json_decode($data, true);
-
         $model = $models[0];
 
         $loans = UwLoanTypes::where('isActive', 1)->where('short_code', 'J')->get();
 
-        return view('uw.jur-clients.ins.view-form', compact('model', 'loans'));
+        return view('jur.ins.form', compact('model', 'loans'));
     }
 
     /**
@@ -337,11 +393,18 @@ class UwJuridicalClientsController extends Controller
     {
         //
         $id = $request->id;
-        $filial = $request->filial;
-        $code_client = $request->code;
+        $model = UwJuridicalClient::find($id);
+        $filial = $model->branch_code;
+        $client_code = $model->client_code;
+        if ($model->client_type == '11'){
+            $coa = '20218';
+        } else {
+            $coa = '20208';
+        }
         $type = 'saldo';
+        $array = array('filial' => $filial, 'client_code' => $client_code, 'coa' => $coa, 'type' => $type);
 
-        $data = $this->curlHttpPost($filial, $code_client, $type);
+        $data = $this->curlHttpPost($array);
 
         $models = json_decode($data, true);
 
@@ -380,6 +443,57 @@ class UwJuridicalClientsController extends Controller
                 $saldo->save();
             }
         }
+
+        return response()->json($models);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOraK2(Request $request)
+    {
+        //
+        $id = $request->id;
+        $model = UwJuridicalClient::find($id);
+        $filial = $model->branch_code;
+        $client_code = $model->client_code;
+        $type = 'k2';
+        $array = array('filial' => $filial, 'client_code' => $client_code, 'type' => $type);
+
+        $data = $this->curlHttpPost($array);
+
+        $models = json_decode($data, true);
+
+        UwJurSaldo::updateOrCreate(['jur_clients_id' => $id],
+            [
+                'jur_clients_id' => $id,
+                'k2' => $models[0]['saldo_unlead']/100,
+                'lead_last_date' => $models[0]['lead_last_date']
+            ]);
+
+        return response()->json($models);
+    }
+
+    public function getOraLeads(Request $request)
+    {
+        //
+        $id = $request->id;
+        $model = UwJuridicalClient::find($id);
+        $filial = $model->branch_code;
+        $client_code = $model->client_code;
+        if ($model->client_type == '11'){
+            $coa = '20218';
+        } else {
+            $coa = '20208';
+        }
+        $type = 'leads';
+        $array = array('filial' => $filial, 'client_code' => $client_code, 'coa' => $coa, 'type' => $type);
+
+        $data = $this->curlHttpPost($array);
+
+        $models = json_decode($data, true);
 
         return response()->json($models);
     }
@@ -476,7 +590,7 @@ class UwJuridicalClientsController extends Controller
     public function create()
     {
         //
-        return view('uw.jur-clients.ins.create');
+        return view('jur.ins.create');
     }
 
     /**
@@ -503,8 +617,8 @@ class UwJuridicalClientsController extends Controller
             'owner_form' => 'required|max:5',
             'code_juridical_person' => 'required|max:10',
             'phone' => 'required',
-            'oked' => 'required|max:10',
-            'okpo' => 'required|max:10'
+            //'oked' => 'required|max:10',
+            //'okpo' => 'required|max:10'
         );
 
         $validator = Validator::make(Input::all(), $rules);
@@ -597,6 +711,8 @@ class UwJuridicalClientsController extends Controller
 
         $saldos = UwJurSaldo::where('jur_clients_id', $id)->get();
 
+        $k2 = UwJurSaldo::where('jur_clients_id', $id)->get();
+
         $credit_result = $this->clientCreditResults($id);
 
         $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
@@ -605,8 +721,11 @@ class UwJuridicalClientsController extends Controller
 
         $modelComments = UwJurClientComment::where('jur_clients_id', $id)->get();
 
-        return view('uw.jur-clients.ins.view-client',
-            compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'credit_result', 'guars', 'files', 'modelComments')
+        $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
+
+        return view('jur.ins.view',
+            compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'k2','credit_result',
+                'guars', 'files', 'modelComments', 'personal')
         );
     }
 
@@ -647,7 +766,7 @@ class UwJuridicalClientsController extends Controller
 
         $modelComments = UwJurClientComment::where('jur_clients_id', $id)->get();
 
-        return view('uw.jur-clients.uw.view',
+        return view('jur.uw.view',
             compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'credit_result', 'guars', 'files', 'modelComments')
         );
     }
@@ -669,7 +788,7 @@ class UwJuridicalClientsController extends Controller
 
         $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
 
-        return view('uw.jur-clients.ins.edit-client', compact('model', 'loans', 'guars', 'files'));
+        return view('jur.ins.edit', compact('model', 'loans', 'guars', 'files'));
     }
 
     /**
@@ -693,8 +812,8 @@ class UwJuridicalClientsController extends Controller
             'summa' => 'required',
             'owner_form' => 'required|max:5',
             'phone' => 'required',
-            'oked' => 'required|max:10',
-            'okpo' => 'required|max:10'
+            //'oked' => 'required|max:10',
+            //'okpo' => 'required|max:10'
         );
 
         $validator = Validator::make(Input::all(), $rules);
@@ -704,7 +823,7 @@ class UwJuridicalClientsController extends Controller
             return Redirect::to('/jur/client/'.$id.'/edit')
                 ->withErrors($validator);
 
-        } else{
+        } else {
 
             $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'loan_type_id');
 

@@ -59,7 +59,7 @@ class UwClientsController extends Controller
     public function CsIndex($status)
     {
         //
-        $currentWorkUser = MWorkUsers::with('department')->where('user_id', Auth::id())->where('isActive', 'A')->first();
+        $currentWorkUser = MWorkUsers::with('department')->where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
         $models = UwClients::where('id', 0)->get();
         if ($currentWorkUser){
@@ -182,8 +182,8 @@ class UwClientsController extends Controller
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
         $duplicateClients = UwClients::where('id', '!=', $model->id)
-            ->where('inn', '=',$model->inn)
-            ->orWhere(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->document_serial.$model->document_serial)
+            ->where('pin', '=',$model->pin)
+            ->where(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->document_serial.$model->document_serial)
             ->get();
 
         $sch_type_d = 'checked';
@@ -337,6 +337,7 @@ class UwClientsController extends Controller
         $model = UwClients::updateOrCreate(['id' => $row_id],
             [
                 'inn' => $request->inn,
+                'document_type' => $request->document_type,
                 'document_serial' => $request->document_serial,
                 'document_number' => $request->document_number,
                 'document_date' => $document_date,
@@ -357,8 +358,7 @@ class UwClientsController extends Controller
 
         return response()->json([
             'model' => $model,
-            'credit_debt' => $model->katm->summa?? 0,
-            'loan_name' => $model->loanType->title,
+            'loan_name' => $model->loanType->title??'-',
         ]);
     }
 
@@ -380,7 +380,7 @@ class UwClientsController extends Controller
         $model->update([
             'status' => $request->status,
             'reg_status' => $request->reg_status,
-            'user_id' => $request->cs_user_id
+            'work_user_id' => $request->cs_user_id
         ]);
 
         // update katm
@@ -433,12 +433,15 @@ class UwClientsController extends Controller
             ->select('m_work_users.id as work_user_id',
                 DB::raw('CONCAT(m_personal_users.l_name," ", m_personal_users.f_name) AS full_name'),
                 'm_work_users.branch_code as filial_code', 'departments.title as filial_name')
+            ->where('users.status', '=',1)
+            ->where('users.isUw','=', 1)
+            ->where('m_work_users.isActive', '=','A')
             ->get();
 
         return response()->json([
             'model' => $model,
             'modelLoanType' => $modelLoanType,
-           // 'csUsers' => $csUsers,
+            'csUsers' => $csUsers,
         ]);
 
     }
@@ -742,7 +745,6 @@ class UwClientsController extends Controller
         }
     }
 
-
     public function postInps($model_id, $claim_id)
     {
 
@@ -951,7 +953,6 @@ class UwClientsController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {

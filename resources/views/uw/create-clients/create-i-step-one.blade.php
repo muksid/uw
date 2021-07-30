@@ -111,10 +111,10 @@
                                 <div class="col-md-2">
                                     <div class="box-body">
                                         <div class="form-group">
-                                            <label>Pasport turi <span class="text-red">*</span></label>
+                                            <label>Hujjat turi <span class="text-red">*</span></label>
                                             <select name="document_type" class="form-control" required>
                                                 <option value="" selected disabled>Tanlang</option>
-                                                <option value="6" @if(6 == ($model->document_type ?? '')) selected @endif>Pasport</option>
+                                                <option value="6" @if(6 == ($model->document_type ?? '')) selected @endif>Passport</option>
                                                 <option value="0" @if(7 == ($model->document_type ?? '')) selected @endif>ID karta</option>
                                             </select>
                                         </div>
@@ -189,7 +189,7 @@
                                 <div class="col-md-2">
                                     <div class="box-body">
                                         <div class="form-group">
-                                            <label>Passport PINFL <span class="*"></span></label>
+                                            <label>PINFL <span class="*"></span></label>
                                             <input type="text" name="pin"
                                                    data-inputmask='"mask": "99999999999999"' data-mask
                                                    class="form-control" value="{{ $model->pin ?? '' }}"
@@ -198,7 +198,7 @@
                                     </div>
 
                                 </div>
-                                <div class="col-md-2">
+                                {{--<div class="col-md-2">
                                     <div class="box-body">
                                         <div class="form-group {{ $errors->has('inn') ? 'has-error' : '' }}">
                                             <label>INN <span class="text-red">*</span></label>
@@ -209,17 +209,16 @@
                                         </div>
                                     </div>
 
-                                </div>
+                                </div>--}}
                                 <div class="col-md-2">
                                     <div class="box-body">
                                         <div class="form-group">
-                                            <label>INPSni tanlang <span class="text-red">*</span></label>
+                                            <label>Oylik daromadi <span class="text-red">*</span></label>
                                             <select class="form-control"
                                                     name="is_inps" required>
                                                 <option value="" disabled>Tanlang</option>
-                                                <option value="1" @if (1 == ($model->is_inps ?? '')) {{ 'selected' }} @endif>Tashkilot xodimi (INPS bor)</option>
-                                                <option value="2" @if (2 == ($model->is_inps ?? '')) {{ 'selected' }} @endif>Organ xodimi (INPS yo`q)</option>
-                                                <option value="3" @if (3 == ($model->is_inps ?? '')) {{ 'selected' }} @endif>Nafaqada (INPS yo`q)</option>
+                                                <option value="1" @if (1 == ($model->is_inps ?? '')) {{ 'selected' }} @endif>Bor</option>
+                                                <option value="2" @if (2 == ($model->is_inps ?? '')) {{ 'selected' }} @endif>Yo`q</option>
                                             </select>
 
                                         </div>
