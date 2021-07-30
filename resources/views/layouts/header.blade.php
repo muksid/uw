@@ -1,20 +1,10 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: Admin
- * Date: 06.01.2020
- * Time: 17:08
- */
-?>
-
-<!-- Main Header -->
 <header class="main-header">
     <!-- Logo -->
     <a href="{{ url('home') }}" class="logo">
         <!-- mini logo for sidebar mini 50x50 pixels -->
         <span class="logo-mini"><b>T</b>B</span>
         <!-- logo for regular state and mobile devices -->
-        <span class="logo-lg"><b>Андирайтинг </b></span>
+        <span class="logo-lg"><b>Андеррайтинг </b></span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">
@@ -27,9 +17,9 @@
             <ul class="nav navbar-nav">
                 <!-- User Account: style can be found in dropdown.less -->
                 <li class="dropdown user user-menu">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown1">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <img src="{{ url('/admin-lte/dist/img/user.png') }}" class="user-image">
-                        <span class="hidden-xs">{{ mb_substr(Auth::user()->fname ??'', 0,1).'.'.Auth::user()->lname }}</span>
+                        <span class="hidden-xs">{{ mb_substr(Auth::user()->personal->f_name ??'', 0,1).'.'.Auth::user()->personal->l_name??'' }}</span>
                     </a>
                     <ul class="dropdown-menu">
                         <!-- User image -->
@@ -37,7 +27,7 @@
                             <img src="{{ url('/admin-lte/dist/img/user.png') }}" class="img-circle">
 
                             <p>
-                                {{Auth::user()->fname}} {{Auth::user()->lname}}
+                                {{Auth::user()->personal->f_name??''}} {{Auth::user()->personal->l_name??''}}
                                 <small>Login: {{Auth::user()->username}}</small>
                             </p>
                         </li>

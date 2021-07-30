@@ -63,6 +63,7 @@
                                 <th>#</th>
                                 <th>@lang('blade.title_uz')</th>
                                 <th>Filial code</th>
+                                <th>Local code</th>
                                 <th>Parent</th>
                                 <th>status</th>
                                 <th><i class="fa fa-pencil-square-o"></i></th>
@@ -77,6 +78,7 @@
                                     <td>{{ $i++ }}</td>
                                     <td>{{ $model->title }}</td>
                                     <td>{{ $model->filial_code }}</td>
+                                    <td>{{ $model->local_code }}</td>
                                     <td>{{ $model->filial->title??'' }}</td>
                                     <td class="text-center">
                                         @switch($model->status)
@@ -125,20 +127,26 @@
                                     <div class="modal-body">
                                         <input type="hidden" name="model_id" id="model_id">
                                         <div class="form-group">
-                                            <label for="name" class="control-label">@lang('blade.title_uz')</label>
+                                            <label for="title" class="control-label">@lang('blade.title_uz')</label>
                                             <input type="text" class="form-control" style="width: 100%" id="title"
                                                    name="title" value="" required="">
                                         </div>
                                         <div class="form-group">
-                                            <label for="name" class="control-label">@lang('blade.title_ru')</label>
+                                            <label for="title_ru" class="control-label">@lang('blade.title_ru')</label>
                                             <input type="text" class="form-control" style="width: 100%" id="title_ru"
                                                    name="title_ru" value="" required="">
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="name" class="control-label">Filial code</label>
+                                            <label for="filial_code" class="control-label">Filial code</label>
                                             <input type="number" class="form-control" style="width: 100%" id="filial_code"
                                                    name="filial_code" value="" required="">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="local_code" class="control-label">Local code</label>
+                                            <input type="text" class="form-control" style="width: 100%" id="local_code"
+                                                   name="local_code" value="" required="">
                                         </div>
 
                                         <div class="form-group">
@@ -281,6 +289,7 @@
                         $('#title').val(data.title);
                         $('#title_ru').val(data.title_ru);
                         $('#filial_code').val(data.filial_code);
+                        $('#local_code').val(data.local_code);
                         $('#parent_id').val(data.parent_id);
                         $('#f_sort').val(data.f_sort);
                         $('#status').val(data.status);
@@ -342,28 +351,17 @@
 
                                 var model =
                                     '<tr id="rowId_' + data.id + '">' +
-                                    '<td>' + data.id + '</td>' +
-                                    '<td>' + data.title + '</td>' +
-                                    '<td>' + data.filial_code + '</td>' +
-                                    '<td>' + data.parent_id + '</td>'+
-                                    '<td>' + data.status + '</td>';
-
-                                model +=
-                                    '<td>' +
-                                    '<button type="button" class="btn btn-flat btn-info" id="editFilial" data-id="' + data.id + '">' +
-                                    '<i class="fa fa-pencil">' +
-                                    '</button>' +
-                                    '</td>';
-
-                                model +=
-                                    '<td>' +
-                                    '<button type="button" class="btn btn-flat btn-danger" id="deleteFilial" data-id="' + data.id + '">' +
-                                    '<i class="fa fa-trash">' +
-                                    '</button>' +
-                                    '</td>' +
-
-                                    '<td>' + data.created_at + '</td>' +
-
+                                        '<td>' + data.id + '</td>' +
+                                        '<td>' + data.title + '</td>' +
+                                        '<td>' + data.filial_code + '</td>' +
+                                        '<td>' + data.local_code + '</td>' +
+                                        '<td>' + data.parent_id + '</td>'+
+                                        '<td>' + data.status + '</td>'+
+                                        '<td><button type="button" class="btn btn-flat btn-info" id="editFilial" data-id="' + data.id + '">' +
+                                                '<i class="fa fa-pencil">' +
+                                            '</button>' +
+                                        '</td>'+
+                                        '<td>' + data.created_at + '</td>' +
                                     '</tr>';
 
 

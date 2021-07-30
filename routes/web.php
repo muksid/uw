@@ -31,18 +31,53 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/home', 'HomeController@index')->name('home');
 
+    // New User Position
+    // User
+    Route::get('insertUsers','UserController@getTest');
+
+    Route::resource('admin/users','UserController');
+    Route::any('admin/users-search','UserController@index');
+
+    Route::get('admin/users-username-check/{username}','UserController@usernameCheck');
+    Route::get('admin/users-get-branch/{id}','UserController@getBranch');
+    Route::post('admin/users-update','UserController@updateUser');
+    // Work Users
+    Route::resource('admin/work-users','MWorkUsersController');
+    Route::get('admin/work-users-tab_num-check/{tab_num}','MWorkUsersController@tab_numCheck');
+    // User get history
+    Route::get('admin/work-users/get-roles/{id}','MWorkUsersController@getRoles');
+    Route::get('admin/work-users/get-history/{id}','MWorkUsersController@getHistory');
+    Route::get('admin/work-users/get-history-roles/{id}','MWorkUsersController@getHistoryRoles');
+    Route::get('admin/work-users/activate-user/{id}','MWorkUsersController@activateUser');
+    // Admin Core Menu Controller
+    Route::resource('admin/menus','MCoreMenusController');
+    Route::any('admin/menus-search', 'MCoreMenusController@search')->name('admin-core-search');
+    // Admin Menu Roles Controller
+    Route::resource('admin/menu_roles','MMenuRolesController');
+    Route::any('admin/menus_roles-search', 'MMenuRolesController@search')->name('admin-menu_roles-search');
+    // Admin Role Menus Controller
+    Route::resource('admin/role_menus','MRoleMenusController');
+    Route::any('admin/role_menus-search', 'MRoleMenusController@search')->name('admin-role_menus-search');
+    // Personal users Controller
+    Route::resource('admin/personal-users','MPersonalUsersController');
+    Route::any('admin/personal-users-search', 'MPersonalUsersController@search')->name('admin-personal-users-search');
+    Route::get('admin/personal-users-email-check/{email}','MPersonalUsersController@emailCheck');
+
+    Route::get('admin/role_menus/user_role/{id}','MRoleMenusController@getParent');
+    // End New User Position
+
     // User Role
     Route::resource('admin/roles', 'RoleController');
     Route::get('admin/ora','RoleController@ora');
 
     // User
-    Route::resource('admin/users','UserController');
+    //Route::resource('admin/users','UserController');
 
     // User search
-    Route::any('users-search','UserController@search')->name('users/search');
+    //Route::get('admin/users-search','UserController@search');
 
     // Department
-    Route::resource('admin/departments','DepartmentController');
+    Route::resource('departments','DepartmentController');
 
     Route::post('/get-department','DepartmentController@department');
 
@@ -51,17 +86,17 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('/postbranch','DepartmentController@subdep');
 
     // uw project begin
+    #Route::post('/uw/create-client','UwClientsController@store');
+    #Route::get('/uw/get-client-katm/{cid}','UwClientsController@getClientKatm');
+    #Route::get('/uw/get-client-inps/{cid}','UwClientsController@getClientInps');
     Route::resource('uw/filials', 'FilialsController');
     Route::resource('uw/uw-users', 'UwUsersController');
     Route::resource('uw-clients', 'UwClientsController');
     Route::get('/uw/home', 'UwClientsController@home');
     Route::get('/uw-clients/create', 'UwClientsController@create');
     Route::get('/uw/client-katm/{id}/{claim_id}', 'UwClientsController@clientKatm')->name('uw-katm');
-    #Route::post('/uw/create-client','UwClientsController@store');
     Route::post('/get-districts','UwClientsController@getDistricts');
     Route::post('/get-reg-districts','UwClientsController@getRegDistricts');
-    #Route::get('/uw/get-client-katm/{cid}','UwClientsController@getClientKatm');
-    #Route::get('/uw/get-client-inps/{cid}','UwClientsController@getClientInps');
     Route::post('uw-clients-edit','UwClientsController@storeEdit');
     Route::post('uw-risk-edit','UwClientsController@riskEdit');
     Route::post('/uw/cs-app-send', 'UwClientsController@csAppSend');
@@ -71,7 +106,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/uw-client-file/delete/{id}', 'UwClientsController@destroyFile');
     Route::get('/uw/clients/{status}', 'UwClientsController@CsIndex');
     Route::any('/uw/loan-app/{status}','UwClientsController@riskAdminIndex');
-    Route::any('/uw/all-clients','UwClientsController@allClients');
+    Route::any('phy/all-clients','UwClientsController@allClients');
     Route::get('/uw/view-loan/{id}/{claim_id}', 'UwClientsController@riskAdminView');
     Route::get('/uw/view-loan-super-admin/{id}/{claim_id}', 'UwClientsController@superAdminView');
     Route::post('/uw/risk-admin-confirm', 'UwClientsController@riskAdminConfirm');
@@ -105,7 +140,7 @@ Route::group(['middleware' => ['auth']], function() {
 
         Route::post('uw-online-registration', 'UwInquiryIndividualController@onlineRegistration')->name('uw.online.registration');
         Route::get('uw-get-result-buttons/{id}', 'UwInquiryIndividualController@getResultButtons')->name('uw.get-result-buttons');
-        Route::get('get-client-res-k/{id}','UwInquiryIndividualController@getClientKatm');
+        Route::get('get-client-res-k','UwInquiryIndividualController@getClientKatm');
         Route::get('get-client-res-i/{id}','UwInquiryIndividualController@getClientInps');
         Route::get('get-status-send/{id}/{sch_type}','UwInquiryIndividualController@getStatusSend');
         #Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
@@ -121,8 +156,52 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('create-client-file', 'UwCreateClientsController@createClientFile')->name('uw.create-client-file');
         Route::get('delete-client-file/{id}', 'UwCreateClientsController@deleteClientFile');
     });
+
+    // JURIDICAL
+    Route::group(['prefix'=>'jur'], function(){
+        Route::resource('client','UwJuridicalClientsController');
+        Route::any('clients/{q}','UwJuridicalClientsController@getClients');
+        Route::any('uw-clients/{q}','UwJuridicalClientsController@getUwClients');
+        Route::any('all-clients','UwJuridicalClientsController@getAllClients');
+        Route::get('ora-search','UwJuridicalClientsController@getOraSearch');
+        Route::get('view-form/{q}','UwJuridicalClientsController@getOraData');
+        Route::post('guar-store','UwJuridicalClientsController@guarStore');
+        Route::get('guar-delete/{id}','UwJuridicalClientsController@guarDelete');
+        Route::post('files-store','UwJuridicalClientsController@filesStore');
+        Route::get('file-download/{id}','UwJuridicalClientsController@fileDownload');
+        Route::get('file-delete/{id}','UwJuridicalClientsController@fileDelete');
+        Route::get('send-to-admin','UwJuridicalClientsController@sendToAdmin');
+
+        Route::get('uw/client-view/{q}','UwJuridicalClientsController@uwShow');
+        Route::post('agr-confirm', 'UwJuridicalClientsController@agrConfirm');
+        Route::post('agr-cancel', 'UwJuridicalClientsController@agrCancel');
+
+        Route::get('online-reg','UwInquiryEntityController@onlineRegistration');
+        Route::get('get-scoring-kias','UwInquiryEntityController@creditReportScoring');
+        Route::get('get-balance-form','UwInquiryEntityController@getBalanceForm');
+
+        Route::get('get-kias-modal','UwJuridicalClientsController@getKiasModal');
+        Route::get('get-balance-modal','UwJurBalanceFormsController@getBalanceModal');
+        Route::get('get-jur-saldo','UwJuridicalClientsController@getOraSaldo');
+        Route::get('get-jur-k2','UwJuridicalClientsController@getOraK2');
+        Route::get('get-jur-leads','UwJuridicalClientsController@getOraLeads');
+
+        Route::get('get-select','UwJuridicalClientsController@getSelect');
+
+
+        Route::resource('client-personal','UwJurClientPersonalController');
+
+        Route::get('get-hr_emps','UwJuridicalClientsController@getHrEmps');
+
+    });
+
     // DEBTORS
     Route::resource('uw-debtors', 'UwClientDebtorsController');
+    Route::get('get-uw-debtor/{id}', 'UwClientDebtorsController@onlineDebtorsRegistration');
+
+    // GUAR TYPES
+    Route::resource('uw-guar-type', 'UwGuarTypesController');
+    Route::get('get-guar-types', 'UwGuarTypesController@getModel');
 
     // Laravel log
     Route::get('/storage/log', 'HomeController@storageLog')->name('storage-log');

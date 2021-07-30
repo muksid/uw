@@ -19,6 +19,7 @@ class Department extends Model
         'title',
         'title_ru',
         'branch_code',
+        'local_code',
         'parent_id',
         'status',
     ];

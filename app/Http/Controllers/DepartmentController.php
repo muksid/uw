@@ -25,8 +25,7 @@ class DepartmentController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('departments.index',compact('departments','allDepartments',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('departments.index',compact('departments','allDepartments'));
 
     }
 
@@ -40,8 +39,7 @@ class DepartmentController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('departments.create',compact('filial',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('departments.create',compact('filial'));
 
     }
     public function userDepartment(Request $request){
@@ -102,6 +100,7 @@ class DepartmentController extends Controller
             'title' => 'required',
             'title_ru' => 'required',
             'branch_code' => 'required',
+            'local_code' => 'required',
         ]);
 
         $input = $request->all();
@@ -123,11 +122,13 @@ class DepartmentController extends Controller
     public function show(Department $department)
     {
 
-        // count() //
-        @include('count_message.php');
+        return view('departments.show',compact('department'));
+    }
 
-        return view('departments.show',compact('department',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+    public function view(Department $department)
+    {
+
+        return view('departments.show',compact('department'));
     }
 
     public function edit(Department $department)
@@ -137,10 +138,7 @@ class DepartmentController extends Controller
 
         $departments = Department::where('status', '=', 1)->where('parent_id', '=', 0)->get();
 
-        // count() //
-        @include('count_message.php');
-        return view('departments.edit',compact('filials', 'department','departments',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('departments.edit',compact('filials', 'department','departments'));
     }
 
     public function update(Request $request, Department $department)
@@ -148,6 +146,7 @@ class DepartmentController extends Controller
         $request->validate([
             'title' => 'required',
             'title_ru' => 'required',
+            'local_code' => 'required',
         ]);
 
         $d = Department::where('id',$request['parent_id'])->first();

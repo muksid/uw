@@ -4,13 +4,13 @@
 
     <section class="content-header">
         <h1>
-            Anderrayting Arizalar
+            Jismoniy shaxslar
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">anderrayting</a></li>
-            <li class="active">anderrayting</li>
+            <li><a href="#">Jismoniy shaxslar</a></li>
+            <li class="active">index</li>
         </ol>
         @if (count($errors) > 0)
             <div class="alert alert-danger">
@@ -63,7 +63,7 @@
                                 <th>IABS unikal</th>
                                 <th>Ariza #</th>
                                 <th>Mijoz nomi</th>
-                                <th>Kredit summasi</th>
+                                <th>Summa</th>
                                 <th class="text-center">@lang('blade.status')</th>
                                 <th class="text-center">Ko`rish</th>
                                 <th><i class="fa fa-pencil-square-o"></i></th>
@@ -92,7 +92,7 @@
                                     <td>{{ $model->iabs_num }}</td>
                                     <td>{{ $model->claim_id }}</td>
                                     <td>{{ $model->family_name. ' '.$model->name. ' '.$model->patronymic}}</td>
-                                    <td>{{ number_format($model->summa, 2) }}</td>
+                                    <td class="text-bold">{{ number_format($model->summa) }}</td>
                                     <td>
                                         @if($model->status == 0)
                                             <span class="badge bg-red-active">Bekor qilingan</span>
@@ -185,22 +185,22 @@
 
                                                 <div class="row">
 
-                                                    <div class="col-md-2">
+                                                    <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Familya</label>
                                                             <input type="text" id="family_name" name="family_name"
                                                                    class="form-control latin-only" value="" required>
                                                         </div>
-
                                                     </div>
-                                                    <div class="col-md-2">
+
+                                                    <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Ismi<span class=""></span></label>
                                                             <input type="text" id="name" name="name"
                                                                    class="form-control latin-only" value="" required>
                                                         </div>
-
                                                     </div>
+
                                                     <div class="col-md-3">
                                                         <div class="form-group {{ $errors->has('patronymic') ? 'has-error' : '' }}">
                                                             <label>Otasining ismi<span class=""></span></label>
@@ -220,7 +220,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-2">
+                                                    <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Jinsi <span class="text-red">*</span></label>
                                                             <select id="gender" class="form-control" name="gender">
@@ -228,7 +228,16 @@
 
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-2">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Hujjat turi<span class="text-red">*</span></label>
+                                                            <select id="document_type" class="form-control"
+                                                                    name="document_type">
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label for="name" class="control-label">Passport AA</label>
                                                             <input type="text" class="form-control" style="width: 100%"
@@ -254,7 +263,7 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <label for="name" class="control-label">INPS</label>
+                                                            <label for="pin" class="control-label">PINFL</label>
                                                             <input type="number" class="form-control"
                                                                    style="width: 100%" id="pin"
                                                                    name="pin" value="" required="">
@@ -263,16 +272,17 @@
 
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <label for="name" class="control-label">Inn</label>
+                                                            <label for="inn" class="control-label">STIR</label>
                                                             <input type="number" class="form-control"
                                                                    style="width: 100%" id="inn"
-                                                                   name="inn" value="" required="">
+                                                                   name="inn" value="">
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <label>INPS tanlang <span class="text-red">*</span></label>
+                                                            <label>Oylik daromadi <span
+                                                                        class="text-red">*</span></label>
                                                             <select id="is_inps" class="form-control" name="is_inps">
                                                             </select>
 
@@ -288,7 +298,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-2">
+                                                    <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label for="iabs_num" class="control-label">IABS Num</label>
                                                             <input type="number" class="form-control"
@@ -297,30 +307,33 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="registration_address" class="control-label">Yashash manzili</label>
+                                                            <label>Kredit turi<span class="text-red">*</span></label>
+                                                            <select id="loan_type_id" class="form-control"
+                                                                    name="loan_type_id">
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="registration_address" class="control-label">Yashash
+                                                                manzili</label>
                                                             <input type="text" class="form-control"
                                                                    style="width: 100%" id="registration_address"
                                                                    name="registration_address" value="" required="">
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="job_address" class="control-label">Ish joy manzili</label>
+                                                            <label for="job_address" class="control-label">Ish joy
+                                                                manzili</label>
                                                             <input type="text" class="form-control"
                                                                    style="width: 100%" id="job_address"
                                                                    name="job_address" value="" required="">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label>Kredit turi<span class="text-red">*</span></label>
-                                                            <select id="loan_type_id" class="form-control" name="loan_type_id">
-                                                            </select>
-
                                                         </div>
                                                     </div>
 
@@ -334,7 +347,8 @@
 
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-default btn-flat pull-left"
-                                                data-dismiss="modal"><i class="fa fa-ban"></i> @lang('blade.cancel')</button>
+                                                data-dismiss="modal"><i class="fa fa-ban"></i> @lang('blade.cancel')
+                                        </button>
                                         <button type="submit" class="btn btn-primary btn-flat" id="btn-save"
                                                 value="create"><i class="fa fa-save"></i> @lang('blade.save')
                                         </button>
@@ -475,7 +489,7 @@
 
                 $('body').on('click', '#editClient', function () {
 
-                    var model_id = $(this).data('id');
+                    let model_id = $(this).data('id');
 
                     $.get('/uw-clients/' + model_id, function (data) {
                         console.log(data);
@@ -494,33 +508,37 @@
                         $('#document_date').val(data.model.document_date);
                         $('#birth_date').val(data.model.birth_date);
 
-                        if (data.model.gender == 1){
+                        if (data.model.gender === '1'){
                             $('#gender').html(
                                 '<option value="'+data.model.gender+'" selected>Erkak</option>'+
-                            '<option value="2">Ayol</option>');
+                                '<option value="2">Ayol</option>');
                         } else {
                             $('#gender').html(
                                 '<option value="'+data.model.gender+'" selected>Ayol</option>'+
                                 '<option value="1">Erkak</option>');
                         }
 
-                        if (data.model.is_inps == 1){
+                        if (data.model.is_inps === 1){
                             $('#is_inps').html(
-                                '<option value="'+data.model.is_inps+'" selected>Tashkilot hodimi (INPS bor)</option>'+
-                                '<option value="2">Organ hodimi (INPS yo`q)</option>'+
-                                '<option value="3">Nafaqada (INPS yo`q)</option>'
+                                '<option value="'+data.model.is_inps+'" selected>Bor</option>'+
+                                '<option value="2">Yo`q</option>'
                             );
-                        }if (data.model.is_inps == 2) {
+                        }else {
                             $('#is_inps').html(
-                                '<option value="'+data.model.is_inps+'" selected>Organ hodimi (INPS yo`q)</option>'+
-                                '<option value="1">Tashkilot hodimi (INPS bor)</option>'+
-                                '<option value="3">Nafaqada (INPS yo`q)</option>'
+                                '<option value="'+data.model.is_inps+'" selected>Yo`q</option>'+
+                                '<option value="1">Bor</option>'
                             );
-                        } if (data.model.is_inps == 3) {
-                            $('#is_inps').html(
-                                '<option value="'+data.model.is_inps+'" selected>Nafaqada (INPS yo`q)</option>'+
-                                '<option value="1">Tashkilot hodimi (INPS bor)</option>'+
-                                '<option value="2">Organ hodimi (INPS yo`q)</option>'
+                        }
+
+                        if (data.model.document_type === '6'){
+                            $('#document_type').html(
+                                '<option value="'+data.model.document_type+'" selected>Passport</option>'+
+                                '<option value="0">ID karta</option>'
+                            );
+                        } else {
+                            $('#document_type').html(
+                                '<option value="'+data.model.document_type+'" selected>ID karta</option>'+
+                                '<option value="6">Passport</option>'
                             );
                         }
 
@@ -586,7 +604,7 @@
 
                     submitHandler: function (form) {
 
-                        var actionType = $('#btn-save').val();
+                        let actionType = $('#btn-save').val();
 
                         $('#btn-save').html('Sending..');
 
@@ -605,13 +623,12 @@
                                 var model =
                                     '<tr id="rowId_' + data.model.id + '">' +
                                     '<td>' + data.model.id + '</td>' +
-                                    '<td>' + data.loan_name + '</td>' +
+                                    '<td><span class="text-sm text-green">' + data.loan_name + '</span></td>' +
                                     '<td>' + data.model.iabs_number + '</td>' +
                                     '<td>' + data.model.claim_id + '</td>' +
                                     '<td>' + data.model.family_name +' '+data.model.name+' '+data.model.patronymic+ '</td>' +
-                                    '<td>' + formatCurrency(data.model.summa) + '</td>' +
-                                    '<td><span class="badge bg-yellow-active">Yangi</span></td>' +
-                                    '<td>' + formatCurrency(data.credit_debt) + '</td>';
+                                    '<td class="text-bold">' + formatCurrency(data.model.summa) + '</td>' +
+                                    '<td><span class="badge bg-yellow-active">Yangi</span></td>';
 
                                 model +=
                                     '<td>' +
@@ -638,7 +655,7 @@
                                     '</tr>';
 
 
-                                if (actionType == "createRole") {
+                                if (actionType === "createRole") {
 
                                     $('#roleTable').prepend(model);
 

@@ -1,5 +1,5 @@
 <?php ?>
-@extends('layouts.table')
+@extends('layouts.uw.dashboard')
 
 @section('content')
     <!-- Content Header (Page header) -->
@@ -66,79 +66,57 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <form role="form" method="POST" action="{{ url('admin/departments') }}">
+                        <form role="form" method="POST" action="{{ url('/departments') }}">
                             {{ csrf_field() }}
-                            @foreach(json_decode(Auth::user()->roles) as $role)
-                                @switch($role)
-                                    @case('admin')
-                                    <div class="form-group">
-                                        <label>Filial</label>
-                                        <select
-                                                id="filial_code"
-                                                class="form-control select2"
-                                                name="branch_code"
-                                                style="width: 100%;">
+                            <div class="form-group">
+                                <label>Filial</label>
+                                <select
+                                        id="filial_code"
+                                        class="form-control select2"
+                                        name="branch_code"
+                                        style="width: 100%;">
 
-                                            <option disabled selected value>Filialni tanlang</option>
-                                            @foreach($filial as $value)
-                                                <option value="{{$value->branch_code}}">{{$value->branch_code. ' - ' .$value->title}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group" id="departdiv" hidden>
-                                        <label>Departament</label>
-                                        <select
-                                                id="depart"
-                                                class="form-control select2"
-                                                name="parent_id"
-                                                style="width: 100%;">
+                                    <option disabled selected value>Filialni tanlang</option>
+                                    @foreach($filial as $value)
+                                        <option value="{{$value->branch_code}}">{{$value->branch_code. ' - ' .$value->title}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group" id="departdiv" hidden>
+                                <label>Departament</label>
+                                <select
+                                        id="depart"
+                                        class="form-control select2"
+                                        name="parent_id"
+                                        style="width: 100%;">
 
-                                            <option selected="selected" value=""></option>
-                                        </select>
-                                    </div>
+                                    <option selected="selected" value=""></option>
+                                </select>
+                            </div>
 
-                                    <div class="form-group" id="departdiv2" hidden>
-                                        <label>Sub Departament</label>
-                                        <select
-                                                id="sub_depart"
-                                                class="form-control select2"
-                                                name="parent_id"
-                                                style="width: 100%;">
+                            <div class="form-group" id="departdiv2" hidden>
+                                <label>Sub Departament</label>
+                                <select
+                                        id="sub_depart"
+                                        class="form-control select2"
+                                        name="parent_id"
+                                        style="width: 100%;">
 
-                                            <option selected="selected" value=""></option>
-                                        </select>
-                                    </div>
+                                    <option selected="selected" value=""></option>
+                                </select>
+                            </div>
 
-                                    <div class="form-group" id="departdiv3" hidden>
-                                        <label>Sub Sub Departament</label>
-                                        <select
-                                                id="sub_sub_depart"
-                                                class="form-control select2"
-                                                name="parent_id"
-                                                style="width: 100%;">
+                            <div class="form-group" id="departdiv3" hidden>
+                                <label>Sub Sub Departament</label>
+                                <select
+                                        id="sub_sub_depart"
+                                        class="form-control select2"
+                                        name="parent_id"
+                                        style="width: 100%;">
 
-                                            <option selected="selected" value=""></option>
-                                        </select>
-                                    </div>
-
-                                    @break
-                                    @case('branch_admin')
-                                    <div class="form-group">
-                                        <label>Filial MFO</label>
-                                        <input type="text" name="branch_code" class="form-control"
-                                               value="{{Auth::user()->branch_code}}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Bo`limni tanlang</label>
-                                        <select class="form-control select2" name="depart_id" style="width: 100%;">
-                                            @foreach($departments as $department)
-                                                <option value="{{$department->id}}">{{$department->title}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @break
-                            @endswitch
-                        @endforeach
+                                    <option selected="selected" value=""></option>
+                                </select>
+                            </div>
                         <!-- /.form-group -->
                             <div class="form-group">
                                 <label>Title</label>
@@ -148,6 +126,11 @@
                             <div class="form-group">
                                 <label>Title Ru</label>
                                 <input type="text" name="title_ru" class="form-control" placeholder="Enter title Ru">
+                            </div>
+                            <!-- /.form-group -->
+                            <div class="form-group">
+                                <label>Local Code</label>
+                                <input type="text" name="local_code" class="form-control" placeholder="Local Code">
                             </div>
                             <!-- /.form-group -->
                             <div class="form-group">

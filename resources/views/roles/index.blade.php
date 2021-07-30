@@ -70,19 +70,6 @@
                             </thead>
                             <tbody id="roleTable">
                             <?php $i = 1 ?>
-                            {{--@foreach($result['rows'] as $key => $model)
-                                <tr>
-                                    <td>{{ $model->LOAN_ID }}</td>
-                                    <td>{{ $model->CLIENT_NAME }}</td>
-                                    <td>{{ $model->LN_STATUS_NAME }}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            @endforeach--}}
                                 @foreach ($roles as $key => $model)
                                     <tr id="rowId_{{ $model->id }}">
                                         <td>{{ $i++ }}</td>

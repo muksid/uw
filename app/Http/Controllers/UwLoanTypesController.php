@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Department;
 use App\Filials;
 use App\UwClients;
 use App\UwLoanBank;
@@ -57,13 +58,13 @@ class UwLoanTypesController extends Controller
 
         $checkedBanks = UwLoanBank::where('loan_types_id', $id)->get();
 
-        $enableBanks = $checkedBanks->implode('filials_id', ',');
+        $enableBanks = $checkedBanks->implode('depart_id', ',');
 
         $enableBanks = explode(',', $enableBanks);
 
-        $checkedModel = Filials::whereIn('id', $enableBanks)->get();
+        $checkedModel = Department::whereIn('id', $enableBanks)->get();
 
-        $model = Filials::whereNotIn('id', $enableBanks)->where('parent_id', 0)->get();
+        $model = Department::whereNotIn('id', $enableBanks)->where('parent_id', 0)->get();
 
 
         return response()->json(['model' => $model, 'checkedModel' => $checkedModel, 'enableBanks' => $enableBanks, 'loanName' => $loanName]);
@@ -89,6 +90,7 @@ class UwLoanTypesController extends Controller
                 $model = new UwLoanBank();
                 $model->loan_types_id = $loan_id;
                 $model->filials_id = $filial;
+                $model->depart_id = $filial;
                 $model->isActive = 1;
                 $model->save();
             }

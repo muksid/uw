@@ -14,16 +14,4 @@ class Role extends Model
         'role_code'
     ];
 
-    /**
-
-     * Get the index name for the model.
-
-     *
-
-     * @return string
-
-     */
-
-
-
 }

@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Department;
+use App\MWorkUsers;
 use App\UnDistricts;
 use App\UnRegions;
 use App\UwClientComments;
 use App\UwClientFiles;
 use App\UwClientGuars;
 use App\UwClients;
+use App\UwGuarType;
 use App\UwLoanTypes;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UwCreateClientsController extends Controller
 {
@@ -23,26 +28,45 @@ class UwCreateClientsController extends Controller
     public function index(Request $request)
     {
         //
-        $filial = DB::table('uw_users as a')
+        /*$filial = DB::table('uw_users as a')
             ->leftJoin('filials as b', 'a.filial_id', '=', 'b.id')
-            ->where('a.user_id', Auth::id())
+            ->where('a.user_id', Auth::user()->old_user_id)
             ->where('a.status', 1)
             ->select('b.parent_id')
-            ->first();
+            ->first();*/
 
-        $models = UwLoanTypes::whereHas('banks',
-            function ($query) use ($filial) {
-                $query->where('filials_id', $filial->parent_id);
+        function ftp_file_exists(){
+
+            $ftp_server = "172.16.1.233";
+            $ftp_user = "Muksid";
+            $ftp_pass = "TuR0N09011!@#$";
+
+            $conn_id = ftp_connect($ftp_server) or die("Couldn't connect to $ftp_server");
+
+            if (@ftp_login($conn_id, $ftp_user, $ftp_pass)) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        $depart = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+
+        $models = UwLoanTypes::with('banks')
+            ->whereHas('banks',
+            function ($query) use ($depart) {
+                $query->where('depart_id', $depart->gen_dep_id);
                 $query->where('isActive', 1);
             })
             ->where('short_code', 'M')
             ->where('isActive', 1)
             ->orderBy('id', 'DESC')
             ->get();
+        //print_r($models); die;
 
         //$request->session()->forget('model');
 
-        $loan_models = UwLoanTypes::get()->unique('credit_type');
+        $loan_models = UwLoanTypes::where('short_code', '!=', 'J')->get()->unique('credit_type');
 
         return view('uw/create-clients/.index',compact('models', 'loan_models'));
     }
@@ -59,19 +83,22 @@ class UwCreateClientsController extends Controller
         {
             $output="";
             //$models = UwLoanTypes::where('credit_type', $request->credit_type)->where('isActive', 1)->get();
-            $filial = DB::table('uw_users as a')
+            /*$filial = DB::table('uw_users as a')
                 ->leftJoin('filials as b', 'a.filial_id', '=', 'b.id')
                 ->where('a.user_id', Auth::id())
                 ->where('a.status', 1)
                 ->select('b.parent_id')
-                ->first();
+                ->first();*/
+
+            $depart = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
 
             $models = UwLoanTypes::whereHas('banks',
-                function ($query) use ($filial) {
-                    $query->where('filials_id', $filial->parent_id);
+                function ($query) use ($depart) {
+                    $query->where('depart_id', $depart->gen_dep_id);
                     $query->where('isActive', 1);
                 })
                 ->where('credit_type', $request->credit_type)
+                ->where('short_code', '!=', 'J')
                 ->where('isActive', 1)
                 ->orderBy('id', 'DESC')
                 ->get();
@@ -121,7 +148,7 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-'.$blade.'-step-one',compact('model','regions', 'districts', 'loan'));
+        return view('uw.create-clients.create-i-step-one',compact('model','regions', 'districts', 'loan'));
     }
 
     /**
@@ -147,7 +174,7 @@ class UwCreateClientsController extends Controller
             'document_number' => 'required',
             'document_date' => 'required',
             'pin' => 'required',
-            'inn' => 'required',
+            //'inn' => 'required',
             'is_inps' => 'required',
             'registration_address' => 'required',
             'live_number' => 'required',
@@ -183,7 +210,7 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-'.$blade.'-step-two',compact('model', 'id', 'loan'));
+        return view('uw.create-clients.create-i-step-two',compact('model', 'id', 'loan'));
     }
 
     /**
@@ -219,7 +246,7 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-'.$blade.'-step-three',compact('model', 'id', 'loan'));
+        return view('uw.create-clients.create-i-step-three',compact('model', 'id', 'loan'));
     }
 
     /**
@@ -230,13 +257,21 @@ class UwCreateClientsController extends Controller
     public function postCreateStepThree(Request $request)
     {
         //
+        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+        if (!$currentWorkUser){
+            return back()->with(
+                [
+                    'status' => 'warning',
+                    'message' => 'Inspektor passive holatda!!! (ip:247)'
+                ]);
+        }
         $model = $request->session()->get('model');
 
         $inn = preg_replace('/[^A-Za-z0-9]/', '', $model->inn);
         $checkModel = UwClients::where(
             function ($query) use ($model, $inn) {
                 $query->orWhere('pin', $model->pin)
-                    ->orWhere('inn', $inn)
+                    //->orWhere('inn', $inn)
                     ->orWhere(DB::raw("CONCAT(`document_serial`,`document_number`)"), $model->document_serial.$model->document_serial);
             })
             ->where(function ($status){
@@ -248,7 +283,8 @@ class UwCreateClientsController extends Controller
         $str_summa = str_replace(',', '.', $model->summa);
         $summa = str_replace(' ', '', $str_summa);
 
-        $branchCode = Auth::user()->branch_code;
+        $branchCode = $currentWorkUser->branch_code;
+        $localCode = Department::find($currentWorkUser->depart_id);
 
         $lastModelId = UwClients::where('branch_code', '=', $branchCode)->latest()->first();
 
@@ -256,8 +292,9 @@ class UwCreateClientsController extends Controller
 
         $claim_number = $lastModelId->claim_number + 1;
         $claim_id = '1'.$branchCode.$claim_number;
-        $model->user_id = Auth::id();
+        $model->work_user_id = $currentWorkUser->id;
         $model->branch_code = $branchCode;
+        $model->local_code = $localCode->local_code;
         $model->claim_id = $claim_id;
         $model->claim_date = today();
         $model->claim_number = $claim_number;
@@ -279,7 +316,7 @@ class UwCreateClientsController extends Controller
             return back()->with(
                 [
                     'status' => 'warning',
-                    'message' => 'Mijoz tizimda mavjud Risk Adminstratorga murojaat qiling!!! (ip:247)',
+                    'message' => 'Mijoz tizimda mavjud Anderrayterga murojaat qiling!!! (ip:247,268,246)',
                     'data' => $checkModel,
                 ]);
         }
@@ -306,7 +343,7 @@ class UwCreateClientsController extends Controller
         //
         $model = UwClients::find($id);
 
-        $blade = mb_strtolower($model->loanType->short_code);
+        $blade = mb_strtolower($model->loanType->short_code??'');
 
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
@@ -321,7 +358,7 @@ class UwCreateClientsController extends Controller
             $sch_type_a = 'checked';
         }
 
-        return view('uw.create-clients.create-'.$blade.'-step-result',compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
+        return view('uw.create-clients.create-i-step-result',compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
     }
 
     /**
@@ -343,7 +380,7 @@ class UwCreateClientsController extends Controller
 
             return datatables()->of(UwClientGuars::where('uw_clients_id', $id)->get())
                 ->addColumn('action', function($data) use ($disabled) {
-                    $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-post '.$disabled.'">
+                    $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-guar '.$disabled.'">
 <span class="glyphicon glyphicon-pencil"></span></a>';
                     $button .= '&nbsp;&nbsp;';
                     $button .= ' | <a href="javascript:void(0);" id="delete-post" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
@@ -364,16 +401,19 @@ class UwCreateClientsController extends Controller
     public function createClientGuar(Request $request)
     {
         //
+        $id = $request->model_id;
         $postId = $request->post_id;
+
+        $model = UwClients::find($id);
 
         $post = UwClientGuars::updateOrCreate(['id' => $postId],
             [
-                'uw_clients_id' => $request->model_id,
-                'claim_id' => $request->claim_id,
+                'uw_clients_id' => $model->id,
+                'claim_id' => $model->claim_id,
                 'guar_type' => $request->guar_type,
                 'title' => $request->title,
-                'address' => $request->address,
-                'guar_owner' => $request->guar_owner,
+                //'address' => $request->address,
+                //'guar_owner' => $request->guar_owner,
                 'guar_sum' => $request->guar_sum
             ]);
 
@@ -393,9 +433,11 @@ class UwCreateClientsController extends Controller
     public function editClientGuar($id)
     {
         //
-        $post  = UwClientGuars::find($id);
+        $model  = UwClientGuars::find($id);
 
-        return response()->json($post);
+        $guarTypes = UwGuarType::where('isActive', 1)->get();
+
+        return response()->json(['model' => $model, 'guarTypes' => $guarTypes]);
 
     }
 
@@ -479,15 +521,24 @@ class UwCreateClientsController extends Controller
 
         $modelFile = new UwClientFiles();
 
+        $today = Carbon::today();
+        $year = $today->year;
+        $month = $today->month;
+        $day = $today->day;
+        $path = 'uw/phy/files/'.$year.'/'.$month.'/'.$day.'/';
+
         $modelFile->uw_client_id = $model_id;
+
+        $modelFile->file_path = $path;
 
         $modelFile->file_hash = $model_id . '_' . Auth::id() . '_' . date('dmYHis') . uniqid() . '.'
             . $file->getClientOriginalExtension();
 
         $modelFile->file_size = $file->getSize();
 
-        $file->move(public_path() . '/uwFiles/', $modelFile->file_hash);
-        //Storage::disk('disk_edo_123')->put('/uwFiles/'.$modelFile->file_hash, file_get_contents($file->getRealPath()));
+        //$file->move(public_path() . '/uwFiles/', $modelFile->file_hash);
+
+        Storage::disk('ftp_nas')->put($path.$modelFile->file_hash, file_get_contents($file->getRealPath()));
 
         $modelFile->file_name = $file->getClientOriginalName();
 
@@ -509,15 +560,10 @@ class UwCreateClientsController extends Controller
         //
         $model = UwClientFiles::find($id);
 
-        $file_path = public_path().'/uwFiles/'.$model->file_hash;
-        if(file_exists($file_path)){
-            unlink($file_path);
+        if (Storage::disk('ftp_nas')->exists($model->file_path.$model->file_hash)){
+
+            Storage::disk('ftp_nas')->delete($model->file_path.$model->file_hash);
         }
-
-        /*if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
-
-            Storage::disk('disk_edo_123')->delete('/uwFiles/'.$model->file_hash);
-        }*/
 
         $model->delete();
 

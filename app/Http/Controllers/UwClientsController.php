@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Department;
+use App\MWorkUsers;
 use App\UnDistricts;
 use App\UnRegions;
 use App\User;
 use App\UwClientComments;
-use App\UwClientCredits;
 use App\UwClientFiles;
 use App\UwClients;
 use App\UwInpsClients;
@@ -58,13 +59,24 @@ class UwClientsController extends Controller
     public function CsIndex($status)
     {
         //
-        UwUsers::where('user_id', Auth::id())->where('status', 1)->firstorFail();
+        $currentWorkUser = MWorkUsers::with('department')->where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
-        $models = UwClients::where('branch_code', Auth::user()->branch_code)
-            ->where('user_id', Auth::id())
-            ->where('status', $status)
-            ->orderBy('id', 'DESC')
-            ->get();
+        $models = UwClients::where('id', 0)->get();
+        if ($currentWorkUser){
+            $user = MWorkUsers::where('user_id', Auth::id())->get()->pluck('id');
+            $workUserIds = $user->toArray();
+
+            $local_code_id = $currentWorkUser->department->id;
+
+            $local_code = Department::find($local_code_id);
+
+            $models = UwClients::where('branch_code', $local_code->branch_code)
+                ->where('local_code', $local_code->local_code)
+                ->whereIn('work_user_id', $workUserIds)
+                ->where('status', $status)
+                ->orderBy('id', 'DESC')
+                ->get();
+        }
 
         return view('uw.uw-clients.index', compact('models'));
     }
@@ -72,7 +84,7 @@ class UwClientsController extends Controller
     public function riskAdminIndex($status)
     {
         //
-        UwUsers::where('user_id', Auth::id())->where('status', 1)->firstorFail();
+        //UwUsers::where('user_id', Auth::id())->where('status', 1)->firstorFail();
 
         $search = UwClients::where('status', $status);
 
@@ -81,7 +93,7 @@ class UwClientsController extends Controller
         $d = Input::get ( 'd' );
 
         if($u) {
-            $search->where('user_id', $u);
+            $search->where('work_user_id', $u);
         }
 
         if($t) {
@@ -110,9 +122,9 @@ class UwClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = UwUsers::select('user_id', 'filial_id')->where('role_id', 18)->get();
+        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
 
-        $searchUser = User::select('id', 'fname', 'lname', 'branch_code')->where('id', $u)->first();
+        $searchUser = MWorkUsers::find($u);
 
         return view('uw.uw-clients.risk-admin-index',compact('models','u','t','d','users','searchUser','status'));
     }
@@ -127,7 +139,7 @@ class UwClientsController extends Controller
         $d = Input::get ( 'd' );
 
         if($u) {
-            $search->where('user_id', $u);
+            $search->where('work_user_id', $u);
         }
 
         if($t) {
@@ -154,9 +166,9 @@ class UwClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = UwUsers::select('user_id', 'filial_id')->where('role_id', 18)->get();
+        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
 
-        $searchUser = User::select('id', 'fname', 'lname', 'branch_code')->where('id', $u)->first();
+        $searchUser = MWorkUsers::find($u);
 
         return view('uw.uw-clients.super-admin-index',compact('models','u','t','d','users','searchUser'));
 
@@ -170,8 +182,8 @@ class UwClientsController extends Controller
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
         $duplicateClients = UwClients::where('id', '!=', $model->id)
-            ->where('inn', '=',$model->inn)
-            ->orWhere(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->document_serial.$model->document_serial)
+            ->where('pin', '=',$model->pin)
+            ->where(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->document_serial.$model->document_serial)
             ->get();
 
         $sch_type_d = 'checked';
@@ -240,10 +252,11 @@ class UwClientsController extends Controller
         // Risk admin comments
         $modelComment = new UwClientComments();
         $modelComment->uw_clients_id = $id;
-        $modelComment->user_id = Auth::id();
+        $modelComment->work_user_id = Auth::user()->currentWork->id??0;
         $modelComment->claim_id = $model->claim_id;
-        $modelComment->title = 'Confirmed';
+        $modelComment->title = 'Anderrayter tomonidan tasdiqlangan';
         $modelComment->comment_type = 3;
+        $modelComment->process_type = 'CONF';
         $modelComment->save();
 
         return response()->json(array('success' => true, 'msg' => $id));
@@ -262,10 +275,11 @@ class UwClientsController extends Controller
         // Risk admin comments
         $modelComment = new UwClientComments();
         $modelComment->uw_clients_id = $id;
-        $modelComment->user_id = Auth::id();
+        $modelComment->work_user_id = Auth::user()->currentWork->id??0;
         $modelComment->claim_id = $model->claim_id;
         $modelComment->title = $descr;
         $modelComment->comment_type = 1;
+        $modelComment->process_type = 'CANC';
         $modelComment->save();
 
         return response()->json(array('success' => true));
@@ -323,6 +337,7 @@ class UwClientsController extends Controller
         $model = UwClients::updateOrCreate(['id' => $row_id],
             [
                 'inn' => $request->inn,
+                'document_type' => $request->document_type,
                 'document_serial' => $request->document_serial,
                 'document_number' => $request->document_number,
                 'document_date' => $document_date,
@@ -343,8 +358,7 @@ class UwClientsController extends Controller
 
         return response()->json([
             'model' => $model,
-            'credit_debt' => $model->katm->katm_summ?? 0,
-            'loan_name' => $model->loanType->title,
+            'loan_name' => $model->loanType->title??'-',
         ]);
     }
 
@@ -366,7 +380,7 @@ class UwClientsController extends Controller
         $model->update([
             'status' => $request->status,
             'reg_status' => $request->reg_status,
-            'user_id' => $request->cs_user_id
+            'work_user_id' => $request->cs_user_id
         ]);
 
         // update katm
@@ -385,9 +399,11 @@ class UwClientsController extends Controller
         $comment = new UwClientComments();
         $comment->uw_clients_id = $model->id;
         $comment->claim_id = $model->claim_id;
-        $comment->user_id = Auth::id();
-        $comment->title = json_encode($request->all());
+        $comment->work_user_id = Auth::user()->currentWork->id??0;
+        $comment->title = 'Client status updated';
+        $comment->json_data = json_encode($request->all());
         $comment->comment_type = $request->status;
+        $comment->process_type = 'UPD';
         $comment->save();
 
         return response()->json([
@@ -410,12 +426,16 @@ class UwClientsController extends Controller
 
         $modelLoanType = UwLoanTypes::where('isActive', 1)->get();
 
-        $csUsers = DB::table('uw_users')
-            ->join('filials', 'uw_users.filial_id', '=', 'filials.id')
-            ->join('users', 'uw_users.user_id', '=', 'users.id')
-            ->select('users.id as user_id',
-                DB::raw('CONCAT(users.lname," ", users.fname) AS full_name'),
-                'filials.filial_code as filial_code', 'filials.title as filial_name')
+        $csUsers = DB::table('users')
+            ->join('m_personal_users', 'users.id', '=', 'm_personal_users.user_id')
+            ->join('m_work_users', 'users.id', '=', 'm_work_users.user_id')
+            ->join('departments', 'm_work_users.depart_id', '=', 'departments.id')
+            ->select('m_work_users.id as work_user_id',
+                DB::raw('CONCAT(m_personal_users.l_name," ", m_personal_users.f_name) AS full_name'),
+                'm_work_users.branch_code as filial_code', 'departments.title as filial_name')
+            ->where('users.status', '=',1)
+            ->where('users.isUw','=', 1)
+            ->where('m_work_users.isActive', '=','A')
             ->get();
 
         return response()->json([
@@ -725,7 +745,6 @@ class UwClientsController extends Controller
         }
     }
 
-
     public function postInps($model_id, $claim_id)
     {
 
@@ -934,7 +953,6 @@ class UwClientsController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
@@ -1040,26 +1058,26 @@ class UwClientsController extends Controller
     public function downloadFile($file){
 
         $model = UwClientFiles::find($file);
-        $file= public_path(). "/uwFiles/".$model->file_hash;
 
         $headers = array(
             'Content-Type: application/octet-stream',
         );
 
-        if(file_exists(public_path() . "/uwFiles/" . $model->file_hash)){
+        /*if(file_exists(public_path() . "/uwFiles/" . $model->file_hash)){
 
+            $file= public_path(). "/uwFiles/".$model->file_hash;
             return Response::download($file, $model->file_name);
 
         } else {
 
             return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
-        }
-
-        /*if (Storage::disk('disk_edo_123')->exists('/uwFiles/'.$model->file_hash)){
-
-            return Storage::disk('disk_edo_123')->download('/uwFiles/'.$model->file_hash, $model->file_name, $headers);
-
         }*/
+
+        if (Storage::disk('ftp_nas')->exists($model->file_path.$model->file_hash)){
+
+            return Storage::disk('ftp_nas')->download($model->file_path.$model->file_hash, $model->file_name, $headers);
+
+        }
 
         return back();
 
@@ -1350,16 +1368,17 @@ class UwClientsController extends Controller
 
         $clientComment = new UwClientComments();
         $clientComment->uw_clients_id = $id;
-        $clientComment->user_id = Auth::id();
+        $clientComment->work_user_id = Auth::user()->currentWork->id??0;
         $clientComment->claim_id = $model->claim_id;
-        $clientComment->title = '(code:'.$code.' - result:'.$result.') '.$resultMessage;
+        $clientComment->code = $code;
+        $clientComment->title = '(result:'.$result.') '.$resultMessage;
         $clientComment->comment_type = '-1';
+        $clientComment->process_type = 'DEL';
         $clientComment->katm_type = 0;
+        $clientComment->json_data = $result;
         $clientComment->save();
 
         return response()->json(['success'=>'Client Deleted successfully','message' => $resultMessage]);
-
-
     }
 
     public function destroyFile($id)

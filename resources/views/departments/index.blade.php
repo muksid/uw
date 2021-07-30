@@ -1,4 +1,4 @@
-@extends('layouts.table')
+@extends('layouts.uw.dashboard')
 
 @section('content')
 
@@ -51,6 +51,7 @@
                                 <th>#</th>
                                 <th>Branch name</th>
                                 <th>Title</th>
+                                <th>Local Code</th>
                                 <th>Status</th>
                                 <th>Created</th>
                                 <th><i class="fa fa-eye text-green"></i></th>
@@ -71,6 +72,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $department->title }}</td>
+                                    <td>{{ $department->local_code }}</td>
                                     <td>
                                         @if($department->status == 1)
                                             <i class="fa fa-check-circle text-green"></i>
@@ -80,12 +82,12 @@
                                             <i class="fa fa-ban text-yellow"></i>
                                         @endif
                                     </td>
-                                    <td>{{ $department->created_at }}</td>
+                                    <td>{{ $department->created_at->format('d.m.Y') }}</td>
                                     <td>
                                         <a href="{{ route('departments.show', $department->id) }}"><i class="fa fa-eye text-green"></i></a>
                                     </td>
                                     <td>
-                                        <a href="{{ route('departments.edit', $department->id) }}"><i class="fa fa-pencil"></i></a>
+                                        <a class="btn btn-flat btn-primary" href="{{ route('departments.edit', $department->id) }}"><i class="fa fa-pencil"></i></a>
                                     </td>
                                     <td>
                                         <form action="{{ url('departments/'.$department->id) }}" method="POST" style="display: inline-block">

@@ -193,7 +193,7 @@
     <script>
         $(function () {
 
-            $('#messageModal').modal('show');
+            $('#messageModal').modal('hide');
 
         });
     </script>

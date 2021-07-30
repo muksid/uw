@@ -10,11 +10,12 @@
     "require": {
         "php": "^7.1.3",
         "ext-curl": "*",
+        "ext-ftp": "*",
+        "ext-json": "*",
         "fideloper/proxy": "^4.0",
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
-        "yajra/laravel-datatables-oracle": "^9.15",
-      "ext-json": "*"
+        "yajra/laravel-datatables-oracle": "^9.15"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
