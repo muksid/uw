@@ -177,7 +177,7 @@ class UwJuridicalClientsController extends Controller
 
         $searchUser = MWorkUsers::find($u);
 
-        return view('jur.ins.all-clients',
+        return view('jur.uw.all-clients',
             compact('models','u','t','d','users','searchUser'));
 
     }
@@ -309,13 +309,16 @@ class UwJuridicalClientsController extends Controller
 
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        } elseif ($type == 'hr'){
+        } elseif ($type == 'emp'){
+            $emp_code = $array['emp_code'];
             $query = "
-            select * from hr_emps a
-            where 1=1 and a.condition = 'A'
-            order by a.creation_date desc
+            select a.*,b.department_code,c.department_name,d.begin_date as begin_work_date,d.work_dep,d.work_post 
+            from hr_emps a, hr_staffing b, hr_s_departments c, hr_emp_works d
+            where 1=1 and A.CONDITION != 'P' and a.staffing_id = b.staffing_id and b.department_code = c.code 
+            and a.emp_id = d.emp_id 
+            and d.work_now = 'Y' 
+            and (a.emp_id like '".$emp_code."' or upper(a.last_name|| ' ' || a.first_name|| ' ' || a.middle_name) like '%".$emp_code."%')            
             ";
-
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
         }
@@ -353,6 +356,22 @@ class UwJuridicalClientsController extends Controller
         $type = 'cc';
 
         $array = array('client_code' => $client_code, 'type' => $type);
+
+        $data = $this->curlHttpPost($array);
+
+        $models = json_decode($data);
+
+        return response()->json($models);
+    }
+
+    public function getOraEmpSearch(Request $request)
+    {
+        //
+        $client_code = $request->input('emp_code');
+
+        $type = 'emp';
+
+        $array = array('emp_code' => $client_code, 'type' => $type);
 
         $data = $this->curlHttpPost($array);
 

@@ -13,9 +13,6 @@ class UwKatmClients extends Model
         'summa',
         'scoring_ball',
         'status',
-        'katm_score',
-        'katm_tb',
-        'json_data',
         'isVersion'
     ];
 }

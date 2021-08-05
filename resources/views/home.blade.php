@@ -1,10 +1,7 @@
-@extends('layouts.uw.dashboard')
+@extends('layouts.dashboard')
 
 @section('content')
 
-    <!-- TRANSLATED -->
-
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
             @lang('blade.user')
@@ -12,8 +9,8 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}"><i class="fa fa-dashboard"></i> @lang('blade.home_page')</a></li>
-            <li><a href="#">@lang('blade.user')</a></li>
-            <li class="active">@lang('blade.panel')</li>
+            <li><a href="#">@lang('blade.panel')</a></li>
+            <li class="active">home</li>
         </ol>
         @if (count($errors) > 0)
             <div class="alert alert-danger">
@@ -46,35 +43,6 @@
         <!-- Main row -->
         <div class="row">
             <!-- Left col -->
-
-            <div class="modal fade" id="messageModal" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-blue-gradient">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title">Message</h4>
-                        </div>
-                        <div class="modal-body">
-                            <h4 class="text-maroon text-center"><span class="fa fa-desktop"></span>
-                                Anderrayting dasturi <b>"2021-YIL 1 IYUL"</b> dan ushbu ip manziliga o'tkaziladi&hellip;
-                            </h4>
-                            <h5>Ushbu ip manzillarni filial (BXO)larda tekshiring <b>(ma'lumot uchun ip:153)</b></h5>
-                            <ul>
-                                <li><span class="fa fa-hand-o-right"></span> <a href="http://172.16.1.123:8088" target="_blank">172.16.1.123:8088</a> (192 lik)</li><br>
-                                <li><span class="fa fa-hand-o-right"></span> <a href="http://uw.turonbank.uz:8088/login" target="_blank">uw.turonbank.uz:8088</a> (domain da)</li><br>
-                                <li><span class="fa fa-hand-o-right"></span> <a href="http://10.11.48.77:8088" target="_blank">10.11.48.77:8088</a> (10 link)</li>
-                            </ul>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary pull-left" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                    <!-- /.modal-content -->
-                </div>
-                <!-- /.modal-dialog -->
-            </div>
-
             <section class="col-lg-5 connectedSortable">
                 <div class="box box-primary">
                     <div class="box-header">
@@ -106,7 +74,8 @@
 
                                 <span class="text">@lang('blade.overdue')</span>
 
-                                <small class="label label-danger"><i class="fa fa-clock-o"></i> 2 @lang('blade.minute')</small>
+                                <small class="label label-danger"><i class="fa fa-clock-o"></i> 2 @lang('blade.minute')
+                                </small>
 
                                 <div class="tools">
                                     <i class="fa fa-edit"></i>
@@ -124,7 +93,8 @@
 
                                 <span class="text">@lang('blade.term')</span>
 
-                                <small class="label label-info"><i class="fa fa-clock-o"></i> 4 @lang('blade.hour')</small>
+                                <small class="label label-info"><i class="fa fa-clock-o"></i> 4 @lang('blade.hour')
+                                </small>
 
                                 <div class="tools">
                                     <i class="fa fa-edit"></i>
@@ -160,7 +130,8 @@
                     <div class="box-body">
                         <form action="#" method="post">
                             <div class="form-group">
-                                <input type="text" class="form-control" name="subject" placeholder="@lang('blade.subject')">
+                                <input type="text" class="form-control" name="subject"
+                                       placeholder="@lang('blade.subject')">
                             </div>
                             <div>
                                     <textarea class="textarea" placeholder="@lang('blade.text')"
@@ -180,21 +151,4 @@
 
     </section>
     <!-- /.content -->
-
-    <!-- jQuery 2.2.3 -->
-    <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-
-    <!-- AdminLTE App -->
-    <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-    <!-- jQuery UI 1.11.4 -->
-    <script src="{{ asset ("/admin-lte/dist/js/jquery-ui.min.js") }}"></script>
-
-    <script>
-        $(function () {
-
-            $('#messageModal').modal('hide');
-
-        });
-    </script>
 @endsection

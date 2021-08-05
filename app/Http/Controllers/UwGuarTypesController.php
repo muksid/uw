@@ -21,7 +21,7 @@ class UwGuarTypesController extends Controller
         //
         $models = UwGuarType::all();
 
-        return view('guar-types.index', compact('models'));
+        return view('madmin.guar-types.index', compact('models'));
     }
 
     /**
@@ -31,7 +31,7 @@ class UwGuarTypesController extends Controller
     public function create()
     {
         //
-        return view('guar-types.create');
+        return view('madmin.guar-types.create');
     }
 
     /**
@@ -63,7 +63,7 @@ class UwGuarTypesController extends Controller
             $model->isActive = $request->isActive;
             $model->save();
 
-            return Redirect::to(route('uw-guar-type.index'))->with('success', 'Ta`minot turi qo`shildi');
+            return Redirect::to(route('guar-type.index'))->with('success', 'Ta`minot turi qo`shildi');
         }
     }
 
@@ -95,7 +95,7 @@ class UwGuarTypesController extends Controller
         //
         $model = UwGuarType::findOrFail($id);
 
-        return view('guar-types.edit', compact('model'));
+        return view('madmin.guar-types.edit', compact('model'));
     }
 
     /**
@@ -125,7 +125,7 @@ class UwGuarTypesController extends Controller
             $model = UwGuarType::find($id);
             $model->update($request);
 
-            return Redirect::to(route('uw-guar-type.index'))
+            return Redirect::to(route('guar-type.index'))
                 ->with('success', 'Ta`minot turi yangilandi');
         }
     }

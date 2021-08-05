@@ -1,4 +1,4 @@
-@extends('layouts.uw.dashboard')
+@extends('uw_log.uw.dashboard')
 
 @section('content')
 

@@ -7,25 +7,21 @@ use App\MCoreMenu;
 
 class MCoreMenusController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         //
         $models = MCoreMenu::orderBy('created_at', 'DESC')->paginate(25);
 
-        @include('count_message.php');
-
-        return view('control.menus.m-core-menus', compact('models'))->with('i', (request()->input('page', 1) - 1) * 50);
+        return view('madmin.menus.m-core-menus',
+            compact('models'))->with('i', (request()->input('page', 1) - 1) * 50);
     }
 
     public function search(Request $request)
     {
-        # code...
+        //
         $input = $request->input('input');
+
         $models = MCoreMenu::where('title', 'like', '%'.$input.'%')
             ->orWhere('lang_code', 'like', '%'.$input.'%')
             ->orWhere('icon_code', 'like', '%'.$input.'%')
@@ -35,9 +31,9 @@ class MCoreMenusController extends Controller
 
         $models->appends ( array ('input' => $input) );
 
-        @include('count_message.php');
-
-        return view('control.menus.m-core-menus', compact('models','input','inbox_count','sent_count','all_inbox_count'))->with('i', (request()->input('page', 1) - 1) * 50);
+        return view('madmin.menus.m-core-menus',
+            compact('models','input'))
+            ->with('i', (request()->input('page', 1) - 1) * 50);
     }
 
     /**

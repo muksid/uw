@@ -16,7 +16,6 @@ class UwLoanTypesController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -42,7 +41,7 @@ class UwLoanTypesController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-        return view('uw/loan-types.index');
+        return view('madmin.loan-types.index');
     }
 
     /**

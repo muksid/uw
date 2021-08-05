@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('uw_log.app')
 
 @section('content')
 <div class="container">

@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Message;
 use Illuminate\Http\Request;
 
 use App\User;
 use App\Role;
 use App\Department;
-use App\MessageUsers;
 use App\MWorkUsers;
 use App\MPersonalUsers;
 use App\MUserRoles;
@@ -19,110 +17,49 @@ use Illuminate\Support\Facades\Input;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-
-    public function getTest()
-    {
-        //MUserRoles::where('user_id', '!=', 3633)->delete();
-        /*us  = MWorkUsers::all();
-        foreach ($us as $u){
-            $role  = new MUserRoles();
-            $role->user_id = $u->id;
-            $role->role_id = 2;
-            $role->isActive = 'A';
-            $role->save();
-        }*/
-        print_r('test'); die;
-        /*$db_ext = DB::connection('mysql_uw');
-        $on_uw = $db_ext->table('users')->get();
-        foreach ($on_uw as $value){
-            $new_user = User::where('username', $value->username)->first();
-            $new_user->update(['old_user_id' => $value->id]);
-        }*/
-
-        //print_r($on_uw); die;
-        /*MWorkUsers::where('user_id', '!=', 1600)->delete();
-        foreach ($on_uw as $value){
-            $new_user = new MWorkUsers();
-            $dep = Department::find($value->depart_id);
-            if ($dep){
-                $dep1 = $dep->depart_id;
-            } else{
-                $dep1 = 0;
-            }
-            $new_user->user_id = $value->id;
-            $new_user->branch_code = $value->branch_code;
-            $new_user->tab_num = $value->card_num;
-            $new_user->gen_dep_id = $dep1;
-            $new_user->depart_id = $value->depart_id;
-            $new_user->job_title = $value->job_title;
-            $new_user->date_begin = $value->created_at;
-            $new_user->sort = 0;
-            $new_user->isActive = 'A';
-            $new_user->save();
-        }*/
-        /*MPersonalUsers::where('user_id', '!=', 1600)->delete();
-        foreach ($on_uw as $value){
-            $new_user = new MPersonalUsers();
-            $new_user->user_id = $value->id;
-            $new_user->f_name = $value->fname;
-            $new_user->l_name = $value->lname;
-            $new_user->m_name = $value->sname;
-            $new_user->email = $value->email;
-            $new_user->save();
-        }*/
-        //$on_uw = $db_ext->table('users')->get();
-        /*User::where('id', '!=', 1600)->delete();
-        foreach ($on_uw as $value){
-         $new_user = new User();
-         $new_user->username = $value->username;
-         $new_user->email = $value->username;
-         $new_user->password = $value->password;
-         $new_user->remember_token = $value->remember_token;
-         $new_user->status = $value->status;
-         $new_user->created_at = $value->created_at;
-         $new_user->updated_at = $value->updated_at;
-         $new_user->last_login = $value->last_login;
-         $new_user->last_login_ip = $value->last_login_ip;
-         $new_user->isUw = 0;
-         $new_user->save();
-        }*/
-    }
 
     public function index(Request $request)
     {
         $filials = Department::where('parent_id', 0)->where('status', 1)->orderBy('branch_code', 'ASC')->get();
 
-        /*$models = User::with('personal', 'currentWork')
-            ->orderBy('isUw','DESC')
-            ->orderBy('created_at','DESC')
-            ->paginate(20);
-
-        return view('users.index', compact('models', 'filials'));*/
+        $roles = Role::all();
 
         $search = User::orderBy('id', 'DESC');
 
         $u = Input::get ( 'u' );
         $t = Input::get ( 't' );
         $uw = Input::get ( 'uw' );
+        $r = Input::get ( 'r' );
 
         if($u) {
-            $search ->whereHas('currentWork', function ($query) use($u){
+            $search->whereHas('currentWork', function ($query) use($u){
                 $query->where('id', $u);
             });
         }
 
         if($uw) {
-            $search ->where('isUw', $uw);
+            $search->where('isUw', $uw);
+        }
+
+        if($r) {
+            $work_user_id = MWorkUsers::leftJoin('m_user_roles', function($join) {
+                $join->on('m_work_users.id', '=', 'm_user_roles.user_id');
+                })
+                ->leftJoin('roles', function($join) {
+                    $join->on('m_user_roles.role_id', '=', 'roles.id');
+                })
+                ->where('roles.id', $r)
+                ->where('m_work_users.isActive', '=', 'A')
+                ->pluck('m_work_users.user_id')->toArray();
+
+            $search->whereIn('id', $work_user_id);
+
+            $r = Role::find($r);
         }
 
         if($t) {
             $search->where('username', 'LIKE', '%' . $t . '%');
-            $search ->orWhereHas('personal', function ($query) use($t){
+            $search->orWhereHas('personal', function ($query) use($t){
                 $query->whereRaw("concat(l_name, ' ', f_name) like '%".$t."%' ");
             });
         }
@@ -131,125 +68,19 @@ class UserController extends Controller
 
         $models->appends ( array (
             'u' => Input::get ( 'u' ),
+            'r' => Input::get ( 'r' ),
             't' => Input::get ( 't' )
         ) );
 
-        return view('users.index',
-            compact('models','filials','t', 'uw'))
+        return view('madmin.users.index',
+            compact('models','filials','roles','t', 'uw', 'r'))
             ->withDetails ( $models )->withQuery ( $u, $t );
 
     }
 
-    public function search(Request $request)
-    {
-
-        $f = $request->filial;
-
-        $t = $request->text;
-
-        if ($t !='' || $f !='')
-        {
-
-            $search = User::with('personal', 'currentWork')->orderBy('created_at', 'DESC');
-
-            if($t) {
-                $search->where('username', 'LIKE', '%' . $t . '%');
-                $search ->orWhereHas('personal', function ($query) use($t){
-                    $query->whereRaw("concat(l_name, ' ', f_name) like '%".$t."%' ");
-                });
-            }
-
-            if($f) {
-                $search ->whereHas('currentWork', function ($query) use($f){
-                    $query->where('branch_code', ''.$f.'');
-                });
-            }
-
-            $models = $search->paginate(20);
-
-            $page = 'users.search_temp';
-
-            if ($request->page){
-
-                $page = 'users.index';
-                if (count ( $models ) > 0)
-                    return view ( $page,
-                        compact('models','t','f'));
-            }
-
-            return view($page,compact('models'));
-
-        }
-        else
-        {
-            $filials = Department::where('parent_id', 0)->where('status', 1)->orderBy('branch_code', 'ASC')->get();
-
-            $models = User::with('personal', 'currentWork')
-                ->orderBy('created_at', 'DESC')
-                ->paginate(20);
-
-            return view('users.search_temp', compact('models', 'filials'));
-
-        }
-    }
-
-    public function search1()
-    {
-        $models = User::orderBy('created_at', 'DESC')->paginate(25);
-
-        $filial = Department::where('parent_id', 0)->where('status', 1)->orderBy('id','ASC')->get();
-
-        $q = Input::get ( 'q' );
-        $f = Input::get ( 'f' );
-        $s = Input::get ( 's' );
-
-        $f_title = Department::select('title')->where('branch_code', $f)->where('parent_id', '0')->first();
-
-        if (!empty($f_title))
-        {
-            $f_title = $f_title->title;
-
-        } else {
-            $f_title = '';
-        }
-
-        if($q != '' or $f != '' or $s != ''){
-
-            $models = User::with('personal')->where(function ($query) use($q) {
-                $query->whereRaw("concat(l_name, ' ', f_name) like '%".$q."%' ")
-                    ->orWhere('username', 'like', '%' . $q . '%');
-            })
-                ->where('branch_code', 'LIKE', '%'.$f.'%')
-                ->where('status', 'LIKE', '%'.$s.'%')
-                ->orderBy('created_at', 'DESC')
-                ->paginate(25);
-
-            $models->appends ( array (
-                'q' => Input::get ( 'q' ),
-                'f' => Input::get ( 'f' ),
-                's' => Input::get ( 's' )
-            ) );
-
-            if (count ( $models ) > 0)
-                return view ( 'users.index',
-                    compact('models','q','f','s','f_title','filial'))
-
-                    ->withDetails ( $models )->withQuery ( $q );
-        }
-
-        return view('users.index',
-            compact('models','q','f','s','f_title','filial'))
-            ->with('i', (request()->input('page', 1) - 1) * 25);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
+
         $work_user = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
 
         $user_roles = DB::table('m_user_roles as a')
@@ -275,7 +106,7 @@ class UserController extends Controller
                 ->orderBy('id','ASC')
                 ->get();
 
-            return view('users.create',compact('roles', 'filials'));
+            return view('madmin.users.create',compact('roles', 'filials'));
 
         }
         elseif(in_array( 'branch_admin', $user_arr_roles))
@@ -291,7 +122,7 @@ class UserController extends Controller
 
             $roles = Role::where('for_others', 'B')->get(); //get roles for branch admin
 
-            return view('users.create',compact('roles', 'filials'));
+            return view('madmin.users.create',compact('roles', 'filials'));
         }
         else
         {
@@ -302,15 +133,12 @@ class UserController extends Controller
     public function getBranch($id)
     {
         $depart = Department::findOrFail($id);
+
         $branch = Department::where('parent_id', 0)->where('branch_code',$depart->branch_code)->first();
+
         return response()->json(['depart' => $depart, 'branch' => $branch], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -356,29 +184,7 @@ class UserController extends Controller
 
         return back()->with('success', 'Xodim muvaffaqiyatli qo`shildi');
 
-        return redirect()->route('users.index')
-        ->with('success','Xodim muvaffaqiyatli yangilandi');
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-
-    public function show(Message $message)
-    {
-        return view('messages.show',compact('message'));
-    }
-
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
 
     public function edit($id)
     {
@@ -391,15 +197,14 @@ class UserController extends Controller
             ->groupBy('a.role_id')
             ->get();
 
-        //print_r($user_roles); die;
-
         $user_arr_roles = array();
+
         if($user_roles){
             foreach ($user_roles as $key => $value) {
                 array_push($user_arr_roles, $value->role_code);
             }
         }
-//print_r($user_arr_roles[2]); die;
+
         if(in_array( 'madmin', $user_arr_roles))
         {
             $user           = User::findOrFail($id);
@@ -414,8 +219,9 @@ class UserController extends Controller
                 ->orderBy('id','ASC')
                 ->get();
 
-            return view('users.edit',
+            return view('madmin.users.edit',
                 compact('user','personal_user','model', 'filials','roles'));
+
         } elseif ($user_arr_roles[2] = 'uw_admin '){
             $user           = User::findOrFail($id);
             $personal_user  = MPersonalUsers::where('user_id', $user->id)->first();
@@ -429,7 +235,7 @@ class UserController extends Controller
                 ->orderBy('id','ASC')
                 ->get();
 
-            return view('users.edit',
+            return view('madmin.users.edit',
                 compact('user','personal_user','model', 'filials','roles'));
         }
         else
@@ -451,11 +257,10 @@ class UserController extends Controller
         if ($id == Auth::user()->id){
 
             $this->validate($request, [
-                'fname' => 'required|max:25',
                 'password' => 'confirmed'
             ]);
 
-            $input = $request->only('fname', 'lname', 'sname', 'job_title', 'password');
+            $input = $request->only('password');
 
             if(!empty($input['password'])){
                 $input['password'] = Hash::make($input['password']); //update the password
@@ -465,37 +270,13 @@ class UserController extends Controller
 
             $user->update($input); //update the user info
 
-            // add user table in Uw
-            $db_uw = DB::connection('mysql_uw');
-
-            $uw_tb = $db_uw->table('users')->where('id', $id)->update($input);
-
             return back()->with('success', 'Sizning profilingiz muvaffaqiyatli yangilandi');
 
         } else{
 
-            if($user->username != $request->username){
-                $this->validate($request, [
-                    'username'  => 'required|max:25|unique:users'
-                ]);
-            }
-
-            if($user->card_num != $request->card_num){
-                $this->validate($request, [
-                    'card_num'  => 'required|max:15|unique:users'
-                ]);
-            }
-
             $this->validate($request, [
-                'fname'     => 'required|max:25',
-                'password'  => 'confirmed',
-                'roles'     => 'required',
-                'user_sort' => 'required|max:3'
+                'password'  => 'confirmed'
             ]);
-
-
-            $input = $request->only('fname', 'lname', 'sname', 'job_title', 'branch_code', 'card_num', 'username',
-                'email', 'password','depart_id', 'job_date', 'status','user_sort');
 
             if(!empty($input['password'])){
                 $input['password'] = Hash::make($input['password']);
@@ -503,21 +284,9 @@ class UserController extends Controller
                 $input = array_except($input,array('password'));
             }
 
-            foreach ($request->input('roles') as $value) {
-                # code...
-                $data_user[] = $value;
-            }
-
-            $input['roles'] = json_encode($data_user);
-
-            // add user table in Uw
-            $db_uw = DB::connection('mysql_uw');
-
-            $uw_tb = $db_uw->table('users')->where('id', $id)->update($input);
-
             $user->update($input);
 
-            return redirect()->route('users.index')
+            return redirect()->route('madmin.users.index')
                 ->with('success','Xodim muvaffaqiyatli yangilandi');
 
         }

@@ -1,9 +1,7 @@
-@extends('layouts.uw.dashboard')
-<link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+@extends('layouts.dashboard')
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
             Mijoz yaratish
@@ -17,7 +15,6 @@
 
     </section>
 
-    <!-- Main content -->
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
@@ -29,7 +26,7 @@
                                 <div class="form-group">
                                     <div class="col-sm-2">
                                     </div>
-                                    <label for="inputName" class="col-sm-2 control-label">Код клиента (IABS#)</label>
+                                    <label for="inputName" class="col-sm-2 control-label">Код клиента (IABS)</label>
 
                                     <div class="col-sm-3">
                                         <input type="text" class="form-control" id="client_code" maxlength="8" onkeypress='validate(event)' placeholder="Код клиента">
@@ -51,15 +48,15 @@
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Filial Code</th>
+                                <th>Filial</th>
                                 <th>Client Code</th>
-                                <th>Client Name</th>
-                                <th>Client Tin</th>
-                                <th>Director Name</th>
-                                <th>Region Name</th>
-                                <th>District Name</th>
-                                <th>Address</th>
-                                <th>Date Open</th>
+                                <th>Mijoz nomi</th>
+                                <th>STIR</th>
+                                <th>Direktor</th>
+                                <th>Viloyat</th>
+                                <th>Tuman</th>
+                                <th>Manzili</th>
+                                <th>Sana</th>
                             </tr>
                             </thead>
                             <tbody class="data-table">
@@ -68,20 +65,11 @@
                     </div>
 
                 </div>
-                <!-- /.box -->
+
             </div>
-            <!-- /.col -->
+
         </div>
 
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-        <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
-
-        <link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
-
-        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
         <script>
             function validate(evt) {
                 var theEvent = evt || window.event;
@@ -101,6 +89,7 @@
                 }
             }
             $("#loading").hide();
+
             $("#search").click(function () {
 
                 let client_code = $('#client_code').val();
@@ -153,7 +142,7 @@
 
             });
 
-            $('#search_tin').keydown(function(event){
+            $('#client_code').keydown(function(event){
 
                 var keyCode = (event.keyCode ? event.keyCode : event.which);
                 if (keyCode === 13) {
@@ -176,8 +165,6 @@
 
                 return [day, month, year].join('.');
             }
-
-
 
         </script>
     </section>

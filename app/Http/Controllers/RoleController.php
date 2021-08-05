@@ -2,58 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
 use Illuminate\Http\Request;
 use App\Role;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
+
     public function index()
     {
-        // count() //
-        //@include('oracle_connect.php');
+        $models = Role::orderBy('role_code', 'ASC')->get();
 
-        /*$rs = oci_parse($conn??'',
-            "select count(*) from ln_card a
-            join Dwh_Loan_Card d on a.loan_id = d.loan_id
-            where 1=1
-            ");
+        return view('madmin.roles.index', compact('models'));
+    }
 
-        oci_execute($rs);
+    public function store(Request $request)
+    {
+        $row_id = $request->model_id;
 
-        $row = oci_fetch_row($rs);
+        $model = Role::updateOrCreate(['id' => $row_id],
+            [
+                'title' => $request->title,
+                'title_ru' => $request->title_ru,
+                'role_code' => $request->role_code
+            ]);
 
-        $result["total"] = $row[0];
+        return response()->json($model);
+    }
 
-        $sql = "select * from hr_emps a
-        where 1=1
-        order by 1 desc OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY ";
+    public function edit($id)
+    {
+        //
+        $user = Role::find($id);
 
-        $rs = oci_parse($conn, $sql);
+        return response()->json($user);
+    }
 
-        oci_execute($rs);
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     */
+    public function show($id)
+    {
+        $role = Role::find($id);
 
-        $items = array();
+        return response()->json($role);
+    }
 
-        while (($row = oci_fetch_object($rs)) != false) {
-            array_push($items, $row);
-        }
-        $result["rows"] = $items;
-        //echo json_encode($result);
-        oci_close($conn);
-print_r($items); die;*/
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
 
-        $roles = Role::orderBy('role_code', 'ASC')->get();
+        //Role::find($id)->delete();
+        $message = 'Role o`chirish mumkin emas';
+        $code = 1;
 
-        // count() //
-        @include('count_message.php');
-
-        return view('roles.index', compact('roles'));
+        return response()->json([
+            'success' => 'Role',
+            'code' => $code,
+            'message' => $message
+        ]);
     }
 
     public function ora()
@@ -119,60 +132,5 @@ and a.rnk = 1
 
         return view('roles.ora', compact('roles','result',
             'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
-    }
-
-    public function store(Request $request)
-    {
-        $row_id = $request->model_id;
-
-        $model = Role::updateOrCreate(['id' => $row_id],
-            [
-                'title' => $request->title,
-                'title_ru' => $request->title_ru,
-                'role_code' => $request->role_code
-            ]);
-
-        return response()->json($model);
-    }
-
-    public function edit($id)
-    {
-        //
-        $user = Role::find($id);
-
-        return response()->json($user);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $role = Role::find($id);
-
-        return response()->json($role);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy($id)
-    {
-
-        Role::find($id)->delete();
-        $message = 'Role o`chirildi';
-        $code = 1;
-
-        return response()->json([
-            'success' => 'Role',
-            'code' => $code,
-            'message' => $message
-        ]);
     }
 }

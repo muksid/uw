@@ -1,9 +1,7 @@
-@extends('layouts.uw.dashboard')
-<link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+@extends('layouts.dashboard')
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
             Yuridik mijozlar
@@ -28,32 +26,29 @@
             </div>
         @endif
 
-        <div class="box-body">
-            <p>
-                <a href="{{ url('jur/client/create') }}" class="btn bg-olive-active btn-flat margin">
-                    <i class="fa fa-plus-circle"></i> @lang('blade.add')
-                </a>
-                <a href="{{ url('jur/clients/1') }}" class="btn bg-maroon btn-flat margin">
-                    <i class="fa fa-undo"></i> Yangi arizalar
-                </a>
-                <a href="{{ url('jur/clients/2') }}" class="btn bg-purple btn-flat margin">
-                    <i class="fa fa-send-o"></i> Yuborilgan
-                </a>
-                <a href="{{ url('jur/clients/3') }}" class="btn bg-navy btn-flat margin">
-                    <i class="fa fa-check-circle"></i> Tasdiqlangan
-                </a>
-                <a href="{{ url('jur/clients/0') }}" class="btn bg-orange btn-flat margin">
-                    <i class="fa fa-pencil"></i> Taxrirlashda
-                </a>
-            </p>
-        </div>
-
     </section>
 
-    <!-- Main content -->
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
+
+                <div>
+                    <a href="{{ url('jur/client/create') }}" class="btn bg-olive-active btn-flat margin">
+                        <i class="fa fa-plus-circle"></i> @lang('blade.add')
+                    </a>
+                    <a href="{{ url('jur/clients/1') }}" class="btn bg-maroon btn-flat margin">
+                        <i class="fa fa-undo"></i> Yangi arizalar
+                    </a>
+                    <a href="{{ url('jur/clients/2') }}" class="btn bg-purple btn-flat margin">
+                        <i class="fa fa-send-o"></i> Yuborilgan
+                    </a>
+                    <a href="{{ url('jur/clients/3') }}" class="btn bg-navy btn-flat margin">
+                        <i class="fa fa-check-circle"></i> Tasdiqlangan
+                    </a>
+                    <a href="{{ url('jur/clients/0') }}" class="btn bg-orange btn-flat margin">
+                        <i class="fa fa-pencil"></i> Taxrirlashda
+                    </a>
+                </div>
 
                 <div class="box box-primary">
 
@@ -91,7 +86,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group has-success">
                                         <input type="text" class="form-control" name="t" value="{{ $t }}"
-                                               placeholder="(iabs, ariza#, fio, inn, summa, mfo)">
+                                               placeholder="% IABS, ARIZA, STIR, SUMMA, FILIAL">
                                     </div>
                                 </div>
 
@@ -131,15 +126,13 @@
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Kredit Turi</th>
-                                <th>IABS #</th>
-                                <th>Ariza #</th>
+                                <th class="text-center"><i class="fa fa-bank"></i></th>
+                                <th>IABS</th>
+                                <th>Ariza</th>
                                 <th>Mijoz nomi</th>
-                                <th>STIR</th>
                                 <th>Summa</th>
                                 <th class="text-center">@lang('blade.status')</th>
                                 <th class="text-center">@lang('blade.update')</th>
-                                <th class="text-center"><i class="fa fa-bank"></i></th>
                                 <th>Filial (BXO)</th>
                                 <th class="text-center">Inspektor</th>
                                 <th>Sana</th>
@@ -151,7 +144,7 @@
                                 @foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}">
                                         <td>{{ $i++ }}</td>
-                                        <td class="text-sm">{{ $model->loanType->title??'' }}</td>
+                                        <td><span class="badge bg-light-blue">{{ $model->department->branch_code??'-' }}</span></td>
                                         <td>{{ $model->client_code }}</td>
                                         <td>{{ $model->claim_id }}</td>
                                         <td class="text-uppercase">
@@ -159,7 +152,6 @@
                                                 {{ $model->jur_name}}
                                             </a>
                                         </td>
-                                        <td>{{ $model->inn }}</td>
                                         <td><b>{{ number_format($model->summa) }}</b></td>
 
                                         <td>
@@ -174,11 +166,10 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ route('client.edit', ['id' => $model->id]) }}" class="btn btn-success btn-flat">
+                                            <a href="{{ route('client.edit', ['id' => $model->id]) }}" class="btn btn-success btn-sm">
                                                 <i class="fa fa-pencil"></i>
                                             </a>
                                         </td>
-                                        <td><span class="badge bg-light-blue">{{ $model->department->branch_code??'-' }}</span></td>
                                         <td class="text-sm">{{ $model->department->title_ru??'' }}</td>
                                         <td class="text-sm text-center text-bold text-blue">
                                             {{ $model->user->personal->l_name??'-' }}
@@ -197,132 +188,12 @@
                         <span class="paginate">{{ $models->links() }}</span>
                     </div>
 
-                    <div class="modal fade" id="resultKATMModal" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" style="width: auto; max-width: 1100px">
-                            <div class="modal-content">
-                                <div class="modal-header bg-aqua-active">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title text-center" id="success">Mijozning kredit tarixi (KATM)</h4>
-                                </div>
-                                <div id="reportBase64Modal"></div>
-                                <form id="roleForm14" name="roleForm14">
-                                    <div class="modal-body">
-                                        <input type="hidden" name="claim_id" id="katmClaimId">
-                                        <input type="hidden" name="katmSumm" id="katmSumm" value="">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-flat pull-right btn-default" data-dismiss="modal">@lang('blade.close')</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--create/updte modal--}}
-                    <div class="modal fade modal-primary" id="modalForm" aria-hidden="true">
-                        <div class="modal-dialog modal-sm">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" id="modalHeader"></h4>
-                                </div>
-                                <form id="roleForm" name="roleForm">
-                                    <div class="modal-body">
-                                        <input type="hidden" name="model_id" id="model_id">
-                                        <div class="form-group">
-                                            <label for="name" class="control-label">Inn</label>
-                                            <input type="text" class="form-control" style="width: 100%" id="inn"
-                                                   name="inn" value="" required="">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="name" class="control-label">INPS</label>
-                                            <input type="text" class="form-control" style="width: 100%" id="pin"
-                                                   name="pin" value="" required="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="name" class="control-label">summa</label>
-                                            <input type="text" class="form-control" style="width: 100%" id="summa"
-                                                   name="summa" value="" required="">
-                                        </div>
-
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline pull-left"
-                                                data-dismiss="modal">@lang('blade.cancel')</button>
-                                        <button type="submit" class="btn btn-outline" id="btn-save"
-                                                value="create">@lang('blade.save')
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--delete modal--}}
-                    <div id="ConfirmModal" class="modal fade modal-danger" role="dialog">
-                        <div class="modal-dialog modal-sm">
-                            <!-- Modal content-->
-                            <div class="modal-content">
-                                <div class="modal-header bg-danger">
-                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    <h4 class="modal-title text-center">O`chirishni tasdiqlash</h4>
-                                </div>
-
-                                <div class="modal-body">
-                                    <h4 class="text-center"><span class="glyphicon glyphicon-info-sign"></span> Client serverdan o`chiriladi!</h4>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <center>
-                                        <button type="button" class="btn btn-outline pull-left"
-                                                data-dismiss="modal">@lang('blade.cancel')</button>
-                                        <button type="button" class="btn btn-outline" id="yesDelete"
-                                                value="create">Ha, O`chirish
-                                        </button>
-                                    </center>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal fade modal-success" id="successModal" tabindex="-1" role="dialog"
-                         aria-labelledby="myModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-sm">
-                            <div class="modal-content">
-                                <div class="modal-header bg-aqua-active">
-                                    <h4 class="modal-title">
-                                        Client <i class="fa fa-check-circle"></i>
-                                    </h4>
-                                </div>
-                                <div class="modal-body">
-                                    <h5>Client Successfully deleted</h5>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline" data-dismiss="modal">@lang('blade.close')
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
                 <!-- /.box -->
             </div>
             <!-- /.col -->
         </div>
 
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-        <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
-
-        <link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
-
-        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
         <script>
 
             $(function () {
@@ -349,186 +220,6 @@
                 });
             });
 
-            // crud form
-            $(document).ready(function () {
-
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-
-                $('#createNewRole').click(function () {
-
-                    $('#btn-save').val("createRole");
-
-                    $('#roleForm').trigger("reset");
-
-                    $('#modalHeader').html("Add role");
-
-                    $('#modalForm').modal('show');
-                });
-
-
-                function atou(b64) {
-                    return decodeURIComponent(escape(atob(b64)));
-                }
-
-                $('body').on('click', '#getKatmShow', function () {
-                    $('#reportBase64Modal').empty();
-                    var cid = $(this).val();
-
-                    $.get('/uw/get-client-katm/' + cid, function (data) {
-                        //console.log(data);
-
-                        var decodedString = atou(data.reportBase64);
-
-                        $('#reportBase64Modal').prepend(decodedString);
-
-                        $('#resultKATMModal').modal('show');
-
-                    })
-                });
-
-                $('body').on('click', '#editRole', function () {
-
-                    var model_id = $(this).data('id');
-
-                    $.get('/uw-clients/' + model_id, function (data) {
-                        console.log(data);
-
-                        $('#modalHeader').html("Edit client");
-
-                        $('#btn-save').val("editRole");
-
-                        $('#modalForm').modal('show');
-
-                        $('#model_id').val(model_id);
-
-                        $('#inn').val(data.inn);
-
-                        $('#pin').val(data.pin);
-
-                        $('#summa').val(data.summa);
-
-                    })
-                });
-
-                $('body').on('click', '#deleteRole', function (e) {
-
-                    e.preventDefault();
-                    var id = $(this).data("id");
-
-                    $('#ConfirmModal').data('id', id).modal('show');
-                });
-
-                $('#yesDelete').click(function () {
-
-                    var token = $('meta[name="csrf-token"]').attr('content');
-
-                    var id = $('#ConfirmModal').data('id');
-
-                    $('#rowId_'+id).remove();
-
-                    $.ajax(
-                        {
-                            type: 'DELETE',
-                            url: "{{ url('uw-clients') }}"+'/'+id,
-                            success: function (data)
-                            {
-                                $('#successModal').modal('show');
-                                $("#rowId_" + id).remove();
-                            }
-                        });
-
-                    $('#ConfirmModal').modal('hide');
-                });
-
-            });
-
-            if ($("#roleForm").length > 0) {
-
-                $("#roleForm").validate({
-
-                    submitHandler: function (form) {
-
-                        var actionType = $('#btn-save').val();
-
-                        $('#btn-save').html('Sending..');
-
-                        $.ajax({
-                            data: $('#roleForm').serialize(),
-
-                            url: "{{ url('uw-clients-edit') }}",
-
-                            type: "POST",
-
-                            dataType: 'json',
-
-                            success: function (data) {
-                                /*console.log(data);*/
-
-                                var model =
-                                    '<tr id="rowId_' + data.id + '">' +
-                                    '<td>' + data.id + '</td>' +
-                                    '<td>' + data.claim_id + '</td>' +
-                                    '<td>' + data.family_name +' '+data.name+' '+data.patronymic+ '</td>' +
-                                    '<td>' + data.summa + '</td>' +
-                                    '<td>' + data.created_at + '</td>' +
-                                    '<td><span class="badge bg-yellow-active">Yangi</span></td>' +
-                                    '<td>1</td>';
-
-                                model +=
-                                    '<td>' +
-                                    '<a class="btn btn-flat btn-primary" href="" data-id="' + data.id + '">' +
-                                    '<i class="fa fa-eye-slash"> Show' +
-                                    '</a>' +
-                                    '</td>';
-
-                                model +=
-                                    '<td>' +
-                                    '<button type="button" class="btn btn-flat btn-info" id="editRole" data-id="' + data.id + '">' +
-                                    '<i class="fa fa-pencil">' +
-                                    '</button>' +
-                                    '</td>';
-
-                                model +=
-                                    '<td>' +
-                                    '<button type="button" class="btn btn-flat btn-danger" id="deleteRole" data-id="' + data.id + '">' +
-                                    '<i class="fa fa-trash">' +
-                                    '</button>' +
-                                    '</td>' +
-
-                                    '</tr>';
-
-
-                                if (actionType == "createRole") {
-
-                                    $('#roleTable').prepend(model);
-
-                                } else {
-
-                                    console.log(data);
-
-                                    $("#rowId_" + data.id).replaceWith(model);
-
-                                }
-
-                                $('#roleForm').trigger("reset");
-
-                                $('#modalForm').modal('hide');
-
-                                $('#btn-save').html('Save Changes');
-
-                            },
-                            error: function (data) {
-                                console.log('Error:', data);
-                                $('#btn-save').html('Save Changes');
-                            }
-                        });
-                    }
-                })
-            }
         </script>
     </section>
     <!-- /.content -->
