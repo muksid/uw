@@ -598,7 +598,7 @@
                         $.ajax({
                             data: $('#clientForm').serialize(),
 
-                            url: "{{ url('uw-clients-edit') }}",
+                            url: "{{ url('/phy/uw-clients-edit') }}",
 
                             type: "POST",
 

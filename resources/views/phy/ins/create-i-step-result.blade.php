@@ -996,7 +996,7 @@
                         <button type="button" class="btn btn-outline pull-right" onclick="print('resultINPSModal')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
-                        <h4 class="modal-title text-center" id="success_inps">Oylik daromadi natijasi</h4>
+                        <h4 class="modal-title text-center" id="salaryVersion">Oylik daromadi natijasi</h4>
                     </div>
                     <div class="modal-body">
                         <div id="resultDataINPS"></div>
@@ -1072,7 +1072,7 @@
                 $('#send_to_admin_buttons').empty().append(button_send_a);
             }
 
-            var katm_inps_route = "{{ url('/phy/client/get-result-buttons', ['id' => $model->id]) }}";
+            let katm_inps_route = "{{ url('/phy/client/get-result-buttons', ['id' => $model->id]) }}";
             $.get(katm_inps_route, function(res){
                 //console.log(res.data_i.length);
                 $('#credit_can_be').append(formatCurrency(res.credit_results.credit_can_be));
@@ -1450,7 +1450,10 @@
                             let other_salary = 0;
                             let sum = 0;
                             let other_sum = 0;
+                            let salaryVersion = '';
                             if (data[0]['isVersion'] === 2){
+
+                                salaryVersion = 'Oylik daromadi natijasi (SOLIQ)';
 
                                 table+= '<div class="box-body no-padding">' +
                                     '<table class="table table-striped">' +
@@ -1507,10 +1510,14 @@
 
                             } else {
 
+                                salaryVersion = 'Oylik daromadi natijasi (XALQBANK)';
+
                                 table+= '<div class="box-body no-padding">' +
                                     '<table class="table table-striped">' +
                                     '<tr>' +
                                     '<th style="width: 10px">#</th>' +
+                                    '<th>F.I.O.</th>' +
+                                    '<th>PINFL</th>' +
                                     '<th>Davr</th>' +
                                     '<th>Summa</th>' +
                                     '<th>Tashkilot</th>' +
@@ -1527,7 +1534,9 @@
 
                                     table+= '<tr>' +
                                         '<td>'+ key++ +'.</td>' +
-                                        '<td><span class="label label-success">'+val.PERIOD+'</span></td>' +
+                                        '<td>'+val.client_name+'</td>' +
+                                        '<td>'+val.pinfl+'</td>' +
+                                        '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
                                         '<td>'+sum+'</td>' +
                                         '<td class="text-sm">'+val.ORGNAME+'</td>' +
                                         '<td>'+val.ORG_INN+'</td>' +
@@ -1546,6 +1555,8 @@
                             }
 
                             $('#resultINPSModal').modal('show');
+
+                            $("#salaryVersion").html(salaryVersion);
 
                             $("#resultDataINPS").html(table);
 
@@ -2087,13 +2098,14 @@
 
                         $.ajax({
                             data: $('#sendForm').serialize() + "&sch_type="+getSChType,
-                            url: "{{ url('/uw/cs-app-send') }}",
+                            url: "{{ url('/phy/client-send-to-uw') }}",
                             type: "POST",
                             dataType: 'json',
                             beforeSend: function(){
                                 $("#loading-gif").show();
                             },
                             success: function (data) {
+                                console.log(data);
                                 $("#loading-gif").hide();
                                 $('#sendForm').trigger("reset");
                                 $('#modalFormSend').modal('hide');

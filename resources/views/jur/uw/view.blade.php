@@ -119,8 +119,8 @@
                                                         <tr>
                                                             <th>#</th>
                                                             <th>X/R</th>
-                                                            <th>Credit (Jami)</th>
-                                                            <th>Debit (Jami)</th>
+                                                            {{--<th>Credit (Jami)</th>
+                                                            <th>Debit (Jami)</th>--}}
                                                             <th>Credit (Ohirgi)</th>
                                                             <th>Debit (Ohirgi)</th>
                                                             <th>Oy</th>
@@ -130,8 +130,8 @@
                                                             <tr>
                                                                 <td>{{ $key++ }}</td>
                                                                 <td>{{ $saldo->client_acc }}</td>
-                                                                <td class="text-green">{{ number_format($saldo->all_credit) }}</td>
-                                                                <td class="text-maroon">{{ number_format($saldo->all_debit) }}</td>
+                                                                {{--<td class="text-green">{{ number_format($saldo->all_credit) }}</td>
+                                                                <td class="text-maroon">{{ number_format($saldo->all_debit) }}</td>--}}
                                                                 <td class="text-green">{{ number_format($saldo->credit) }}</td>
                                                                 <td class="text-maroon">{{ number_format($saldo->debit) }}</td>
                                                                 <td>{{ $saldo->saldo_month }} </td>
@@ -1489,9 +1489,9 @@
                                 '<tr>' +
                                     '<th>#</th>' +
                                     '<th>X/R</th>' +
-                                    '<th>Credit (Jami)</th>' +
+                                    /*'<th>Credit (Jami)</th>' +*/
                                     '<th>Credit (Ohirgi)</th>' +
-                                    '<th>Debit (Jami)</th>' +
+                                    /*'<th>Debit (Jami)</th>' +*/
                                     '<th>Debit (Ohirgi)</th>' +
                                     '<th>Oy</th>' +
                                     '<th>Yang.Sana</th>' +
@@ -1503,9 +1503,9 @@
                                     '<tr>' +
                                     '<td>'+i+'</td>' +
                                     '<td>'+val['acc_external']+'</td>' +
-                                    '<td class="text-green">'+formatPrice(val['all_credit']/100)+'</td>' +
+                                    /*'<td class="text-green">'+formatPrice(val['all_credit']/100)+'</td>' +*/
                                     '<td class="text-maroon">'+formatPrice((val['all_credit']-val['credit'])/100)+'</td>' +
-                                    '<td class="text-green">'+formatPrice(val['all_debit']/100)+'</td>' +
+                                    /*'<td class="text-green">'+formatPrice(val['all_debit']/100)+'</td>' +*/
                                     '<td class="text-maroon">'+formatPrice((val['all_debit']-val['debit'])/100)+'</td>' +
                                     '<td><span class="label label-warning">'+val['saldo_month']+'</span></td>' +
                                     '<td>'+formatDate(val['l_date'])+'</td>' +

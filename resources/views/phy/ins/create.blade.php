@@ -258,7 +258,7 @@
                 calcLoanType = $('#calcLoanType').val();
 
                 $.ajax({
-                    url: '/uw/calc-form',
+                    url: '/phy/calc-form',
                     type: 'POST',
                     dataType: 'json',
                     data: {

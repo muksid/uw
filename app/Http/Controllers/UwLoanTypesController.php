@@ -207,7 +207,10 @@ class UwLoanTypesController extends Controller
         //
         $checkClient = UwClients::where('loan_type_id', $id)->first();
         if(!$checkClient){
-            UwLoanTypes::where('id',$id)->delete();
+            //print_r($id); die;
+
+            //UwLoanTypes::where('id',$id)->delete();
+
             return Response::json([
                 'message'=>'Client deleted',
                 'code'=>200

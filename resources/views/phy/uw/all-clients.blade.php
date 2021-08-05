@@ -101,7 +101,7 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <a href="{{url('/phy/all-clients')}}" class="btn btn-default btn-flat">
+                                        <a href="{{url('/phy/uw/all-clients')}}" class="btn btn-default btn-flat">
                                             <i class="fa fa-refresh"></i> @lang('blade.reset')
                                         </a>
                                         <button type="submit" class="btn btn-primary btn-flat">

@@ -38,11 +38,10 @@ class UwInquiryIndividualController extends Controller
         if ($isVersion && $isVersion->isVersion == 2) {
 
             $clientTotalSumMonthly  = DB::select(
-                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
-            where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum'));
+                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as MON_PERIOD FROM uw_inps_clients a 
+            where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by MON_PERIOD'));
 
             $clientTotalSumMonthly = count($clientTotalSumMonthly);
-
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
                 ->groupBy('uw_clients_id')
@@ -50,8 +49,11 @@ class UwInquiryIndividualController extends Controller
 
         } else {
 
-            $clientTotalSumMonthly = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-                ->groupBy('PERIOD')->get()->count();
+            $clientTotalSumMonthly  = DB::select(
+                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as MON_PERIOD FROM uw_inps_clients a 
+            where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by MON_PERIOD'));
+
+            $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
                 ->groupBy('uw_clients_id')->sum('INCOME_SUMMA');
@@ -1026,6 +1028,8 @@ class UwInquiryIndividualController extends Controller
                 DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
                 where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum')
             );
+
+            $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
             $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
                 ->groupBy('uw_clients_id')->sum('INCOME_SUMMA');

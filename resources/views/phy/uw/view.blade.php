@@ -935,16 +935,6 @@
                             $("#overlayKias").show();
                         },
                         success: function(result){
-
-/*                            console.log(result);
-                            if (result.scoring_base64 === null){
-                                alert('dfasdasd')
-                            } else {
-
-                            }*/
-                            let katm_score = JSON.parse(result.scoring_base64.katm_score);
-
-                            let katm_tb = JSON.parse(result.scoring_base64.katm_tb);
                             if (result.scoring_k.isVersion === 2){
 
                                 let res = result.scoring_file;
@@ -1070,6 +1060,8 @@
                                 $('#tableModal').modal('show');
                             } else {
                                 let data = result;
+                                let katm_score = JSON.parse(result.scoring_base64.katm_score);
+                                let katm_tb = JSON.parse(result.scoring_base64.katm_tb);
                                 $('#scoringPage').empty();
                                 $("#scoringPage").prepend(data.scoring_page);
                                 $(".client_name").html(katm_score.client_info_1);
@@ -1276,6 +1268,8 @@
                                     '<table class="table table-striped">' +
                                     '<tr>' +
                                     '<th style="width: 10px">#</th>' +
+                                    '<th>F.I.O.</th>' +
+                                    '<th>PINFL</th>' +
                                     '<th>Davr</th>' +
                                     '<th>Summa</th>' +
                                     '<th>Tashkilot</th>' +
@@ -1292,7 +1286,9 @@
 
                                     table+= '<tr>' +
                                         '<td>'+ key++ +'.</td>' +
-                                        '<td><span class="label label-success">'+val.PERIOD+'</span></td>' +
+                                        '<td>'+val.client_name+'</td>' +
+                                        '<td>'+val.pinfl+'</td>' +
+                                        '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
                                         '<td>'+sum+'</td>' +
                                         '<td class="text-sm">'+val.ORGNAME+'</td>' +
                                         '<td>'+val.ORG_INN+'</td>' +
@@ -1451,7 +1447,7 @@
                             $.ajax({
                                 data: $('#confirmForm').serialize(),
 
-                                url: "{{ url('/uw/risk-admin-confirm') }}",
+                                url: "{{ url('/phy/uw/risk-admin-confirm') }}",
 
                                 type: "POST",
 
@@ -1488,7 +1484,7 @@
 
                             $.ajax({
                                 data: $('#cancelForm').serialize(),
-                                url: "{{ url('/uw/risk-admin-cancel') }}",
+                                url: "{{ url('/phy/uw/risk-admin-cancel') }}",
                                 type: "POST",
                                 dataType: 'json',
                                 beforeSend: function(){

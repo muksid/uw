@@ -166,9 +166,11 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ route('client.edit', ['id' => $model->id]) }}" class="btn btn-success btn-sm">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
+                                            @if($model->status == 0 || $model->status == 1)
+                                                <a href="{{ route('client.edit', ['id' => $model->id]) }}" class="btn btn-success btn-sm">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                            @endif
                                         </td>
                                         <td class="text-sm">{{ $model->department->title_ru??'' }}</td>
                                         <td class="text-sm text-center text-bold text-blue">

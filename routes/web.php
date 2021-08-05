@@ -94,6 +94,8 @@ Route::group(['middleware' => ['auth']], function() {
         Route::any('uw/all-clients','UwClientsController@uwAllClients');
         Route::get('uw/view-client/{id}/{claim_id}', 'UwClientsController@uwView');
         Route::get('get-loan-type', 'UwCreateClientsController@getLoanType')->name('uw.get.loan.type');
+        Route::post('uw/risk-admin-confirm', 'UwClientsController@riskAdminConfirm');
+        Route::post('uw/risk-admin-cancel', 'UwClientsController@riskAdminCancel');
 
         //INS
         Route::get('clients/{q}', 'UwClientsController@CsIndex');
@@ -106,12 +108,16 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('create-step-three', 'UwCreateClientsController@postCreateStepThree')->name('phy.create.step.three.post');
         Route::get('create-step-result/{id}', 'UwCreateClientsController@createStepResult')->name('phy.create.step.result');
         Route::get('client/edit/{id}', 'UwClientsController@edit');
+        Route::post('uw-clients-edit','UwClientsController@storeEdit');
         Route::post('client/online-reg', 'UwInquiryIndividualController@onlineRegistration');
         Route::get('client/get-result-buttons/{id}', 'UwInquiryIndividualController@getResultButtons');
         Route::get('client/get-scoring','UwInquiryIndividualController@getScoring');
         Route::get('client/get-salary','UwInquiryIndividualController@getSalary');
         Route::get('get-status-send/{id}/{sch_type}','UwInquiryIndividualController@getStatusSend');
         Route::get('uw/post-katm', 'UwKatmController@postKatm');
+        Route::post('calc-form','UwClientsController@calcForm');
+        Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
+        Route::post('client-send-to-uw', 'UwClientsController@csAppSend');
 
         // DEBTORS
         Route::resource('client-debtors', 'UwClientDebtorsController');
@@ -198,8 +204,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/uw/view-loan-super-admin/{id}/{claim_id}', 'UwClientsController@superAdminView');
     Route::post('/uw/risk-admin-confirm', 'UwClientsController@riskAdminConfirm');
     Route::post('/uw/risk-admin-cancel', 'UwClientsController@riskAdminCancel');
-    Route::get('/uw/loan-app-statistics', 'UwClientsController@loanAppStatistics');
     Route::post('/uw/calc-form','UwClientsController@calcForm');
+    Route::get('/uw/loan-app-statistics', 'UwClientsController@loanAppStatistics');
     Route::get('/uw/get-app-blank/{claim_id}','UwClientsController@getAppBlank');*/
 
 });

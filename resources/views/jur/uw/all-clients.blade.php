@@ -117,7 +117,6 @@
                                 <th>STIR</th>
                                 <th>Summa</th>
                                 <th class="text-center">@lang('blade.status')</th>
-                                <th class="text-center">@lang('blade.update')</th>
                                 <th class="text-center"><i class="fa fa-bank"></i></th>
                                 <th>Filial (BXO)</th>
                                 <th class="text-center">Inspektor</th>
@@ -151,11 +150,6 @@
                                             @elseif($model->status == 3)
                                                 <span class="badge bg-aqua-active">Tasdiqlangan</span>
                                             @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="{{ route('client.edit', ['id' => $model->id]) }}" class="btn btn-success btn-flat">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
                                         </td>
                                         <td><span class="badge bg-light-blue">{{ $model->department->branch_code??'-' }}</span></td>
                                         <td class="text-sm">{{ $model->department->title_ru??'' }}</td>
