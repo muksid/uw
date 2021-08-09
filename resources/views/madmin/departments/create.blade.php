@@ -147,7 +147,6 @@
                                         <a href="/home" class="btn btn-default">Bekor qilish </a>
                                         <button type="submit" class="btn btn-primary">Saqlash</button>
                                     </div>
-
                                 </div>
                             </div>
                             <!-- /.col -->
