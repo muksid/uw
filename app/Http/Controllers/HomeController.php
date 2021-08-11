@@ -108,4 +108,52 @@ class HomeController extends Controller
         return back()->with('message', $message);
     }
 
+    public $URL = "http://91.204.239.44/broker-api/send";
+    private $USERNAME = "turonbank2";
+    private $PASSWORD = 'e76rKR3Li2';
+
+    public function smsSend(){
+
+        $isError = 0;
+
+        $errorMessage = true;
+
+        $postData = array(
+            "messages" => array([
+                "recipient" => "998973253420",
+                "message-id" => "mabc000000008",
+                "sms" => array(
+                    "originator" => "2800",
+                    "content" => array(
+                        "text" => "test sms Muksid 8"
+                    )
+                )
+            ]),
+        );
+
+        $ch = curl_init($this->URL);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->USERNAME . ":" . $this->PASSWORD);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_exec($ch);
+
+        //Print error if any
+        if (curl_errno($ch)) {
+            $isError = true;
+            $errorMessage = curl_error($ch);
+        }
+        curl_close($ch);
+
+        if($isError){
+            return array('error' => 1 , 'message' => $errorMessage);
+        }else{
+            return array('error' => 0 );
+        }
+    }
+
+
 }
