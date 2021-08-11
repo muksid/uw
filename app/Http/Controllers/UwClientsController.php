@@ -13,6 +13,7 @@ use App\UwClients;
 use App\UwInpsClients;
 use App\UwKatmClients;
 use App\UwLoanTypes;
+use App\UwPhyKatmFile;
 use App\UwUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -191,7 +192,10 @@ class UwClientsController extends Controller
             $sch_type_a = 'checked';
         }
 
-        return view('phy.uw.view', compact('model', 'modelComments', 'duplicateClients', 'sch_type_d', 'sch_type_a'));
+        $kias_history = UwPhyKatmFile::where('uw_clients_id', $id)->where('uw_katm_id', 0)->where('file_type', '=', 'B64_K_HIS')->first();
+
+        return view('phy.uw.view',
+            compact('model', 'modelComments', 'duplicateClients', 'sch_type_d', 'sch_type_a', 'kias_history'));
     }
 
     public function superAdminView($id,$claim_id)

@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Department;
 use App\MWorkUsers;
 use App\User;
+use App\UwJurBalanceChild;
 use App\UwJurBalanceForm;
 use App\UwJurClientComment;
 use App\UwJurClientFiles;
 use App\UwJurClientGuars;
 use App\UwJurClientPersonal;
+use App\UwJurFinancialChild;
 use App\UwJurFinancialForm;
 use App\UwJuridicalClient;
 use App\UwJurKatmClient;
@@ -182,36 +184,270 @@ class UwJuridicalClientsController extends Controller
 
     }
 
-    public function getSelect(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     *
+     */
+    public function create()
     {
         //
-        $filial = 1;
-
-        $tin = 1;
-
-        $type = 'q';
-
-        $data = $this->curlHttpPost($filial, $tin, $type);
-
-        $models = json_decode($data);
-
-        return response()->json($models);
+        return view('jur.ins.create');
     }
 
-    public function getHrEmps(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Request $request)
     {
         //
-        $filial = 1;
+        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+        if (!$currentWorkUser){
+            return back()->with(
+                [
+                    'status' => 'warning',
+                    'message' => 'Inspektor passive holatda!!! (ip:247)'
+                ]);
+        }
 
-        $tin = 1;
+        $rules = array(
+            'hbranch' => 'required|max:10',
+            'summa' => 'required',
+            'owner_form' => 'required|max:5',
+            'code_juridical_person' => 'required|max:10',
+            'phone' => 'required',
+            //'oked' => 'required|max:10',
+            //'okpo' => 'required|max:10'
+        );
 
-        $type = 'hr';
+        $validator = Validator::make(Input::all(), $rules);
 
-        $data = $this->curlHttpPost($filial, $tin, $type);
+        if ($validator->fails()){
 
-        $models = json_decode($data);
+            return Redirect::to(url('/jur/view-form/'.$request->inn))
+                ->withErrors($validator);
 
-        return response()->json($models);
+        } else{
+
+            $branchCode = $currentWorkUser->branch_code;
+
+            $localCode = Department::find($currentWorkUser->depart_id);
+
+            $lastModelId = UwJuridicalClient::where('branch_code', '=', $branchCode)->latest()->first();
+            $claim_id = 1000;
+            if ($lastModelId){
+                $claim_id = $lastModelId->claim_number + 1;
+            }
+
+            $phone = preg_replace('/[^A-Za-z0-9]/', '', $request->phone);
+            $str_summa = str_replace(',', '.', $request->summa);
+            $summa = str_replace(' ', '', $str_summa);
+
+            $model  = new UwJuridicalClient();
+            $model->claim_id = '2'.$branchCode.$claim_id;
+            $model->claim_date = today();
+            $model->inn = $request->inn;
+            $model->claim_number = $claim_id;
+            $model->agreement_number = $claim_id;
+            $model->agreement_date = today();
+            $model->resident = $request->resident;
+            $model->juridical_status = 1;
+            $model->nibbd = '';
+            $model->client_type = $request->client_type;
+            $model->jur_name = $request->jur_name;
+            $model->live_cadastr = '';
+            $model->owner_form = $request->owner_form;
+            $model->goverment = 1;
+            $model->registration_region = $request->registration_region;
+            $model->registration_district = $request->registration_district;
+            $model->registration_address = $request->registration_address;
+            $model->phone = $phone;
+            $model->hbranch = $request->hbranch;
+            $model->oked = $request->oked;
+            $model->okpo = $request->okpo;
+            $model->code_juridical_person = $request->code_juridical_person;
+            $model->summa = $summa;
+            $model->client_code = $request->client_code;
+            $model->loan_type_id = $request->loan_type_id;
+            $model->work_user_id = $currentWorkUser->id;
+            $model->branch_code = $branchCode;
+            $model->local_code = $localCode->local_code;
+            $model->save();
+
+            return Redirect::to('/jur/clients/1')
+                ->with(['success' => 'Mijoz muvaffaqiyatli tizimga qo`shildi']);
+
+        }
+
+    }
+
+    // CREDIT INSPECTOR VIEW
+    public function show($id)
+    {
+        //
+        $model = UwJuridicalClient::findOrFail($id);
+
+        $kias = UwJurKatmClient::where('jur_clients_id', $id)->where('status', 1)->first();
+
+        if ($kias){
+
+            $kias_decode = base64_decode($kias->json_data);
+
+            $kias_table = json_decode($kias_decode, true);
+        } else{
+            $kias = '';
+            $kias_table = '';
+        }
+
+        $balance = UwJurBalanceForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
+
+        $financial = UwJurFinancialForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
+
+        $saldos = UwJurSaldo::where('jur_clients_id', $id)->get();
+
+        $k2 = UwJurSaldo::where('jur_clients_id', $id)->get();
+
+        $credit_result = $this->clientCreditResults($id);
+
+        $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
+
+        $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
+
+        $modelComments = UwJurClientComment::where('jur_clients_id', $id)->get();
+
+        $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
+
+        $balance_class = $this->balanceClass($id);
+
+        return view('jur.ins.view',
+            compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'k2','credit_result',
+                'guars', 'files', 'modelComments', 'personal', 'balance_class')
+        );
+    }
+
+    // UNDERWRITER VIEW
+    public function uwShow($id)
+    {
+        //
+        $model = UwJuridicalClient::findOrFail($id);
+
+        $kias = UwJurKatmClient::where('jur_clients_id', $id)->where('status', 1)->first();
+
+        if ($kias){
+
+            $kias_decode = base64_decode($kias->json_data);
+
+            $kias_table = json_decode($kias_decode, true);
+        } else{
+            $kias = '';
+            $kias_table = '';
+        }
+
+        $balance = UwJurBalanceForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
+
+        $financial = UwJurFinancialForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
+
+        $saldos = UwJurSaldo::where('jur_clients_id', $id)->get();
+
+        $k2 = UwJurSaldo::where('jur_clients_id', $id)->get();
+
+        $credit_result = $this->clientCreditResults($id);
+
+        $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
+
+        $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
+
+        $modelComments = UwJurClientComment::where('jur_clients_id', $id)->get();
+
+        $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
+
+        $balance_class = $this->balanceClass($id);
+
+        return view('jur.uw.view',
+            compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'credit_result',
+                'guars', 'files', 'modelComments', 'k2', 'personal', 'balance_class')
+        );
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function edit($id)
+    {
+        //
+        $model = UwJuridicalClient::findOrFail($id);
+
+        $loans = UwLoanTypes::where('isActive', 1)->where('short_code', 'J')->get();
+
+        $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
+
+        $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
+
+        return view('jur.ins.edit', compact('model', 'loans', 'guars', 'files'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, $id)
+    {
+        //
+        $model = UwJuridicalClient::findOrFail($id);
+
+        $phone = preg_replace('/[^A-Za-z0-9]/', '', $request->phone);
+        $str_summa = str_replace(',', '.', $request->summa);
+        $summa = str_replace(' ', '', $str_summa);
+
+        $rules = array(
+            'hbranch' => 'required|max:10',
+            'summa' => 'required',
+            'owner_form' => 'required|max:5',
+            'phone' => 'required',
+            //'oked' => 'required|max:10',
+            //'okpo' => 'required|max:10'
+        );
+
+        $validator = Validator::make(Input::all(), $rules);
+
+        if ($validator->fails()){
+
+            return Redirect::to('/jur/client/'.$id.'/edit')
+                ->withErrors($validator);
+
+        } else {
+
+            $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'loan_type_id');
+
+            $inputs['summa'] = $summa;
+
+            $inputs['phone'] = $phone;
+
+            $model->update($inputs);
+
+            return Redirect::to('/jur/client/'.$id)
+                ->with('success', 'Mijoz ma`lumotlari muvaffaqiyatli yangilandi');
+
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
     }
 
     public function curlHttpPost($array)
@@ -550,11 +786,17 @@ class UwJuridicalClientsController extends Controller
         $jami_tuley_farqi = $real_monthly_payment - $monthly_payment;
         $credit_can_be = $real_monthly_payment * $loan_type->credit_duration/(+$loan_type->credit_duration*$loan_type->procent*0.01/365*30+1);
 
+        $credit_can_be_ins = $credit_can_be;
+        if ($credit_can_be_ins >= $model->summa){
+            $credit_can_be_ins = $model->summa;
+        }
+
 
         return [
             'credit_debt' => $kias_summa,
             'credit_sum' => $model->summa,
             'credit_can_be' => $credit_can_be,
+            'credit_can_be_ins' => $credit_can_be_ins,
             'scoring_ball' => $kias_ball,
             'monthly_payment' => $monthly_payment,
             'jami_tuley_farqi' => $jami_tuley_farqi,
@@ -600,273 +842,6 @@ class UwJuridicalClientsController extends Controller
         return response()->json([
             'error' => 'Error Scoring KIAS!'
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     */
-    public function create()
-    {
-        //
-        return view('jur.ins.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(Request $request)
-    {
-        //
-        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
-        if (!$currentWorkUser){
-            return back()->with(
-                [
-                    'status' => 'warning',
-                    'message' => 'Inspektor passive holatda!!! (ip:247)'
-                ]);
-        }
-
-        $rules = array(
-            'hbranch' => 'required|max:10',
-            'summa' => 'required',
-            'owner_form' => 'required|max:5',
-            'code_juridical_person' => 'required|max:10',
-            'phone' => 'required',
-            //'oked' => 'required|max:10',
-            //'okpo' => 'required|max:10'
-        );
-
-        $validator = Validator::make(Input::all(), $rules);
-
-        if ($validator->fails()){
-
-            return Redirect::to(url('/jur/view-form/'.$request->inn))
-                ->withErrors($validator);
-
-        } else{
-
-            $branchCode = $currentWorkUser->branch_code;
-
-            $localCode = Department::find($currentWorkUser->depart_id);
-
-            $lastModelId = UwJuridicalClient::where('branch_code', '=', $branchCode)->latest()->first();
-            $claim_id = 1000;
-            if ($lastModelId){
-                $claim_id = $lastModelId->claim_number + 1;
-            }
-
-            $phone = preg_replace('/[^A-Za-z0-9]/', '', $request->phone);
-            $str_summa = str_replace(',', '.', $request->summa);
-            $summa = str_replace(' ', '', $str_summa);
-
-            $model  = new UwJuridicalClient();
-            $model->claim_id = '2'.$branchCode.$claim_id;
-            $model->claim_date = today();
-            $model->inn = $request->inn;
-            $model->claim_number = $claim_id;
-            $model->agreement_number = $claim_id;
-            $model->agreement_date = today();
-            $model->resident = $request->resident;
-            $model->juridical_status = 1;
-            $model->nibbd = '';
-            $model->client_type = $request->client_type;
-            $model->jur_name = $request->jur_name;
-            $model->live_cadastr = '';
-            $model->owner_form = $request->owner_form;
-            $model->goverment = 1;
-            $model->registration_region = $request->registration_region;
-            $model->registration_district = $request->registration_district;
-            $model->registration_address = $request->registration_address;
-            $model->phone = $phone;
-            $model->hbranch = $request->hbranch;
-            $model->oked = $request->oked;
-            $model->okpo = $request->okpo;
-            $model->code_juridical_person = $request->code_juridical_person;
-            $model->summa = $summa;
-            $model->client_code = $request->client_code;
-            $model->loan_type_id = $request->loan_type_id;
-            $model->work_user_id = $currentWorkUser->id;
-            $model->branch_code = $branchCode;
-            $model->local_code = $localCode->local_code;
-            $model->save();
-
-            return Redirect::to('/jur/clients/1')
-                ->with(['success' => 'Mijoz muvaffaqiyatli tizimga qo`shildi']);
-
-        }
-
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function show($id)
-    {
-        //
-        $model = UwJuridicalClient::findOrFail($id);
-
-        $kias = UwJurKatmClient::where('jur_clients_id', $id)->where('status', 1)->first();
-
-        if ($kias){
-
-            $kias_decode = base64_decode($kias->json_data);
-
-            $kias_table = json_decode($kias_decode, true);
-        } else{
-            $kias = '';
-            $kias_table = '';
-        }
-
-        $balance = UwJurBalanceForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
-
-        $financial = UwJurFinancialForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
-
-        $saldos = UwJurSaldo::where('jur_clients_id', $id)->get();
-
-        $k2 = UwJurSaldo::where('jur_clients_id', $id)->get();
-
-        $credit_result = $this->clientCreditResults($id);
-
-        $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
-
-        $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
-
-        $modelComments = UwJurClientComment::where('jur_clients_id', $id)->get();
-
-        $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
-
-        return view('jur.ins.view',
-            compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'k2','credit_result',
-                'guars', 'files', 'modelComments', 'personal')
-        );
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function uwShow($id)
-    {
-        //
-        $model = UwJuridicalClient::findOrFail($id);
-
-        $kias = UwJurKatmClient::where('jur_clients_id', $id)->where('status', 1)->first();
-
-        if ($kias){
-
-            $kias_decode = base64_decode($kias->json_data);
-
-            $kias_table = json_decode($kias_decode, true);
-        } else{
-            $kias = '';
-            $kias_table = '';
-        }
-
-        $balance = UwJurBalanceForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
-
-        $financial = UwJurFinancialForm::where('uw_jur_clients_id', $id)->where('isActive', 1)->first();
-
-        $saldos = UwJurSaldo::where('jur_clients_id', $id)->get();
-
-        $credit_result = $this->clientCreditResults($id);
-
-        $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
-
-        $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
-
-        $modelComments = UwJurClientComment::where('jur_clients_id', $id)->get();
-
-        return view('jur.uw.view',
-            compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'credit_result', 'guars', 'files', 'modelComments')
-        );
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function edit($id)
-    {
-        //
-        $model = UwJuridicalClient::findOrFail($id);
-
-        $loans = UwLoanTypes::where('isActive', 1)->where('short_code', 'J')->get();
-
-        $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
-
-        $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
-
-        return view('jur.ins.edit', compact('model', 'loans', 'guars', 'files'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
-    {
-        //
-        $model = UwJuridicalClient::findOrFail($id);
-
-        $phone = preg_replace('/[^A-Za-z0-9]/', '', $request->phone);
-        $str_summa = str_replace(',', '.', $request->summa);
-        $summa = str_replace(' ', '', $str_summa);
-
-        $rules = array(
-            'hbranch' => 'required|max:10',
-            'summa' => 'required',
-            'owner_form' => 'required|max:5',
-            'phone' => 'required',
-            //'oked' => 'required|max:10',
-            //'okpo' => 'required|max:10'
-        );
-
-        $validator = Validator::make(Input::all(), $rules);
-
-        if ($validator->fails()){
-
-            return Redirect::to('/jur/client/'.$id.'/edit')
-                ->withErrors($validator);
-
-        } else {
-
-            $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'loan_type_id');
-
-            $inputs['summa'] = $summa;
-
-            $inputs['phone'] = $phone;
-
-            $model->update($inputs);
-
-            return Redirect::to('/jur/client/'.$id)
-                ->with('success', 'Mijoz ma`lumotlari muvaffaqiyatli yangilandi');
-
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 
     /**
@@ -1058,5 +1033,484 @@ class UwJuridicalClientsController extends Controller
 
         return response()->json(array('success' => true));
     }
+
+    public function f1cRowNo($id, $value)
+    {
+        $balance_child = UwJurBalanceChild::where('uw_jur_balance_id', $id)->where('row_no', "=",$value)->first();
+
+        return $balance_child->sum_begin_period??0.00;
+    }
+
+    public function f1eRowNo($id, $value)
+    {
+        $balance_child = UwJurBalanceChild::where('uw_jur_balance_id', $id)->where('row_no', "=",$value)->first();
+
+        return $balance_child->sum_end_period??0.00;
+    }
+
+    public function f2cRowNo($id, $value)
+    {
+        $financial_child = UwJurFinancialChild::where('uw_jur_financial_id', $id)->where('row_no', "=",$value)->first();
+
+        return $financial_child->sum_old_period_doxod??0.00;
+    }
+
+    public function f2dRowNo($id, $value)
+    {
+        $financial_child = UwJurFinancialChild::where('uw_jur_financial_id', $id)->where('row_no', "=",$value)->first();
+
+        return $financial_child->sum_old_period_rasxod??0.00;
+    }
+
+    public function f2eRowNo($id, $value)
+    {
+        $financial_child = UwJurFinancialChild::where('uw_jur_financial_id', $id)->where('row_no', "=",$value)->first();
+
+        return $financial_child->sum_period_doxod??0.00;
+    }
+
+    public function f2fRowNo($id, $value)
+    {
+        $financial_child = UwJurFinancialChild::where('uw_jur_financial_id', $id)->where('row_no', "=",$value)->first();
+
+        return $financial_child->sum_period_rasxod??0.00;
+    }
+
+    public function balanceClass($id)
+    {
+        //
+        $balance = UwJurBalanceForm::where('uw_jur_clients_id', $id)->first();
+        $f1 = $balance->id??'';
+
+        $financial = UwJurFinancialForm::where('uw_jur_clients_id', $id)->first();
+        $f2 = $financial->id??'';
+
+        $res_table = '';
+
+        if ($balance and $financial) {
+
+            $f1_row_c_5 = (($this->f1cRowNo($f1,"480") - $this->f1cRowNo($f1,"290")) + $this->f1cRowNo($f1,"490")) - $this->f1cRowNo($f1,"130");
+            $f1_row_e_5 = (($this->f1eRowNo($f1,"480") - $this->f1eRowNo($f1,"290")) + $this->f1eRowNo($f1,"490")) - $this->f1eRowNo($f1,"130");
+
+            $dv_f1cRowNo = (0.00 == $this->f1cRowNo($f1,"600")) ? 1 : $this->f1cRowNo($f1,"600");
+            $f1_row_c_6 = ($this->f1cRowNo($f1,"320") + $this->f1cRowNo($f1,"210")) / $dv_f1cRowNo;
+
+            $dv_f1eRowNo = (0.00 == $this->f1eRowNo($f1,"600")) ? 1 : $this->f1eRowNo($f1,"600");
+            $f1_row_e_6 = ($this->f1eRowNo($f1,"320") + $this->f1eRowNo($f1,"210")) / $dv_f1eRowNo;
+
+            $f1_row_c_7 = ($this->f1cRowNo($f1,"140") + $this->f1cRowNo($f1,"210") + $this->f1cRowNo($f1,"320")) / $dv_f1cRowNo;
+            $f1_row_e_7 = ($this->f1eRowNo($f1,"140") + $this->f1eRowNo($f1,"210") + $this->f1eRowNo($f1,"320")) / $dv_f1eRowNo;
+
+            $dv_f2cRowNo = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f1_row_c_9 = $this->f1cRowNo($f1,"210") / $dv_f2cRowNo * 360;
+
+            $dv_f2eRowNo = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f1_row_e_9 = $this->f1eRowNo($f1,"210") / $dv_f2eRowNo * 90;
+
+            // row 10
+            $dv_f2dRowNo = (0.00 == $this->f2dRowNo($f2,"020")) ? 1 : $this->f2dRowNo($f2,"020");
+            $f1_row_c_10 = $this->f1cRowNo($f1,"601") / $dv_f2dRowNo * 360;
+
+            $dv_f2fRowNo = (0.00 == $this->f2fRowNo($f2,"020")) ? 1 : $this->f2fRowNo($f2,"020");
+            $f1_row_e_10 = $this->f1eRowNo($f1,"601") / $dv_f2fRowNo * 90;
+
+            // row 11
+            $dv_f2cRowNo_11 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f1_row_c_11 = $this->f1cRowNo($f1,"170") / $dv_f2cRowNo_11 * 360;
+
+            $dv_f2eRowNo_11 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f1_row_e_11 = $this->f1eRowNo($f1,"170") / $dv_f2eRowNo_11 * 90;
+
+            // row 12
+            $dv_f2cRowNo_12 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f1_row_c_12 = $this->f1cRowNo($f1,"180") / $dv_f2cRowNo_12 * 360;
+
+            $dv_f2eRowNo_12 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f1_row_e_12 = $this->f1eRowNo($f1,"180") / $dv_f2eRowNo_12 * 90;
+
+            // row 13
+            $dv_f2cRowNo_13 = (0.00 == $this->f2dRowNo($f2,"020")) ? 1 : $this->f2dRowNo($f2,"020");
+            $f1_row_c_13 = $this->f1cRowNo($f1,"150") / $dv_f2cRowNo_13 * 360;
+
+            $dv_f2eRowNo_13 = (0.00 == $this->f2fRowNo($f2,"020")) ? 1 : $this->f2fRowNo($f2,"020");
+            $f1_row_e_13 = $this->f1eRowNo($f1,"150") / $dv_f2eRowNo_13 * 90;
+
+            // row 14
+            $dv_f2cRowNo_14 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f1_row_c_14 = (($this->f1cRowNo($f1,"012") + $this->f1cRowNo($f1,"022")) / $dv_f2cRowNo_14) * 360;
+
+            $dv_f2eRowNo_14 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f1_row_e_14 = (($this->f1eRowNo($f1,"012") + $this->f1eRowNo($f1,"022")) / $dv_f2eRowNo_14) * 90;
+
+            // row 15
+            $dv_f1cRowNo_15 = (0.00 == $this->f1cRowNo($f1,"400")) ? 1 : $this->f1cRowNo($f1,"400");
+            $f2_row_c_15 = $this->f2cRowNo($f2,"010") / $dv_f1cRowNo_15;
+
+            $dv_f1eRowNo_15 = (0.00 == $this->f1eRowNo($f1,"400")) ? 1 : $this->f1eRowNo($f1,"400");
+            $f2_row_e_15 = $this->f2eRowNo($f1,"010") / $dv_f1eRowNo_15;
+
+            // row 17
+            $dv_c_17 = ($this->f1cRowNo($f1,"770") - ($this->f1cRowNo($f1,"570") + $this->f1cRowNo($f1,"580") + $this->f1cRowNo($f1,"670")));
+            $dv_f1cRowNo_17 = (0 == $dv_c_17) ? 1 : $dv_c_17;
+            $f1_row_c_17 = ($this->f1cRowNo($f1,"480") + $this->f1cRowNo($f1,"570") + $this->f1cRowNo($f1,"580")) / $dv_f1cRowNo_17;
+
+            $dv_e_17 = ($this->f1eRowNo($f1,"770") - ($this->f1eRowNo($f1,"570") + $this->f1eRowNo($f1,"580") + $this->f1eRowNo($f1,"670")));
+            $dv_f1eRowNo_17 = (0 == $dv_e_17) ? 1 : $dv_e_17;
+            $f1_row_e_17 = ($this->f1eRowNo($f1,"480") + $this->f1eRowNo($f1,"570") + $this->f1eRowNo($f1,"580")) / $dv_f1eRowNo_17;
+
+            // row 18
+            $dv_c_18 = ($this->f1cRowNo($f1,"780") - $this->f1cRowNo($f1,"022"));
+            $dv_f1cRowNo_18 = (0 == $dv_c_18) ? 1 : $dv_c_18;
+            $f1_row_c_18 = ($this->f1cRowNo($f1,"480") - $this->f1cRowNo($f1,"290")) / $dv_f1cRowNo_18 * 100;
+
+            $dv_e_18 = ($this->f1eRowNo($f1,"780") - $this->f1eRowNo($f1,"022"));
+            $dv_f1eRowNo_18 = (0 == $dv_e_18) ? 1 : $dv_e_18;
+            $f1_row_e_18 = ($this->f1eRowNo($f1,"480") - $this->f1eRowNo($f1,"290")) / $dv_f1eRowNo_18 * 100;
+
+            // row 21
+            $dv_c_21 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f2_row_c_21 = $this->f2dRowNo($f2,"270") / $dv_c_21 * 100;
+
+            $dv_e_21 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f2_row_e_21 = $this->f2fRowNo($f2,"270") / $dv_e_21 * 100;
+
+            // row 22
+            $dv_c_22 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f2_row_c_22 = $this->f2dRowNo($f2,"030") / $dv_c_22 * 100;
+
+            $dv_e_22 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f2_row_e_22 = $this->f2eRowNo($f2,"030") / $dv_e_22 * 100;
+
+            // row 23
+            $dv_c_23 = (0.00 == $this->f1cRowNo($f1,"480")) ? 1 : $this->f1cRowNo($f1,"480");
+            $f2_row_c_23 = $this->f2dRowNo($f2,"270") / $dv_c_23 * 100;
+
+            $dv_e_23 = (0.00 == $this->f1eRowNo($f1,"480")) ? 1 : $this->f1eRowNo($f1,"480");
+            $f2_row_e_23 = $this->f2fRowNo($f2,"270") / $dv_e_23 * 100;
+
+            // row 24
+            $dv_c_24 = ($this->f1cRowNo($f1,"012") + $this->f1cRowNo($f1,"022"));
+            $dv_f1cRowNo_24 = (0 == $dv_c_24) ? 1 : $dv_c_24;
+            $f2_row_c_24 = $this->f2cRowNo($f2,"270") / $dv_f1cRowNo_24 * 100;
+
+            $dv_e_24 = ($this->f1eRowNo($f1,"012") + $this->f1eRowNo($f1,"022"));
+            $dv_f1eRowNo_24 = (0 == $dv_e_24) ? 1 : $dv_e_24;
+            $f2_row_e_24 = $this->f2eRowNo($f2,"270") / $dv_f1eRowNo_24 * 100;
+
+            // row 25
+            $dv_c_25 = (0.00 == $this->f1cRowNo($f1,"390")) ? 1 : $this->f1cRowNo($f1,"390");
+            $f2_row_c_25 = $this->f2dRowNo($f2,"270") / $dv_c_25 * 100;
+
+            $dv_e_25 = (0.00 == $this->f1eRowNo($f1,"390")) ? 1 : $this->f1eRowNo($f1,"390");
+            $f2_row_e_25 = $this->f2fRowNo($f2,"270") / $dv_e_25 * 100;
+
+            // row 26
+            $dv_c_26 = (0.00 == $this->f1cRowNo($f1,"780")) ? 1 : $this->f1cRowNo($f1,"780");
+            $f2_row_c_26 = $this->f2dRowNo($f2,"270") / $dv_c_26;
+
+            $dv_e_26 = (0.00 == $this->f1eRowNo($f1,"780")) ? 1 : $this->f1eRowNo($f1,"780");
+            $f2_row_e_26 = $this->f2fRowNo($f2,"270") / $dv_e_26;
+
+            // row 36
+            $dv_c_36 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f1_row_c_36 = $this->f1cRowNo($f1,"210") / $dv_c_36 * 100;
+
+            $dv_e_36 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f1_row_e_36 = $this->f1eRowNo($f1,"210") / $dv_e_36 * 100;
+
+            // row 37
+            $dv_c_37 = (0.00 == $this->f2cRowNo($f2,"010")) ? 1 : $this->f2cRowNo($f2,"010");
+            $f1_row_c_37 = $this->f1cRowNo($f1,"320") / $dv_c_37 * 100;
+
+            $dv_e_37 = (0.00 == $this->f2eRowNo($f2,"010")) ? 1 : $this->f2eRowNo($f2,"010");
+            $f1_row_e_37 = $this->f1eRowNo($f1,"320") / $dv_e_37 * 100;
+
+            // row 38
+            $dv_c_38 = ($this->f1cRowNo($f1,"010") + $this->f1cRowNo($f1,"020"));
+            $dv_f1cRowNo_38 = (0.00 == $dv_c_38) ? 1 : $dv_c_38;
+            $f1_row_c_38 = ($this->f1cRowNo($f1,"011") + $this->f1cRowNo($f1,"021")) / $dv_f1cRowNo_38;
+
+            $dv_e_38 = ($this->f1eRowNo($f1,"010") + $this->f1eRowNo($f1,"020"));
+            $dv_f1eRowNo_38 = (0.00 == $dv_e_38) ? 1 : $dv_e_38;
+            $f1_row_e_38 = ($this->f1eRowNo($f1,"011") + $this->f1eRowNo($f1,"021")) / $dv_f1eRowNo_38;
+
+            $res_table.='
+                         <tr>
+                            <td class="text-bold text-center">ПОКАЗАТЕЛИ</td>
+                            <td class="text-bold">F1</td>
+                            <td class="text-bold">F2</td>
+                         </tr>
+                         <tr>
+                            <td>Рабочий капитал (Наличие СОС)</td>
+                            <td>'.number_format($f1_row_c_5, 2).'</td><td>'.number_format($f1_row_e_5, 2).'</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент ликвидности</td>
+                            <td>'.number_format($f1_row_c_6, 5).'</td><td>'.number_format($f1_row_e_6, 5).'</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент покрытия</td>
+                            <td>'.number_format($f1_row_c_7, 5).'</td><td>'.number_format($f1_row_e_7, 5).'</td>
+                         </tr>
+                         <tr>
+                            <td colspan="3" class="text-bold text-center bg-warning">ПОКАЗАТЕЛИ ДЕЛОВОЙ АКТИВНОСТИ</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость дебиторской задолженности (в днях)</td>
+                            <td>'.number_format($f1_row_c_9).'</td><td>'.number_format($f1_row_e_9).'</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость кредиторской задолженности (в днях)</td>
+                            <td>'.number_format($f1_row_c_10).'</td><td>'.number_format($f1_row_e_10).'</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость запасов готовой продукции  (в днях)</td>
+                            <td>'.$f1_row_c_11.'</td><td>'.$f1_row_e_11.'</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость товаров для перепродажи  (в днях)</td>
+                            <td>'.$f1_row_c_12.'</td><td>'.$f1_row_e_12.'</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость производственных запасов (в днях)</td>
+                            <td>'.$f1_row_c_13.'</td><td>'.$f1_row_e_13.'</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость основных средств (в днях)</td>
+                            <td>'.$f1_row_c_14.'</td><td>'.$f1_row_e_14.'</td>
+                         </tr>
+                         <tr>
+                            <td>Оборачиваемость активов (в разах)</td>
+                            <td>'.number_format($f2_row_c_15).'</td><td>'.$f2_row_e_15.'</td>
+                         </tr>
+                         <tr>
+                            <td colspan="3" class="text-bold text-center bg-warning">ПОКАЗАТЕЛИ ДЕЛОВОЙ АКТИВНОСТИ</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент соотношения заемных и собственных средств</td>
+                            <td>'.number_format($f1_row_c_17, 2).'</td><td>'.number_format($f1_row_e_17, 2).'</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент автономии</td>
+                            <td>'.number_format($f1_row_c_18, 2).'%</td><td>'.number_format($f1_row_e_18, 2).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент обслуживания долга</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td colspan="3" class="text-bold text-center bg-warning">ПОКАЗАТЕЛИ РЕНТАБЕЛЬНОСТИ</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент чистой рентабельности продаж</td>
+                            <td>'.number_format($f2_row_c_21, 2).'%</td><td>'.number_format($f2_row_e_21, 2).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент валовой рентабельности продаж </td>
+                            <td>'.number_format($f2_row_c_22).'%</td><td>'.number_format($f2_row_e_22).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент рентабельности собственного капитала</td>
+                            <td>'.number_format($f2_row_c_23).'%</td><td>'.number_format($f2_row_e_23).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент рентабельности основных средств</td>
+                            <td>'.$f2_row_c_24.'%</td><td>'.$f2_row_e_24.'%</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент рентабельности оборотных активов</td>
+                            <td>'.number_format($f2_row_c_25).'%</td><td>'.number_format($f2_row_e_25).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Коэффициент рентабельности  активов</td>
+                            <td>'.number_format($f2_row_c_26, 2).'</td><td>'.number_format($f2_row_e_26, 2).'</td>
+                         </tr>
+                         <tr>
+                            <td colspan="3" class="text-bold text-center bg-warning">ПОКАЗАТЕЛИ РЫНОЧНОЙ АКТИВНОСТИ</td>
+                         </tr>
+                         <tr>
+                            <td>Прибыль на 1 акцию</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td>Соотношение рыночной цены акции и прибыли на 1 акцию</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td>Балансовая стоимость 1 акции</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td>Соотношение рыночной и балансовой стоимости 1 акции</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td>Доходность акций с учетом курсовой стоимости акции</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td>Норма дивиденда на 1 акцию</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td>Доля выплаченных дивидендов</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td colspan="3" class="text-bold text-center bg-warning"></td>
+                         </tr>
+                         <tr>
+                            <td>Дебиторская задолженность / Чистые продажи</td>
+                            <td>'.number_format($f1_row_c_36).'%</td><td>'.number_format($f1_row_e_36).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Денежные средства / Чистые продажи</td>
+                            <td>'.number_format($f1_row_c_37).'%</td><td>'.number_format($f1_row_e_37).'%</td>
+                         </tr>
+                         <tr>
+                            <td>Амортизация / Основные средства</td>
+                            <td>'.$f1_row_c_38.'</td><td>'.$f1_row_e_38.'</td>
+                         </tr>
+                         <tr>
+                            <td>Инвестиции в долгосрочные активы</td>
+                            <td> - </td><td> - </td>
+                         </tr>
+                         <tr>
+                            <td colspan="3" class="text-bold text-center bg-warning">: : : : : : : : : : : : : : : : : : : : : : : :: : : : : : : :</td>
+                         </tr>';
+                            // row 42
+                            if ($f1_row_c_6 > 1.5){
+                                $f1_row_c_42 = 1;
+                            } elseif ($f1_row_c_6 <= 1.5 and $f1_row_c_6 > 1) {
+                                $f1_row_c_42 = 2;
+                            } elseif ($f1_row_c_6 <= 1 and $f1_row_c_6 > 0.5) {
+                                $f1_row_c_42 = 3;
+                            } elseif ($f1_row_c_6 <= 0.5) {
+                                $f1_row_c_42 = 4;
+                            } else {
+                                $f1_row_c_42 = '-';
+                            }
+
+                            if ($f1_row_e_6 > 1.5){
+                                $f1_row_e_42 = 1;
+                            } elseif ($f1_row_e_6 <= 1.5 and $f1_row_e_6 > 1) {
+                                $f1_row_e_42 = 2;
+                            } elseif ($f1_row_e_6 <= 1 and $f1_row_e_6 > 0.5) {
+                                $f1_row_e_42 = 3;
+                            } elseif ($f1_row_e_6 <= 0.5) {
+                                $f1_row_e_42 = 4;
+                            } else {
+                                $f1_row_e_42 = '-';
+                            }
+
+                            //row 43
+                            if ($f1_row_c_7 > 2){
+                                $f1_row_c_43 = 1;
+                            } elseif ($f1_row_c_7 <= 2 and $f1_row_c_7 > 1) {
+                                $f1_row_c_43 = 2;
+                            } elseif ($f1_row_c_7 <= 1 and $f1_row_c_7 > 0.5) {
+                                $f1_row_c_43 = 3;
+                            } elseif ($f1_row_c_7 <= 0.5) {
+                                $f1_row_c_43 = 4;
+                            } else {
+                                $f1_row_c_43 = '-';
+                            }
+
+                            if ($f1_row_e_7 > 2){
+                                $f1_row_e_43 = 1;
+                            } elseif ($f1_row_e_7 <= 2 and $f1_row_e_7 > 1) {
+                                $f1_row_e_43 = 2;
+                            } elseif ($f1_row_e_7 <= 1 and $f1_row_e_7 > 0.5) {
+                                $f1_row_e_43 = 3;
+                            } elseif ($f1_row_e_7 <= 0.5) {
+                                $f1_row_e_43 = 4;
+                            } else {
+                                $f1_row_e_43 = '-';
+                            }
+
+                            //row 44
+                            $f1_row_c_18 = $f1_row_c_18/100;
+                            if ($f1_row_c_18 > 0.6){
+                                $f1_row_c_44 = 1;
+                            } elseif ($f1_row_c_18 <= 0.6 and $f1_row_c_18 > 0.3) {
+                                $f1_row_c_44 = 2;
+                            } elseif ($f1_row_c_18 <= 0.3 and $f1_row_c_18 > 0.15) {
+                                $f1_row_c_44 = 3;
+                            } elseif ($f1_row_c_18 <= 15) {
+                                $f1_row_c_44 = 4;
+                            } else {
+                                $f1_row_c_44 = '-';
+                            }
+
+                            $f1_row_e_18 = $f1_row_e_18/100;
+                            if ($f1_row_e_18 > 0.6){
+                                $f1_row_e_44 = 1;
+                            } elseif ($f1_row_e_18 <= 0.6 and $f1_row_e_18 > 0.3) {
+                                $f1_row_e_44 = 2;
+                            } elseif ($f1_row_e_18 <= 0.3 and $f1_row_e_18 > 0.15) {
+                                $f1_row_e_44 = 3;
+                            } elseif ($f1_row_e_18 <= 15) {
+                                $f1_row_e_44 = 4;
+                            } else {
+                                $f1_row_e_44 = '-';
+                            }
+                            //print_r($f1_row_e_18); die;
+
+                            //row 45
+                            $f1_row_c_45 = sqrt( pow((1-$f1_row_c_42), 2) + pow((1-$f1_row_c_43),2) + pow((1-$f1_row_c_44),2));
+                            $f1_row_e_45 = sqrt( pow((1-$f1_row_e_42), 2) + pow((1-$f1_row_e_43),2) + pow((1-$f1_row_e_44),2));
+                            //print_r($f1_row_e_45); die;
+
+                            //row 46
+                            if ($f1_row_c_45 >= 0 and $f1_row_c_45 < 1.3){
+                                $f1_row_c_46 = 'I';
+                            } elseif ($f1_row_c_45 > 1.31 and $f1_row_c_45 < 2.6) {
+                                $f1_row_c_46 = 'II';
+                            } elseif ($f1_row_c_45 > 2.61 and $f1_row_c_45 < 3.9) {
+                                $f1_row_c_46 = 'III';
+                            } elseif ($f1_row_c_45 > 3.91 and $f1_row_c_45 < 5.2) {
+                                $f1_row_c_46 = 'IV';
+                            } else {
+                                $f1_row_c_46 = '-';
+                            }
+
+                            if ($f1_row_e_45 >= 0 and $f1_row_e_45 < 1.3){
+                                $f1_row_e_46 = 'I';
+                            } elseif ($f1_row_e_45 > 1.31 and $f1_row_e_45 < 2.6) {
+                                $f1_row_e_46 = 'II';
+                            } elseif ($f1_row_e_45 > 2.61 and $f1_row_e_45 < 3.9) {
+                                $f1_row_e_46 = 'III';
+                            } elseif ($f1_row_e_45 > 3.91 and $f1_row_e_45 < 5.2) {
+                                $f1_row_e_46 = 'IV';
+                            } else {
+                                $f1_row_e_46 = '-';
+                            }
+
+            $res_table.='<tr>
+                            <td>Ликвидность</td>
+                            <td>'.$f1_row_c_42.'</td><td>'.$f1_row_e_42.'</td>
+                         <tr>
+                            <td>Покрытия</td>
+                            <td>'.$f1_row_c_43.'</td><td>'.$f1_row_e_43.'</td>
+                         </tr>
+                         <tr>
+                            <td>Автономия</td>
+                            <td>'.$f1_row_c_44.'</td><td>'.$f1_row_e_44.'</td>
+                         </tr>
+                         <tr>
+                            <td class="text-bold">Расчеты</td>
+                            <td>'.number_format($f1_row_c_45, 2).'</td><td>'.number_format($f1_row_e_45, 2).'</td>
+                         </tr>
+                         <tr>
+                            <td class="text-bold">Итоговый класс</td>
+                            <td>'.$f1_row_c_46.'</td><td>'.$f1_row_e_46.'</td>
+                         </tr>
+                         ';
+
+        }
+
+        return $res_table;
+    }
+
 
 }

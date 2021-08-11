@@ -62,7 +62,7 @@ class UwInquiryIndividualController extends Controller
 
         $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        $scoringBall = json_decode($clientK['katm_score'], true);
+        //$scoringBall = json_decode($clientK['katm_score'], true);
 
         // Client Debtors Payment Calculate
         $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
@@ -152,7 +152,7 @@ class UwInquiryIndividualController extends Controller
 
         if ($modelClient->reg_status == 1) {
 
-            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps, $modelClient->branch_code);
+            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->branch_code, $modelClient->is_inps);
 
         }
 
@@ -238,7 +238,7 @@ class UwInquiryIndividualController extends Controller
             // update reg
             $modelClient->update(['reg_status' => 1, 'katm_sir' => $katm_sir]);
 
-            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps, $modelClient->branch_code);
+            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->branch_code, $modelClient->is_inps);
 
         } else {
             return response()->json(
@@ -256,14 +256,14 @@ class UwInquiryIndividualController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function creditReportK($id, $claim_id, $is_inps, $branch_code)
+    public function creditReportK($id, $claim_id, $branch_code, $is_inps)
     {
         //
         $isKATM = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
         if ($isKATM){
 
-            return $this->getClientSalary($id, $claim_id, $branch_code);
+            return $this->getClientSalary($id, $claim_id, $branch_code, $is_inps);
         }
 
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
@@ -306,7 +306,7 @@ class UwInquiryIndividualController extends Controller
 
             $token = $data_decode['data']['token'];
 
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
+            return $this->creditReportStatusK($id, $claim_id, $branch_code, $is_inps, $token);
 
         } else {
             return response()->json(
@@ -326,7 +326,7 @@ class UwInquiryIndividualController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code)
+    public function creditReportStatusK($id, $claim_id, $branch_code, $is_inps, $token)
     {
         //
 
@@ -475,7 +475,7 @@ class UwInquiryIndividualController extends Controller
 
                     if ($is_inps == 1 && $scoring_ball > 199){
 
-                        return $this->getClientSalary($id, $claim_id, $branch_code);
+                        return $this->getClientSalary($id, $claim_id, $branch_code, $is_inps);
 
                     } else {
 
@@ -492,7 +492,7 @@ class UwInquiryIndividualController extends Controller
             }
 
         } else{
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
+            return $this->creditReportStatusK($id, $claim_id, $branch_code, $is_inps, $token);
         }
 
 
@@ -503,7 +503,7 @@ class UwInquiryIndividualController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getClientSalary($id, $claim_id, $branch_code)
+    public function getClientSalary($id, $claim_id, $branch_code, $is_inps)
     {
         //
         $inps_client = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
@@ -637,7 +637,7 @@ class UwInquiryIndividualController extends Controller
                 return response()->json(
                     [
                         'status' => 'success',
-                        'message' => '('.$message.$resultDecode.')',
+                        'message' => '('.$message.')',
                         'credit_results' => $this->clientCreditResults($id)
                     ]);
 
@@ -645,7 +645,7 @@ class UwInquiryIndividualController extends Controller
         }
         else {
 
-            return $this->getClientSalaryInps($id, $claim_id, $branch_code);
+            return $this->getClientSalaryInps($id, $claim_id, $branch_code, $is_inps);
 
             /*$message = $resultDecode['errorMessage'];
 
@@ -661,7 +661,7 @@ class UwInquiryIndividualController extends Controller
 
     }
 
-    public function getClientSalaryInps($id, $claim_id, $branch_code)
+    public function getClientSalaryInps($id, $claim_id, $branch_code, $is_inps)
     {
 
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
@@ -702,10 +702,12 @@ class UwInquiryIndividualController extends Controller
         $result = $data_decode['data']['result'];
         $resultMessage = $data_decode['data']['resultMessage'];
 
+        //print_r($data_decode); die;
+
         if ($code == '200'){
             if ($result == '05050'){
                 $token = $data_decode['data']['token'];
-                return $this->getClientSalaryInpsStatus($token, $id, $claim_id, $branch_code);
+                return $this->getClientSalaryInpsStatus($id, $claim_id, $branch_code, $is_inps, $token);
 
             } else {
                 return response()->json(
@@ -717,18 +719,19 @@ class UwInquiryIndividualController extends Controller
             }
 
         } else {
+            $errorMessage = $data_decode['errorMessage'];
 
             return response()->json(
                 [
                     'status'=>'danger',
-                    'message'=> $resultMessage,
-                    'code' => $code
+                    'message'=> 'code: '.$code.') '.$errorMessage,
+                    'data' => $code
                 ]);
         }
 
     }
 
-    public function getClientSalaryInpsStatus($token, $id, $claim_id, $branch_code){
+    public function getClientSalaryInpsStatus($id, $claim_id, $branch_code, $is_inps, $token){
 
         $url1 = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
         $data1 = array(
@@ -742,7 +745,7 @@ class UwInquiryIndividualController extends Controller
                 "pToken" => "".$token."",
                 "pLegal" => 1,
                 "pClaimId" => "".$claim_id."",
-                "pReportId" => 25,
+                "pReportId" => "25",
                 "pReportFormat" => 1
             ),
         );
@@ -766,6 +769,8 @@ class UwInquiryIndividualController extends Controller
         $result = $data_decode['data']['result'];
         $reportBase64 = $data_decode['data']['reportBase64'];
         $code = $data_decode['code'];
+
+        //print_r($data_decode); die;
 
         if ($code == '200') {
 
@@ -809,11 +814,11 @@ class UwInquiryIndividualController extends Controller
 
                     if ($array['report']['incomes']) {
 
+                        $old_salary = UwInpsClients::where('uw_clients_id', $id);
+                        $old_salary->delete();
+
                         $array_income = $array['report']['incomes']['INCOME'];
                         if (array_filter($array_income, 'is_array')) {
-
-                            $old_salary = UwInpsClients::where('uw_clients_id', $id);
-                            $old_salary->delete();
 
                             foreach ($array_income as $key => $value) {
                                 $inps = new UwInpsClients();
@@ -901,9 +906,11 @@ class UwInquiryIndividualController extends Controller
                         ]);
 
                 } else {
-                    return $this->getClientSalaryInpsStatus($token, $id, $claim_id, $branch_code);
+                    return $this->getClientSalaryInpsStatus($id, $claim_id, $branch_code, $is_inps, $token);
                 }
 
+            } elseif ($result == '05050' and (!$reportBase64)) {
+                return $this->getClientSalaryInpsStatus($id, $claim_id, $branch_code, $is_inps, $token);
             }
 
         } else {

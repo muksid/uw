@@ -1136,7 +1136,7 @@
 
                         },
                         success: function(response){
-                            //console.log(response);
+                            console.log(response);
                             $(".inquiry-individual").prop('disabled', false);
                             $("#loading-gif").hide();
                             $('#ResultMessageModal').addClass('modal-'+response.status);
@@ -1545,11 +1545,13 @@
 
                                 let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 
-                                table+= '<tr>' +
-                                    '<td colspan="1"><b>Jami:</b><td>' +
-                                    '<td><b>'+salaryTotal+'</b><td>' +
-                                    '<td colspan="1"><td>' +
-                                    '</tr>';
+                                table+= '<tfoot>' +
+                                            '<tr>' +
+                                                '<td colspan="3"><b>Jami:</b><td>' +
+                                                '<td colspan="2"><b>'+salaryTotal+'</b><td>' +
+                                            '</tr>' +
+                                        '</tfoot>';
+
                                 table+= '</table>' +
                                     '</div>';
                             }

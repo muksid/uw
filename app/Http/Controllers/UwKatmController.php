@@ -51,6 +51,32 @@ class UwKatmController extends Controller
 
             return $this->getClientMib($model_id);
 
+        } elseif ($post_type == 'get_credit_history') {
+
+            $credit_history = UwPhyKatmFile::where('uw_clients_id', $model_id)->where('uw_katm_id', 0)->where('file_type', '=', 'B64_K_HIS')->first();
+
+            $data = '';
+            if ($credit_history){
+
+                $path = $credit_history->file_path.$credit_history->file_hash;
+
+                if (Storage::disk('ftp_nas')->exists($path)){
+
+                    $data = Storage::disk('ftp_nas')->get($path);
+
+                    $data = base64_decode($data);
+
+                }
+
+            }
+
+            return response()->json(
+                [
+                    'message' => 'KATM Kredit tarixi natijasi',
+                    'data' => $data,
+                    'type' => 'get_credit_history'
+                ]);
+
         } else {
 
             return response()->json(['message' => 'Error post type!!!']);
@@ -134,14 +160,7 @@ class UwKatmController extends Controller
     public function getCreditScoring($model_id)
     {
         //
-        $isKATM = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
-
-        if ($isKATM){
-
-            return $this->getClientSalary($id, $claim_id, $branch_code);
-        }
-
-        $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
+        $modelClient = UwClients::find($model_id);
 
         $data = array(
             "security" => array(
@@ -150,563 +169,135 @@ class UwKatmController extends Controller
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".$branch_code."",
+                "pCode" => "".$modelClient->branch_code."",
                 "pLegal" => 1,
-                "pClaimId" => "".$claim_id."",
-                "pReportId" => 21,
+                "pClaimId" => "".$modelClient->claim_id."",
+                "pReportId" => "021",
                 "pReportFormat" => 1
             ),
         );
 
-        $postdata = json_encode($data);
+        $postData = json_encode($data);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8001');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $result = curl_exec($ch);
-        curl_close($ch);
+        $arrData = array(
+            'port' => '8001',
+            'path' => 'katm-api/v1/credit/report',
+            'type' => 'scoring',
+            'model_id' => $model_id,
+            'claim_id' => $modelClient->claim_id,
+            'branch_code' => $modelClient->branch_code,
+            'post_data' =>$postData
+        );
 
-        $data_decode = json_decode($result, true);
-        $result = $data_decode['data']['result'];
-        $resultMessage = $data_decode['data']['resultMessage'];
-
-        if ($result == '05050'){
-
-            $token = $data_decode['data']['token'];
-
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
-
-        } else {
-            return response()->json(
-                [
-                    'status'=>'warning',
-                    'message'=>'('.$result.') KATM Mijoz kredit tarixini olishda xatolik mavjud!',
-                    'data'=> $resultMessage,
-                    'credit_results' => $this->clientCreditResults($id),
-                ]);
-        }
+        return $this->curlInit($arrData);
 
     }
 
-    public function getCreditScoringStatus($model_id, $token)
-    {
+    public function getClientScoringStatus($arrData, $token){
+
         //
-
-        $url1 = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
-
-        $data1 = array(
+        $data = array(
             "security" => array(
                 "pLogin" => "turonbank",
                 "pPassword" => "!trB&GkL@200130"
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".$branch_code."",
+                "pCode" => "".$arrData['branch_code']."",
                 "pToken" => "".$token."",
                 "pLegal" => 1,
-                "pClaimId" => "".$claim_id."",
-                "pReportId" => 21,
+                "pClaimId" => "".$arrData['claim_id']."",
+                "pReportId" => "021",
                 "pReportFormat" => 1
             ),
         );
 
-        $postdata1 = json_encode($data1);
+        $postData = json_encode($data);
 
-        $ch1 = curl_init($url1);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch1, CURLOPT_POST, 1);
-        curl_setopt($ch1, CURLOPT_POSTFIELDS, $postdata1);
-        curl_setopt($ch1, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch1, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
-        curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $json_data = curl_exec($ch1);
-        curl_close($ch1);
+        $arrData = array(
+            'port' => '8001',
+            'path' => 'katm-api/v1/credit/report/status',
+            'type' => 'scoring_status',
+            'model_id' => $arrData['model_id'],
+            'claim_id' => $arrData['claim_id'],
+            'branch_code' => $arrData['branch_code'],
+            'token' => $token,
+            'post_data' =>$postData
+        );
 
-        $json_data_decode = json_decode($json_data, true);
-
-        $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
-
-        if ($this->ftp_file_exists() == 0){
-            return response()->json(
-                [
-                    'status'=>'error',
-                    'message'=>'FTP SERVER ga ulanishda muammo bor!!! (ip:153)'
-                ]);
-        }
-
-        if ($base64_decode){
-            $code = $json_data_decode['code'];
-            //print_r($code); die;
-            if ($code == 200) {
-                // code...
-                $result_code = $json_data_decode['data']['result'];
-                if ($result_code == '05000') {
-                    // code...
-                    $today = Carbon::today();
-                    $year = $today->year;
-                    $month = $today->month;
-                    $day = $today->day;
-
-                    $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
-                    $json_decode_arr = json_decode($base64_decode, true);
-                    $base_arr = $json_decode_arr['html']['body']['div'][1]['table'];
-                    $arr1 = $base_arr[1]['tbody']['tr'];
-                    $arr2 = $base_arr[2]['tbody']['tr'];
-                    $arr_merge = array_merge($arr1,$arr2);
-                    $txt_base64 = base64_encode(json_encode($arr_merge)); // for save all data base64
-
-                    $hash_filename = md5(time().$claim_id);
-
-                    $path_txt = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.txt';
-
-                    Storage::disk('ftp_nas')->put($path_txt, $txt_base64);
-
-                    /*$img_scoring_ball = $arr1[10]['td'][1]['img']['src']; // save img scoring ball
-
-                    if (preg_match('/^data:image\/(\w+);base64,/', $img_scoring_ball)) {
-                        $data = substr($img_scoring_ball, strpos($img_scoring_ball, ',') + 1);
-
-                        $data = base64_decode($data);
-
-                        $path_img = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.png';
-
-                        Storage::disk('ftp_nas')->put($path_img, $data);
-                    }*/
-
-                    $scoring_ball = $arr1[10]['td'][1]['div']['span']; // scoring ball
-
-                    $arr_summa = $arr1[31]['td'][2]['span'][0]; // exit summa
-
-                    if (count($arr_summa) > 1) {
-                        # code...
-                        $summa = $arr1[31]['td'][2]['span'][0]['span'];
-                        $summa = preg_replace('/[^0-9]/', '', $summa);
-                    } else{
-                        $summa = 0;
-                    }
-
-                    // json_data table
-                    for ($i=17; $i < 32; $i++) {
-                        // code...
-                        $arr_table[$i] = array_merge($arr1[$i]);
-
-                    }
-                    $jon_data = base64_encode(json_encode($arr_table)); // table
-
-                    $katm = UwKatmClients::updateOrCreate(['uw_clients_id' => $id],
-                        [
-                            'uw_clients_id' => $id,
-                            'claim_id' => $claim_id,
-                            'summa' => $summa,
-                            'scoring_ball' => $scoring_ball,
-                            'json_data' => $jon_data,
-                            'isVersion' => 2,
-                            'status' => 1
-                        ]);
-
-                    $clientComment = new UwClientComments();
-                    $clientComment->uw_clients_id = $id;
-                    $clientComment->claim_id = $claim_id;
-                    $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
-                    $clientComment->code = $result_code;
-                    $clientComment->title = 'KATM Scoring KIAS muvaffaqiyatli saqlandi';
-                    $clientComment->json_data = '';
-                    $clientComment->process_type = 'KS';
-                    $clientComment->save();
-
-                    // save katm file (base64 txt)
-                    $katmFile = new UwPhyKatmFile();
-                    $katmFile->uw_clients_id = $id;
-                    $katmFile->uw_katm_id = $katm->id;
-                    $katmFile->file_path = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/';
-                    $katmFile->file_hash = $hash_filename.'.txt';
-                    $katmFile->file_type = 'B64';
-                    $katmFile->save();
-
-                    // save katm file (scoring ball png)
-                    /*$katmFile = new UwPhyKatmFile();
-                    $katmFile->uw_clients_id = $id;
-                    $katmFile->uw_katm_id = $katm->id;
-                    $katmFile->file_path = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/';
-                    $katmFile->file_hash = $hash_filename.'.png';
-                    $katmFile->file_type = 'IMG';
-                    $katmFile->save();*/
-
-                    if ($is_inps == 1 && $scoring_ball > 199){
-
-                        return $this->getClientSalary($id, $claim_id, $branch_code);
-
-                    } else {
-
-                        return response()->json(
-                            [
-                                'status'=>'success',
-                                'message'=>'KATM Scoring KIAS muvaffaqiyatli saqlandi',
-                                'is_inps'=> 1,
-                                'data'=> $katm,
-                                'credit_results' => $this->clientCreditResults($id),
-                            ]);
-                    }
-                }
-            }
-
-        } else{
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
-        }
-
+        return $this->curlInit($arrData);
 
     }
 
-    public function getCreditHistory($token, $id, $claim_id, $is_inps, $branch_code)
+    public function getCreditHistory($model_id)
     {
         //
+        $modelClient = UwClients::find($model_id);
 
-        $url1 = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
-
-        $data1 = array(
+        $data = array(
             "security" => array(
                 "pLogin" => "turonbank",
                 "pPassword" => "!trB&GkL@200130"
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".$branch_code."",
-                "pToken" => "".$token."",
+                "pCode" => "".$modelClient->branch_code."",
                 "pLegal" => 1,
-                "pClaimId" => "".$claim_id."",
-                "pReportId" => 21,
-                "pReportFormat" => 1
+                "pClaimId" => "".$modelClient->claim_id."",
+                "pReportId" => "1",
+                "pReportFormat" => 0
             ),
         );
 
-        $postdata1 = json_encode($data1);
+        $postData = json_encode($data);
 
-        $ch1 = curl_init($url1);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch1, CURLOPT_POST, 1);
-        curl_setopt($ch1, CURLOPT_POSTFIELDS, $postdata1);
-        curl_setopt($ch1, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch1, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
-        curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $json_data = curl_exec($ch1);
-        curl_close($ch1);
+        $arrData = array(
+            'port' => '8001',
+            'path' => 'katm-api/v1/credit/report',
+            'type' => 'history',
+            'model_id' => $model_id,
+            'claim_id' => $modelClient->claim_id,
+            'branch_code' => $modelClient->branch_code,
+            'post_data' =>$postData
+        );
 
-        $json_data_decode = json_decode($json_data, true);
-
-        $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
-
-        if ($this->ftp_file_exists() == 0){
-            return response()->json(
-                [
-                    'status'=>'error',
-                    'message'=>'FTP SERVER ga ulanishda muammo bor!!! (ip:153)'
-                ]);
-        }
-
-        if ($base64_decode){
-            $code = $json_data_decode['code'];
-            //print_r($code); die;
-            if ($code == 200) {
-                // code...
-                $result_code = $json_data_decode['data']['result'];
-                if ($result_code == '05000') {
-                    // code...
-                    $today = Carbon::today();
-                    $year = $today->year;
-                    $month = $today->month;
-                    $day = $today->day;
-
-                    $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
-                    $json_decode_arr = json_decode($base64_decode, true);
-                    $base_arr = $json_decode_arr['html']['body']['div'][1]['table'];
-                    $arr1 = $base_arr[1]['tbody']['tr'];
-                    $arr2 = $base_arr[2]['tbody']['tr'];
-                    $arr_merge = array_merge($arr1,$arr2);
-                    $txt_base64 = base64_encode(json_encode($arr_merge)); // for save all data base64
-
-                    $hash_filename = md5(time().$claim_id);
-
-                    $path_txt = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.txt';
-
-                    Storage::disk('ftp_nas')->put($path_txt, $txt_base64);
-
-                    /*$img_scoring_ball = $arr1[10]['td'][1]['img']['src']; // save img scoring ball
-
-                    if (preg_match('/^data:image\/(\w+);base64,/', $img_scoring_ball)) {
-                        $data = substr($img_scoring_ball, strpos($img_scoring_ball, ',') + 1);
-
-                        $data = base64_decode($data);
-
-                        $path_img = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.png';
-
-                        Storage::disk('ftp_nas')->put($path_img, $data);
-                    }*/
-
-                    $scoring_ball = $arr1[10]['td'][1]['div']['span']; // scoring ball
-
-                    $arr_summa = $arr1[31]['td'][2]['span'][0]; // exit summa
-
-                    if (count($arr_summa) > 1) {
-                        # code...
-                        $summa = $arr1[31]['td'][2]['span'][0]['span'];
-                        $summa = preg_replace('/[^0-9]/', '', $summa);
-                    } else{
-                        $summa = 0;
-                    }
-
-                    // json_data table
-                    for ($i=17; $i < 32; $i++) {
-                        // code...
-                        $arr_table[$i] = array_merge($arr1[$i]);
-
-                    }
-                    $jon_data = base64_encode(json_encode($arr_table)); // table
-
-                    $katm = UwKatmClients::updateOrCreate(['uw_clients_id' => $id],
-                        [
-                            'uw_clients_id' => $id,
-                            'claim_id' => $claim_id,
-                            'summa' => $summa,
-                            'scoring_ball' => $scoring_ball,
-                            'json_data' => $jon_data,
-                            'isVersion' => 2,
-                            'status' => 1
-                        ]);
-
-                    $clientComment = new UwClientComments();
-                    $clientComment->uw_clients_id = $id;
-                    $clientComment->claim_id = $claim_id;
-                    $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
-                    $clientComment->code = $result_code;
-                    $clientComment->title = 'KATM Scoring KIAS muvaffaqiyatli saqlandi';
-                    $clientComment->json_data = '';
-                    $clientComment->process_type = 'KS';
-                    $clientComment->save();
-
-                    // save katm file (base64 txt)
-                    $katmFile = new UwPhyKatmFile();
-                    $katmFile->uw_clients_id = $id;
-                    $katmFile->uw_katm_id = $katm->id;
-                    $katmFile->file_path = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/';
-                    $katmFile->file_hash = $hash_filename.'.txt';
-                    $katmFile->file_type = 'B64';
-                    $katmFile->save();
-
-                    // save katm file (scoring ball png)
-                    /*$katmFile = new UwPhyKatmFile();
-                    $katmFile->uw_clients_id = $id;
-                    $katmFile->uw_katm_id = $katm->id;
-                    $katmFile->file_path = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/';
-                    $katmFile->file_hash = $hash_filename.'.png';
-                    $katmFile->file_type = 'IMG';
-                    $katmFile->save();*/
-
-                    if ($is_inps == 1 && $scoring_ball > 199){
-
-                        return $this->getClientSalary($id, $claim_id, $branch_code);
-
-                    } else {
-
-                        return response()->json(
-                            [
-                                'status'=>'success',
-                                'message'=>'KATM Scoring KIAS muvaffaqiyatli saqlandi',
-                                'is_inps'=> 1,
-                                'data'=> $katm,
-                                'credit_results' => $this->clientCreditResults($id),
-                            ]);
-                    }
-                }
-            }
-
-        } else{
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
-        }
-
+        return $this->curlInit($arrData);
 
     }
 
-    public function getCreditHistoryStatus($token, $id, $claim_id, $is_inps, $branch_code)
+    public function getClientHistoryStatus($arrData, $token)
     {
         //
-
-        $url1 = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
-
-        $data1 = array(
+        $data = array(
             "security" => array(
                 "pLogin" => "turonbank",
                 "pPassword" => "!trB&GkL@200130"
             ),
             "data" => array(
                 "pHead" => "011",
-                "pCode" => "".$branch_code."",
+                "pCode" => "".$arrData['branch_code']."",
                 "pToken" => "".$token."",
                 "pLegal" => 1,
-                "pClaimId" => "".$claim_id."",
-                "pReportId" => 21,
-                "pReportFormat" => 1
+                "pClaimId" => "".$arrData['claim_id']."",
+                "pReportId" => "1",
+                "pReportFormat" => 0
             ),
         );
 
-        $postdata1 = json_encode($data1);
+        $postData = json_encode($data);
 
-        $ch1 = curl_init($url1);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch1, CURLOPT_POST, 1);
-        curl_setopt($ch1, CURLOPT_POSTFIELDS, $postdata1);
-        curl_setopt($ch1, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch1, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
-        curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $json_data = curl_exec($ch1);
-        curl_close($ch1);
+        $arrData = array(
+            'port' => '8001',
+            'path' => 'katm-api/v1/credit/report/status',
+            'type' => 'history_status',
+            'model_id' => $arrData['model_id'],
+            'claim_id' => $arrData['claim_id'],
+            'branch_code' => $arrData['branch_code'],
+            'token' => $token,
+            'post_data' =>$postData
+        );
 
-        $json_data_decode = json_decode($json_data, true);
-
-        $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
-
-        if ($this->ftp_file_exists() == 0){
-            return response()->json(
-                [
-                    'status'=>'error',
-                    'message'=>'FTP SERVER ga ulanishda muammo bor!!! (ip:153)'
-                ]);
-        }
-
-        if ($base64_decode){
-            $code = $json_data_decode['code'];
-            //print_r($code); die;
-            if ($code == 200) {
-                // code...
-                $result_code = $json_data_decode['data']['result'];
-                if ($result_code == '05000') {
-                    // code...
-                    $today = Carbon::today();
-                    $year = $today->year;
-                    $month = $today->month;
-                    $day = $today->day;
-
-                    $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
-                    $json_decode_arr = json_decode($base64_decode, true);
-                    $base_arr = $json_decode_arr['html']['body']['div'][1]['table'];
-                    $arr1 = $base_arr[1]['tbody']['tr'];
-                    $arr2 = $base_arr[2]['tbody']['tr'];
-                    $arr_merge = array_merge($arr1,$arr2);
-                    $txt_base64 = base64_encode(json_encode($arr_merge)); // for save all data base64
-
-                    $hash_filename = md5(time().$claim_id);
-
-                    $path_txt = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.txt';
-
-                    Storage::disk('ftp_nas')->put($path_txt, $txt_base64);
-
-                    /*$img_scoring_ball = $arr1[10]['td'][1]['img']['src']; // save img scoring ball
-
-                    if (preg_match('/^data:image\/(\w+);base64,/', $img_scoring_ball)) {
-                        $data = substr($img_scoring_ball, strpos($img_scoring_ball, ',') + 1);
-
-                        $data = base64_decode($data);
-
-                        $path_img = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.png';
-
-                        Storage::disk('ftp_nas')->put($path_img, $data);
-                    }*/
-
-                    $scoring_ball = $arr1[10]['td'][1]['div']['span']; // scoring ball
-
-                    $arr_summa = $arr1[31]['td'][2]['span'][0]; // exit summa
-
-                    if (count($arr_summa) > 1) {
-                        # code...
-                        $summa = $arr1[31]['td'][2]['span'][0]['span'];
-                        $summa = preg_replace('/[^0-9]/', '', $summa);
-                    } else{
-                        $summa = 0;
-                    }
-
-                    // json_data table
-                    for ($i=17; $i < 32; $i++) {
-                        // code...
-                        $arr_table[$i] = array_merge($arr1[$i]);
-
-                    }
-                    $jon_data = base64_encode(json_encode($arr_table)); // table
-
-                    $katm = UwKatmClients::updateOrCreate(['uw_clients_id' => $id],
-                        [
-                            'uw_clients_id' => $id,
-                            'claim_id' => $claim_id,
-                            'summa' => $summa,
-                            'scoring_ball' => $scoring_ball,
-                            'json_data' => $jon_data,
-                            'isVersion' => 2,
-                            'status' => 1
-                        ]);
-
-                    $clientComment = new UwClientComments();
-                    $clientComment->uw_clients_id = $id;
-                    $clientComment->claim_id = $claim_id;
-                    $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
-                    $clientComment->code = $result_code;
-                    $clientComment->title = 'KATM Scoring KIAS muvaffaqiyatli saqlandi';
-                    $clientComment->json_data = '';
-                    $clientComment->process_type = 'KS';
-                    $clientComment->save();
-
-                    // save katm file (base64 txt)
-                    $katmFile = new UwPhyKatmFile();
-                    $katmFile->uw_clients_id = $id;
-                    $katmFile->uw_katm_id = $katm->id;
-                    $katmFile->file_path = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/';
-                    $katmFile->file_hash = $hash_filename.'.txt';
-                    $katmFile->file_type = 'B64';
-                    $katmFile->save();
-
-                    // save katm file (scoring ball png)
-                    /*$katmFile = new UwPhyKatmFile();
-                    $katmFile->uw_clients_id = $id;
-                    $katmFile->uw_katm_id = $katm->id;
-                    $katmFile->file_path = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/';
-                    $katmFile->file_hash = $hash_filename.'.png';
-                    $katmFile->file_type = 'IMG';
-                    $katmFile->save();*/
-
-                    if ($is_inps == 1 && $scoring_ball > 199){
-
-                        return $this->getClientSalary($id, $claim_id, $branch_code);
-
-                    } else {
-
-                        return response()->json(
-                            [
-                                'status'=>'success',
-                                'message'=>'KATM Scoring KIAS muvaffaqiyatli saqlandi',
-                                'is_inps'=> 1,
-                                'data'=> $katm,
-                                'credit_results' => $this->clientCreditResults($id),
-                            ]);
-                    }
-                }
-            }
-
-        } else{
-            return $this->creditReportStatusK($token, $id, $claim_id, $is_inps, $branch_code);
-        }
+        return $this->curlInit($arrData);
 
 
     }
@@ -796,7 +387,7 @@ class UwKatmController extends Controller
                 "pToken" => "".$token."",
                 "pLegal" => 1,
                 "pClaimId" => "".$arrData['claim_id']."",
-                "pReportId" => 25,
+                "pReportId" => "025",
                 "pReportFormat" => 1
             ),
         );
@@ -937,6 +528,22 @@ class UwKatmController extends Controller
 
             return $this->curlResultDecline($arrData, $result);
 
+        } elseif ($arrData['type'] == 'scoring') {
+
+            return $this->curlResultScoring($arrData, $result);
+
+        } elseif ($arrData['type'] == 'scoring_status') {
+
+            return $this->curlResultScoringStatus($arrData, $result);
+
+        } elseif ($arrData['type'] == 'history') {
+
+            return $this->curlResultHistory($arrData, $result);
+
+        } elseif ($arrData['type'] == 'history_status') {
+
+            return $this->curlResultHistoryStatus($arrData, $result);
+
         } elseif ($arrData['type'] == 'salary_xb') {
 
             return $this->curlResultSalaryXB($arrData, $result);
@@ -1074,6 +681,280 @@ class UwKatmController extends Controller
 
     }
 
+    public function curlResultScoring($arrData, $result)
+    {
+        //
+        $data_decode = json_decode($result, true);
+
+        $code = $data_decode['code'];
+        $result = $data_decode['data']['result'];
+        $resultMessage = $data_decode['data']['resultMessage'];
+
+        if ($code == '200'){
+            if ($result == '05050'){
+
+                $token = $data_decode['data']['token'];
+
+                return $this->getClientScoringStatus($arrData, $token);
+
+            } else {
+                return response()->json(['message' => $resultMessage]);
+            }
+
+        } else {
+
+            $errorMessage = $data_decode['errorMessage'];
+
+            return response()->json(['message' => 'code: '.$code.' '.$errorMessage, 'type' => 'salary_xb']);
+        }
+
+    }
+
+    public function curlResultScoringStatus($arrData, $result)
+    {
+        //
+        $data_decode = json_decode($result, true);
+
+        $code = $data_decode['code'];
+
+        if ($code == '200') {
+
+            $result_code = $data_decode['data']['result'];
+
+            if ($result_code == '05000') {
+
+                $reportBase64 = $data_decode['data']['reportBase64'];
+
+                $base64_decode = base64_decode($reportBase64);
+
+                if ($base64_decode) {
+
+                    $model_id = $arrData['model_id'];
+
+                    $claim_id = $arrData['claim_id'];
+
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+
+                    $json_decode_arr = json_decode($base64_decode, true);
+
+                    $base_arr = $json_decode_arr['html']['body']['div'][1]['table'];
+                    $arr1 = $base_arr[1]['tbody']['tr'];
+                    $arr2 = $base_arr[2]['tbody']['tr'];
+                    $arr_merge = array_merge($arr1,$arr2);
+                    $txt_base64 = base64_encode(json_encode($arr_merge)); // for save all data base64
+
+                    $hash_filename = md5(time().$claim_id);
+
+                    $path_txt = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.txt';
+
+                    Storage::disk('ftp_nas')->put($path_txt, $txt_base64);
+
+                    /*$img_scoring_ball = $arr1[10]['td'][1]['img']['src']; // save img scoring ball
+
+                    if (preg_match('/^data:image\/(\w+);base64,/', $img_scoring_ball)) {
+                        $data = substr($img_scoring_ball, strpos($img_scoring_ball, ',') + 1);
+
+                        $data = base64_decode($data);
+
+                        $path_img = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.png';
+
+                        Storage::disk('ftp_nas')->put($path_img, $data);
+                    }*/
+
+                    $scoring_ball = $arr1[10]['td'][1]['div']['span']; // scoring ball
+
+                    $arr_summa = $arr1[31]['td'][2]['span'][0]; // exit summa
+
+                    if (count($arr_summa) > 1) {
+                        # code...
+                        $summa = $arr1[31]['td'][2]['span'][0]['span'];
+                        $summa = preg_replace('/[^0-9]/', '', $summa);
+                    } else{
+                        $summa = 0;
+                    }
+
+                    // json_data table
+                    for ($i=17; $i < 32; $i++) {
+                        // code...
+                        $arr_table[$i] = array_merge($arr1[$i]);
+
+                    }
+                    $jon_data = base64_encode(json_encode($arr_table)); // table
+
+                    $katm = UwKatmClients::updateOrCreate(['uw_clients_id' => $model_id],
+                        [
+                            'uw_clients_id' => $model_id,
+                            'claim_id' => $claim_id,
+                            'summa' => $summa,
+                            'scoring_ball' => $scoring_ball,
+                            'json_data' => $jon_data,
+                            'isVersion' => 2,
+                            'status' => 1
+                        ]);
+
+                    $clientComment = new UwClientComments();
+                    $clientComment->uw_clients_id = $model_id;
+                    $clientComment->claim_id = $claim_id;
+                    $clientComment->work_user_id = Auth::user()->currentWork->id??0;
+                    $clientComment->code = $result_code;
+                    $clientComment->title = 'KATM Scoring KIAS muvaffaqiyatli saqlandi';
+                    $clientComment->json_data = '';
+                    $clientComment->process_type = 'KS';
+                    $clientComment->save();
+
+                    // save katm file (base64 txt)
+                    $katmFile = new UwPhyKatmFile();
+                    $katmFile->uw_clients_id = $model_id;
+                    $katmFile->uw_katm_id = $katm->id;
+                    $katmFile->file_path = 'uw/phy/kias/'.$year.'/'.$month.'/'.$day.'/';
+                    $katmFile->file_hash = $hash_filename.'.txt';
+                    $katmFile->file_type = 'B64';
+                    $katmFile->save();
+
+                    // save katm file (scoring ball png)
+                    /*$katmFile = new UwPhyKatmFile();
+                    $katmFile->uw_clients_id = $id;
+                    $katmFile->uw_katm_id = $katm->id;
+                    $katmFile->file_path = 'uw/phy/img/'.$year.'/'.$month.'/'.$day.'/';
+                    $katmFile->file_hash = $hash_filename.'.png';
+                    $katmFile->file_type = 'IMG';
+                    $katmFile->save();*/
+
+                    return response()->json(
+                        [
+                            'message'=>'KATM Scoring KIAS muvaffaqiyatli saqlandi',
+                            'type'=> $arrData['type']
+                        ]);
+
+
+                } else {
+
+                    $token = $arrData['token'];
+                    return $this->getClientScoringStatus($arrData, $token);
+                }
+            }
+
+            $token = $arrData['token'];
+            return $this->getClientScoringStatus($arrData, $token);
+
+        } else {
+
+            $message = $data_decode['errorMessage'];
+
+            return response()->json(['message' => '('.$code.')'.$message]);
+        }
+
+    }
+
+    public function curlResultHistory($arrData, $result)
+    {
+        //
+        $data_decode = json_decode($result, true);
+
+        $code = $data_decode['code'];
+        $result = $data_decode['data']['result'];
+        $resultMessage = $data_decode['data']['resultMessage'];
+
+        if ($code == '200'){
+            if ($result == '05050'){
+
+                $token = $data_decode['data']['token'];
+
+                return $this->getClientHistoryStatus($arrData, $token);
+
+            } else {
+                return response()->json(['message' => $resultMessage]);
+            }
+
+        } else {
+
+            $errorMessage = $data_decode['errorMessage'];
+
+            return response()->json(['message' => 'code: '.$code.' '.$errorMessage, 'type' => 'history']);
+        }
+
+    }
+
+    public function curlResultHistoryStatus($arrData, $result)
+    {
+        //
+        $data_decode = json_decode($result, true);
+
+        $code = $data_decode['code'];
+
+        if ($code == '200') {
+
+            $result_code = $data_decode['data']['result'];
+
+            if ($result_code == '05000') {
+
+                $reportBase64 = $data_decode['data']['reportBase64'];
+
+                if ($reportBase64) {
+
+                    $model_id = $arrData['model_id'];
+
+                    $claim_id = $arrData['claim_id'];
+
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+
+                    $hash_filename = md5(time().$claim_id);
+
+                    $path_txt = 'uw/phy/kias_his/'.$year.'/'.$month.'/'.$day.'/'.$hash_filename.'.txt';
+
+                    Storage::disk('ftp_nas')->put($path_txt, $reportBase64);
+
+                    $clientComment = new UwClientComments();
+                    $clientComment->uw_clients_id = $model_id;
+                    $clientComment->claim_id = $claim_id;
+                    $clientComment->work_user_id = Auth::user()->currentWork->id??0;
+                    $clientComment->code = $result_code;
+                    $clientComment->title = 'KATM Kredit tarixi muvaffaqiyatli saqlandi';
+                    $clientComment->json_data = '';
+                    $clientComment->process_type = 'K_HIS';
+                    $clientComment->save();
+
+                    // save katm file (base64 txt)
+                    $katmFile = new UwPhyKatmFile();
+                    $katmFile->uw_clients_id = $model_id;
+                    $katmFile->uw_katm_id = 0;
+                    $katmFile->file_path = 'uw/phy/kias_his/'.$year.'/'.$month.'/'.$day.'/';
+                    $katmFile->file_hash = $hash_filename.'.txt';
+                    $katmFile->file_type = 'B64_K_HIS';
+                    $katmFile->save();
+
+                    return response()->json(
+                        [
+                            'message'=>'KATM Kredit tarixi muvaffaqiyatli saqlandi',
+                            'type'=> $arrData['type']
+                        ]);
+
+
+                } else {
+
+                    $token = $arrData['token'];
+                    return $this->getClientHistoryStatus($arrData, $token);
+                }
+            }
+
+            $token = $arrData['token'];
+            return $this->getClientHistoryStatus($arrData, $token);
+
+        } else {
+
+            $message = $data_decode['errorMessage'];
+
+            return response()->json(['message' => '('.$code.')'.$message]);
+        }
+
+    }
+
     public function curlResultSalaryXB($arrData, $result)
     {
         //
@@ -1157,11 +1038,13 @@ class UwKatmController extends Controller
 
                     if ($array['report']['incomes']) {
 
-                        $array_income = $array['report']['incomes']['INCOME'];
-                        if (array_filter($array_income, 'is_array')) {
 
-                            $old_salary = UwInpsClients::where('uw_clients_id', $model_id);
-                            $old_salary->delete();
+                        $old_salary = UwInpsClients::where('uw_clients_id', $model_id);
+                        $old_salary->delete();
+
+                        $array_income = $array['report']['incomes']['INCOME'];
+
+                        if (array_filter($array_income, 'is_array')) {
 
                             foreach ($array_income as $key => $value) {
                                 $inps = new UwInpsClients();

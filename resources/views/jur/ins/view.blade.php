@@ -523,7 +523,7 @@
                                     </div>
                                     <!--/.direct-chat -->
                                 </div>
-                                <!-- /.col -->
+
                                 <div class="col-md-6">
                                     <!-- DIRECT CHAT PRIMARY -->
                                     <div class="box box-danger box-solid">
@@ -615,7 +615,27 @@
                                     </div>
                                     <!--/.direct-chat -->
                                 </div>
-                                <!-- /.col -->
+
+                                <div class="col-md-12">
+                                    <!-- DIRECT CHAT PRIMARY -->
+                                    <div class="box box-danger box-solid">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">Moliyaviy hisobot xulosasi</h3>
+                                        </div>
+
+                                        <div class="box-body no-padding">
+                                            <table class="table table-striped">
+                                                <tbody>
+
+                                                 {!! $balance_class !!}
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!--/.direct-chat -->
+                                </div>
+
                                 @endif
                                 <div class="col-md-12">
                                     <div class="box box-success direct-chat">
@@ -753,7 +773,7 @@
                                     </tr>
                                     <tr class="bg-aqua-active">
                                         <td colspan="2" class="text-center">
-                                            <h4>{{ number_format($credit_result['credit_can_be']) }} so'm</h4>
+                                            <h4>{{ number_format($credit_result['credit_can_be_ins']) }} so'm</h4>
                                         </td>
                                     </tr>
                                     <tr>
@@ -761,7 +781,7 @@
                                     </tr>
                                     <tr class="bg-aqua-active">
                                         <td colspan="2" class="text-center">
-                                            <h5>{{ number_format($credit_result['real_monthly_payment']) }} so'm</h5>
+                                            <h5>{{ number_format($credit_result['monthly_payment']) }} so'm</h5>
                                         </td>
                                     </tr>
                                     </tbody>
@@ -1708,6 +1728,8 @@
                     success: function(res){
                         console.log(res);
 
+                        let credit_val = 0;
+
                         let data = '';
                         data+= '<table class="table table-striped table-bordered"><tbody>' +
                                 '<tr>' +
@@ -1719,6 +1741,7 @@
                         if (res.length !== 0){
                             for (let i = 0; i < res.length; i++) {
                                 let val = res[i];
+                                credit_val+= val['credit']/100;
                                 data+=
                                     '<tr>' +
                                     '<td>'+i+'</td>' +
@@ -1727,6 +1750,17 @@
                                     '<td>'+val['l_date']+'</td>' +
                                     '</tr>';
                             }
+
+                            let creditTotal = (credit_val).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                            data+=
+                                '<tfoot>' +
+                                    '<tr>' +
+                                        '<td><b>Jami:</b><td>' +
+                                        '<td><b>'+creditTotal+'</b><td>' +
+                                    '</tr>' +
+                                '</tfoot>';
+
                         } else {
                             data+=
                                 '<tr>' +
@@ -1751,10 +1785,6 @@
             $("#getSelect").click(function () {
 
                 let id = $('#getSaldo').val();
-
-                let branch_code = $('#branch_code').val();
-
-                let client_code = $('#client_code').val();
 
                 $.ajax({
                     url: '/jur/get-select',

@@ -378,8 +378,8 @@
                                             <span id="model_id" hidden>{{ $model->id }}</span>
                                             <button class='btn btn-success margin postUw' data-id='reg'><i class="fa fa-registered"></i> Registr (KATM)</button>
                                             <button class='btn btn-sm btn-danger postUw' data-id='decline'><i class="fa fa-trash-o"></i> O`chirish (KATM)</button><br>
-                                            <button class='btn btn-sm bg-purple postUw disabled' data-id='scoring'><i class="fa fa-history"></i> Scoring (KATM)</button>
-                                            <button class='btn btn-sm btn-primary postUw disabled' data-id='history'><i class="fa fa-history"></i> Kredit Tarixi (KATM)</button>
+                                            <button class='btn btn-sm btn-primary postUw' data-id='history'><i class="fa fa-bars"></i> Kredit Tarixi (KATM)</button>
+                                            <button class='btn btn-sm bg-purple postUw' data-id='scoring'><i class="fa fa-history"></i> Scoring (KATM)</button>
                                             <button class='btn btn-sm bg-orange postUw' data-id='salary_tin'><i class="fa fa-credit-card"></i> Ish haqi (SOLIQ)</button>
                                             <button class='btn btn-sm bg-orange-active postUw' data-id='salary_xb'><i class="fa fa-credit-card"></i> Ish haqi (XB)</button>
                                             <button class='btn btn-sm bg-navy postUw' data-id='mib'><i class="fa fa-gavel"></i> MIB</button>
@@ -390,7 +390,11 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <h3>KATM so`rovi natijalari</h3>
-                                        <div id="katm_inps_buttons"></div>
+                                        <div id="katm_inps_buttons">
+                                            @if($kias_history)
+                                                <button class="btn btn-flat btn-primary postUw" data-id='get_credit_history'><i class="fa fa-bars"></i> Kredit Tarixi</button>
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="box box-widget widget-user-2">
                                         <div class="widget-user-header bg-blue-active">
@@ -726,6 +730,9 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header bg-aqua-active">
+                        <button type="button" class="btn btn-outline pull-right" onclick="print('postResultMessage')">
+                            <i class="fa fa-print"></i> @lang('blade.print')
+                        </button>
                         <h4 class="modal-title text-center" id="success">KATM So`rov natijasi</h4>
                     </div>
                     <div id="postResultMessage">
@@ -754,7 +761,7 @@
             table{ border-collapse:collapse; width:100%; }
             table td, th{ border:1px solid #d0d0d0; }
 
-            #main_block table {font-size:9px;}
+            #main_block table {font-size:12px;}
             .header-color {background-color:#8EB2E2;}
             .mip-color {background-color:#e3fbf7;}
             .procent25_class {width:25%;}
@@ -774,6 +781,7 @@
         </style>
 
         <script>
+
             $(".postUw").click(function () {
 
                 let model_id = $('#model_id').html();
@@ -790,6 +798,7 @@
                     },
                     success: function(res){
                         console.log(res)
+
                         if (res.type === 'reg'){
                             let data_header = res.data.header;
                             let data_response = res.data.response;
@@ -820,7 +829,12 @@
                         } else if (res.type === 'salary_xb') {
                             let message =
                                 '<p class="text-center text-bold">'+res.message+'</p>';
-                            $('#postResultMessage').html(message)
+                            $('#postResultMessage').html(message);
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 3000);
+
                         } else if (res.type === 'mib') {
                             let message =
                                 '<p class="text-center text-bold">'+res.message+'</p>'+
@@ -829,7 +843,23 @@
                                 '<p class="text-center text-bold">'+res.passportNumber+'</p>'+
                                 '<p class="text-center text-bold">'+res.passportSn+'</p>'+
                                 '<p class="text-center text-bold">'+res.reviewDate+'</p>';
-                            $('#postResultMessage').html(message)
+                            $('#postResultMessage').html(message);
+
+                        } else if (res.type === 'history_status') {
+                            let message =
+                                '<p class="text-center text-bold">'+res.message+'</p>';
+                            $('#postResultMessage').html(message);
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 3000);
+
+                        } else if (res.type === 'get_credit_history') {
+                            //console.log(res)
+                            $('.modal-dialog').css("width", "1100px");
+
+                            $('#postResultMessage').html(res.data);
+
                         } else {
                             let message =
                                 '<p class="text-center text-bold text-danger">'+res.message+'</p>';

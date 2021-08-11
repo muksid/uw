@@ -85,6 +85,10 @@ Route::group(['middleware' => ['auth']], function() {
         //PHYSICAL
         Route::get('get-phy-client/{id}','UwClientsController@show');
         Route::post('uw-risk-edit','UwClientsController@riskEdit');
+
+
+        Route::get('sms-send','HomeController@smsSend');
+
     });
 
     // PHYSICAL
