@@ -20,22 +20,74 @@ use Illuminate\Support\Facades\Storage;
 
 class UwCreateClientsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
+
     public function index(Request $request)
     {
-        //
-        /*$filial = DB::table('uw_users as a')
-            ->leftJoin('filials as b', 'a.filial_id', '=', 'b.id')
-            ->where('a.user_id', Auth::user()->old_user_id)
-            ->where('a.status', 1)
-            ->select('b.parent_id')
-            ->first();*/
 
-        function ftp_file_exists(){
+    }
+
+    public function getLoanType(Request $request)
+    {
+        //
+        if ($request->ajax())
+        {
+            $output="";
+
+            $depart = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+
+            if ($depart->branch_code == '09011'){
+                $models = UwLoanTypes::where('credit_type', $request->credit_type)
+                    ->where('short_code', '!=', 'J')
+                    ->where('isActive', 1)
+                    ->orderBy('id', 'DESC')
+                    ->get();
+
+            } else {
+                $models = UwLoanTypes::whereHas('banks',
+                    function ($query) use ($depart) {
+                        $query->where('depart_id', $depart->gen_dep_id);
+                        $query->where('isActive', 1);
+                    })
+                    ->where('credit_type', $request->credit_type)
+                    ->where('short_code', '!=', 'J')
+                    ->where('isActive', 1)
+                    ->orderBy('id', 'DESC')
+                    ->get();
+            }
+
+            if ($models)
+            {
+                $output .='<tr>'.
+                    '<th>'.'ID'.'</th>'.
+                    '<th>'.'Kredit nomi'.'</th>'.
+                    '<th>'.'Foiz %'.'</th>'.
+                    '<th>'.'Kredit Davri'.'</th>'.
+                    '<th>'.'Imtiy davr'.'</th>'.
+                    '<th>'.'Valyuta'.'</th>'.
+                    '<th>'.'Qarz yuki %'.'</th>'.
+                    '<tr>';
+                foreach ($models as $key => $values) {
+                    $key = $key+1;
+                    $output .='<tr class="clickable-row tr-cursor" data-href="'.route("phy.create.step.one",["id" => $values->id]).'">'.
+                        '<td>'.$key++.'</td>'.
+                        '<td><a href="'.route("phy.create.step.one",["id" => $values->id]).'">'.$values->title.'</a></td>'.
+                        '<td class="text-green">'.$values->procent.' %</td>'.
+                        '<td>'.$values->credit_duration.' oy</td>'.
+                        '<td>'.$values->credit_exemtion.' oy</td>'.
+                        '<td>'.$values->currency.'</td>'.
+                        '<td class="text-maroon">'.$values->dept_procent.' %</td>'.
+                        '</tr>';
+                }
+            }
+            return $output;
+        }
+
+    }
+
+    public function create()
+    {
+        //
+        function ftpExists(){
 
             $ftp_server = "172.16.1.233";
             $ftp_user = "Muksid";
@@ -50,92 +102,32 @@ class UwCreateClientsController extends Controller
             }
         }
 
-        $depart = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
+        $depart = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
-        $models = UwLoanTypes::with('banks')
-            ->whereHas('banks',
-            function ($query) use ($depart) {
-                $query->where('depart_id', $depart->gen_dep_id);
-                $query->where('isActive', 1);
-            })
-            ->where('short_code', 'M')
-            ->where('isActive', 1)
-            ->orderBy('id', 'DESC')
-            ->get();
-        //print_r($models); die;
-
-        //$request->session()->forget('model');
-
-        $loan_models = UwLoanTypes::where('short_code', '!=', 'J')->get()->unique('credit_type');
-
-        return view('uw/create-clients/.index',compact('models', 'loan_models'));
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return string
-     */
-    public function getLoanType(Request $request)
-    {
-        //
-        if ($request->ajax())
-        {
-            $output="";
-            //$models = UwLoanTypes::where('credit_type', $request->credit_type)->where('isActive', 1)->get();
-            /*$filial = DB::table('uw_users as a')
-                ->leftJoin('filials as b', 'a.filial_id', '=', 'b.id')
-                ->where('a.user_id', Auth::id())
-                ->where('a.status', 1)
-                ->select('b.parent_id')
-                ->first();*/
-
-            $depart = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
-
-            $models = UwLoanTypes::whereHas('banks',
-                function ($query) use ($depart) {
-                    $query->where('depart_id', $depart->gen_dep_id);
-                    $query->where('isActive', 1);
-                })
-                ->where('credit_type', $request->credit_type)
-                ->where('short_code', '!=', 'J')
+        if ($depart->branch_code == '09011'){
+            $models = UwLoanTypes::where('short_code', '=', 'M')
                 ->where('isActive', 1)
                 ->orderBy('id', 'DESC')
                 ->get();
-            if ($models)
-            {
-                $output .='<tr>'.
-                    '<th>'.'ID'.'</th>'.
-                    '<th>'.'Kredit nomi'.'</th>'.
-                    '<th>'.'Foiz %'.'</th>'.
-                    '<th>'.'Kredit Davri'.'</th>'.
-                    '<th>'.'Imtiy davr'.'</th>'.
-                    '<th>'.'Valyuta'.'</th>'.
-                    '<th>'.'Qarz yuki %'.'</th>'.
-                    '<tr>';
-                foreach ($models as $key => $values) {
-                    $key = $key+1;
-                    $output .='<tr class="clickable-row tr-cursor" data-href="'.route("uw.create.step.one",["id" => $values->id]).'">'.
-                        '<td>'.$key++.'</td>'.
-                        '<td><a href="'.route("uw.create.step.one",["id" => $values->id]).'">'.$values->title.'</a></td>'.
-                        '<td class="text-green">'.$values->procent.' %</td>'.
-                        '<td>'.$values->credit_duration.' oy</td>'.
-                        '<td>'.$values->credit_exemtion.' oy</td>'.
-                        '<td>'.$values->currency.'</td>'.
-                        '<td class="text-maroon">'.$values->dept_procent.' %</td>'.
-                        '</tr>';
-                }
-            }
-            return $output;
+
+        } else {
+            $models = UwLoanTypes::with('banks')
+                ->whereHas('banks',
+                    function ($query) use ($depart) {
+                        $query->where('depart_id', $depart->gen_dep_id);
+                        $query->where('isActive', 1);
+                    })
+                ->where('short_code', '=', 'M')
+                ->where('isActive', 1)
+                ->orderBy('id', 'DESC')
+                ->get();
         }
 
+        $loan_models = UwLoanTypes::where('short_code', '!=', 'J')->get()->unique('credit_type');
+
+        return view('phy.ins.create',compact('models', 'loan_models'));
     }
 
-    /**
-     * Show the step One Form for creating a new product.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
     public function createStepOne(Request $request, $id)
     {
         $loan = UwLoanTypes::find($id);
@@ -148,15 +140,9 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-i-step-one',compact('model','regions', 'districts', 'loan'));
+        return view('phy.ins.create-i-step-one',compact('model','regions', 'districts', 'loan'));
     }
 
-    /**
-     * Post Request to store step1 info in session
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function postCreateStepOne(Request $request)
     {
         $validatedData = $request->validate([
@@ -194,14 +180,9 @@ class UwCreateClientsController extends Controller
             $request->session()->put('model', $model);
         }
 
-        return redirect()->route('uw.create.step.two', ['id' => $loan_type]);
+        return redirect()->route('phy.create.step.two', ['id' => $loan_type]);
     }
 
-    /**
-     * Show the step One Form for creating a new product.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
     public function createStepTwo(Request $request, $id)
     {
         $loan = UwLoanTypes::find($id);
@@ -210,14 +191,9 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-i-step-two',compact('model', 'id', 'loan'));
+        return view('phy.ins.create-i-step-two',compact('model', 'id', 'loan'));
     }
 
-    /**
-     * Show the step One Form for creating a new product.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function postCreateStepTwo(Request $request)
     {
         $validatedData = $request->validate([
@@ -230,14 +206,9 @@ class UwCreateClientsController extends Controller
         $model->fill($validatedData);
         $request->session()->put('model', $model);
 
-        return redirect()->route('uw.create.step.three', ['id' => $loan_type]);
+        return redirect()->route('phy.create.step.three', ['id' => $loan_type]);
     }
 
-    /**
-     * Show the step One Form for creating a new product.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
     public function createStepThree(Request $request, $id)
     {
         $loan = UwLoanTypes::find($id);
@@ -246,14 +217,9 @@ class UwCreateClientsController extends Controller
 
         $blade = mb_strtolower($loan->short_code);
 
-        return view('uw.create-clients.create-i-step-three',compact('model', 'id', 'loan'));
+        return view('phy.ins.create-i-step-three',compact('model', 'id', 'loan'));
     }
 
-    /**
-     * Show the step One Form for creating a new product.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function postCreateStepThree(Request $request)
     {
         //
@@ -325,7 +291,7 @@ class UwCreateClientsController extends Controller
 
         $request->session()->forget('model');
 
-        return redirect()->route('uw.create.step.result', ['id' => $model->id])->with(
+        return redirect()->route('phy.create.step.result', ['id' => $model->id])->with(
             [
                 'status' => 'info',
                 'message' => 'Mijoz muvaffaqiyatli tizimga qo`shildi',
@@ -336,14 +302,11 @@ class UwCreateClientsController extends Controller
      * Show the form for creating a new resource.
      *
      * @param $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function createStepResult($id)
     {
         //
         $model = UwClients::find($id);
-
-        $blade = mb_strtolower($model->loanType->short_code??'');
 
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
@@ -358,7 +321,8 @@ class UwCreateClientsController extends Controller
             $sch_type_a = 'checked';
         }
 
-        return view('uw.create-clients.create-i-step-result',compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
+        return view('phy.ins.create-i-step-result',
+            compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
     }
 
     /**
@@ -383,7 +347,7 @@ class UwCreateClientsController extends Controller
                     $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-guar '.$disabled.'">
 <span class="glyphicon glyphicon-pencil"></span></a>';
                     $button .= '&nbsp;&nbsp;';
-                    $button .= ' | <a href="javascript:void(0);" id="delete-post" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
+                    $button .= ' | <a href="javascript:void(0);" id="delete-guar" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
  <span class="glyphicon glyphicon-trash"></span></a>';
                     return $button;
                 })
@@ -490,7 +454,7 @@ class UwCreateClientsController extends Controller
             return datatables()->of(UwClientFiles::where('uw_client_id', $id)->get())
                 ->addColumn('view', function($data){
                     $button  = '
-                    <a href="'.route('file-load', ['file' => $data->id]).'" id="download-file" data-toggle="tooltip" data-original-title="Download" data-id="'.$data->id.'" class="text-primary">
+                    <a href="'.url('/phy/client/download-file', ['file' => $data->id]).'" id="download-file" data-toggle="tooltip" data-original-title="Download" data-id="'.$data->id.'" class="text-primary">
  <span class="glyphicon glyphicon-download-alt"></span></a>';
                     return $button;
                 })
@@ -572,16 +536,6 @@ class UwCreateClientsController extends Controller
                 'message' => 'File Successfully deleted'
             )
         );
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**

@@ -9,20 +9,17 @@ use App\MRoleMenu;
 
 class MMenuRolesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         //
         $models = MMenuRoles::orderBy('created_at', 'DESC')->paginate(25);
 
         $core_menus = MCoreMenu::orderBy('created_at', 'DESC')->get();
-        @include('count_message.php');
 
-        return view('control.menus.m-menu-roles', compact('models','core_menus'))->with('i', (request()->input('page', 1) - 1) * 50);
+        return view('madmin.menus.m-menu-roles',
+            compact('models','core_menus'))
+            ->with('i', (request()->input('page', 1) - 1) * 50);
     }
 
 
@@ -30,6 +27,7 @@ class MMenuRolesController extends Controller
     {
         # code...
         $input = $request->input('input');
+
         $core_menus = MCoreMenu::orderBy('created_at', 'DESC')->get();
 
         $models = MMenuRoles::where('title', 'like', '%'.$input.'%')
@@ -45,9 +43,9 @@ class MMenuRolesController extends Controller
 
         $models->appends ( array ('input' => $input) );
 
-        @include('count_message.php');
-
-        return view('control.menus.m-menu-roles', compact('models','core_menus','input'))->with('i', (request()->input('page', 1) - 1) * 50);
+        return view('madmin.menus.m-menu-roles',
+            compact('models','core_menus','input'))
+            ->with('i', (request()->input('page', 1) - 1) * 50);
     }
 
     /**
@@ -64,7 +62,7 @@ class MMenuRolesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -79,6 +77,7 @@ class MMenuRolesController extends Controller
         ]);
 
         $model = MMenuRoles::create($request->all());
+
         $message = 'Successfuly created!';
 
         return response()->json(['message' => $message, 'model' => $model], 200);
@@ -99,7 +98,7 @@ class MMenuRolesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
@@ -114,7 +113,7 @@ class MMenuRolesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -139,7 +138,11 @@ class MMenuRolesController extends Controller
 
         $message = 'Successfully updated';
 
-        return response()->json(['message' => $message, 'model' => $model, 'core_menu_title' => $core_menu_title], 200);
+        return response()->json([
+            'message' => $message,
+            'model' => $model,
+            'core_menu_title' => $core_menu_title
+        ], 200);
 
     }
 
@@ -147,7 +150,7 @@ class MMenuRolesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {

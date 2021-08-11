@@ -16,7 +16,6 @@ class UwLoanTypesController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -42,7 +41,7 @@ class UwLoanTypesController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-        return view('uw/loan-types.index');
+        return view('madmin.loan-types.index');
     }
 
     /**
@@ -208,7 +207,10 @@ class UwLoanTypesController extends Controller
         //
         $checkClient = UwClients::where('loan_type_id', $id)->first();
         if(!$checkClient){
-            UwLoanTypes::where('id',$id)->delete();
+            //print_r($id); die;
+
+            //UwLoanTypes::where('id',$id)->delete();
+
             return Response::json([
                 'message'=>'Client deleted',
                 'code'=>200

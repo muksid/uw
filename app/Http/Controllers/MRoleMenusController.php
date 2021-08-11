@@ -10,11 +10,7 @@ use DB;
 
 class MRoleMenusController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         //
@@ -24,9 +20,7 @@ class MRoleMenusController extends Controller
 
         $roles = Role::get();
 
-        @include('count_message.php');
-
-        return view('control.menus.m-role-menus', compact('models','menu_roles','roles'))
+        return view('madmin.menus.m-role-menus', compact('models','menu_roles','roles'))
             ->with('i', (request()->input('page', 1) - 1) * 50);
     }
 
@@ -51,9 +45,9 @@ class MRoleMenusController extends Controller
 
         $models->appends ( array ('input' => $input) );
 
-        @include('count_message.php');
-
-        return view('control.menus.m-role-menus', compact('models','menu_roles','roles','input'))->with('i', (request()->input('page', 1) - 1) * 50);
+        return view('madmin.menus.m-role-menus',
+            compact('models','menu_roles','roles','input'))
+            ->with('i', (request()->input('page', 1) - 1) * 50);
     }
 
     public function getParent($id)
@@ -66,7 +60,9 @@ class MRoleMenusController extends Controller
             ->where('a.role_id', $id)
             ->get();
         $message = 'Success';
+
         return response()->json(['message' => $message, 'model' => $model], 200);
+
     }
     /**
      * Show the form for creating a new resource.
@@ -82,7 +78,7 @@ class MRoleMenusController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -97,6 +93,7 @@ class MRoleMenusController extends Controller
         ]);
 
         $model = MRoleMenu::create($request->all());
+
         $message = 'Successfuly created!';
 
         return response()->json(['message' => $message, 'model' => $model], 200);
@@ -117,12 +114,13 @@ class MRoleMenusController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
         //
         $model = MRoleMenu::findOrFail($id);
+
         $parent = DB::table('m_role_menus as a')
             ->join('m_menu_roles as m', 'a.menu_id', 'm.id')
             ->where('a.role_id', $model->role_id)
@@ -136,7 +134,7 @@ class MRoleMenusController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -151,6 +149,7 @@ class MRoleMenusController extends Controller
         ]);
 
         $model = MRoleMenu::findOrFail($id);
+
         $model->update($request->all());
 
         $user_role  = Role::find($model->role_id);
@@ -180,12 +179,13 @@ class MRoleMenusController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         //
         $ids = explode(",",$id);
+
         $model = MRoleMenu::whereIn('id',$ids)->get();
         $message = '';
 

@@ -24,12 +24,17 @@ class Department extends Model
         'status',
     ];
 
-    public function childs() {
+    public function filial() {
 
-        return $this->hasMany('App\Department','parent_id','id')->where('status', 1);
+        return $this->belongsTo(Department::class,'depart_id','id');
 
     }
 
+    public function childs() {
+
+        return $this->hasMany(Department::class,'parent_id','id')->where('status', 1);
+
+    }
 
 }
 

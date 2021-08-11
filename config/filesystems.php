@@ -55,6 +55,20 @@ return [
             'visibility' => 'public',
         ],
 
+        'ftp_nas' => [
+            'driver'   => 'ftp',
+            'host'     => '172.16.1.233',
+            'username' => 'Muksid',
+            'password' => 'TuR0N09011!@#$',
+        ],
+
+        'ftp_edo' => [
+            'driver'   => 'ftp',
+            'host'     => '172.16.2.13',
+            'username' => 'ftp_muksid',
+            'password' => 'ftp_muksid',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

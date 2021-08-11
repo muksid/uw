@@ -1,0 +1,21 @@
+
+/** for back **/
+.content-wrapper, .right-sides011 {
+    justify-content: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-size: cover;
+    background-color: #2c6ed5;
+    padding: 15px;
+}
+
+.loading-gif {
+    background: url("../images/loading-3.gif") no-repeat center top;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 9999999;
+    opacity: 0.5;
+}

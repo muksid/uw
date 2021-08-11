@@ -1,4 +1,4 @@
-@extends('layouts.uw.dashboard')
+@extends('uw_log.uw.dashboard')
 <link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
 
 @section('content')

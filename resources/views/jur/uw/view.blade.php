@@ -1,8 +1,7 @@
-@extends('layouts.uw.dashboard')
+@extends('layouts.dashboard')
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
             Juridical Form
@@ -119,8 +118,8 @@
                                                         <tr>
                                                             <th>#</th>
                                                             <th>X/R</th>
-                                                            <th>Credit (Jami)</th>
-                                                            <th>Debit (Jami)</th>
+                                                            {{--<th>Credit (Jami)</th>
+                                                            <th>Debit (Jami)</th>--}}
                                                             <th>Credit (Ohirgi)</th>
                                                             <th>Debit (Ohirgi)</th>
                                                             <th>Oy</th>
@@ -130,11 +129,60 @@
                                                             <tr>
                                                                 <td>{{ $key++ }}</td>
                                                                 <td>{{ $saldo->client_acc }}</td>
-                                                                <td class="text-green">{{ number_format($saldo->all_credit) }}</td>
-                                                                <td class="text-maroon">{{ number_format($saldo->all_debit) }}</td>
+                                                                {{--<td class="text-green">{{ number_format($saldo->all_credit) }}</td>
+                                                                <td class="text-maroon">{{ number_format($saldo->all_debit) }}</td>--}}
                                                                 <td class="text-green">{{ number_format($saldo->credit) }}</td>
                                                                 <td class="text-maroon">{{ number_format($saldo->debit) }}</td>
                                                                 <td>{{ $saldo->saldo_month }} </td>
+                                                                <td>{{ \Carbon\Carbon::parse($saldo->lead_last_date)->format('d.m.Y') }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                @endif
+                                            </div>
+                                            <div class="form-group pull-right">
+                                                <button type="submit" class="btn btn-sm bg-purple margin" id="getLeads" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Oborotka</button>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-body -->
+                                        <div class="box-footer">
+                                            <div class="form-group pull-right">
+                                                <button type="submit" class="btn btn-sm btn-primary btn-flat" id="getSaldo" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Yangilash</button>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-footer-->
+                                    </div>
+                                    <!--/.direct-chat -->
+                                </div>
+
+
+                                <div class="col-md-12">
+                                    <!-- DIRECT CHAT PRIMARY -->
+                                    <div class="box box-primary box-solid">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">Kartoteka 2</h3>
+                                        </div>
+                                        <!-- /.box-header -->
+                                        <div class="overlay" id="overlayK2">
+                                            <i class="fa fa-refresh fa-spin"></i>
+                                        </div>
+                                        <div class="box-body no-padding">
+                                            <div id="data_k2">
+                                                @if($k2)
+                                                    <table class="table table-striped table-bordered">
+                                                        <tbody>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>X/R</th>
+                                                            <th>K2 Summasi</th>
+                                                            <th>Yang.Sana</th>
+                                                        </tr>
+                                                        @foreach($k2 as $key => $k)
+                                                            <tr class="text-center">
+                                                                <td>{{ $key++ }}</td>
+                                                                <td>{{ $k->client_acc }}</td>
+                                                                <td class="text-maroon">{{ number_format($k->k2) }}</td>
                                                                 <td>{{ \Carbon\Carbon::parse($saldo->lead_last_date)->format('d.m.Y') }}</td>
                                                             </tr>
                                                         @endforeach
@@ -146,7 +194,7 @@
                                         <!-- /.box-body -->
                                         <div class="box-footer">
                                             <div class="form-group pull-right">
-                                                <button type="submit" class="btn btn-sm btn-primary btn-flat" id="getSaldo" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Yangilash</button>
+                                                <button type="submit" class="btn btn-sm btn-primary btn-flat" id="getK2" value="{{ $model->id }}"><i class="fa fa-refresh"></i> Yangilash</button>
                                             </div>
                                         </div>
                                         <!-- /.box-footer-->
@@ -188,88 +236,136 @@
                                         </div>
                                         <div class="box-body no-padding">
                                             <div class="row">
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <div id="data_t">
                                                         @if($kias)
                                                             <table class="table no-padding no-border">
                                                                 <tbody>
                                                                 <tr>
-                                                                    <td><strong>Kredit qarzdorligi:</strong></td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><strong>Kredit qarzdorlik:</strong></td>
                                                                     <td class="text-maroon">{{ number_format($kias->summa) }} so`m</td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td><strong>Scoring bali:</strong></td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><strong>Scoring ball:</strong></td>
                                                                     <td class="text-green"><i class="fa fa-line-chart"></i> <span id="scoring_ball">{{ $kias->scoring_ball }}</span></td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td><strong>Yangilangan vaqti:</strong></td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><strong>Sana:</strong></td>
                                                                     <td>{{ \Carbon\Carbon::parse($kias->updated_at)->format('d.m.Y')  }}</td>
                                                                 </tr>
                                                                 </tbody>
                                                             </table>
-                                                            <button type="button" class="btn btn-sm bg-purple margin" id="getKIASModal" value="{{ $model->id }}">
-                                                                Batafsil..
-                                                            </button>
-
+                                                            <div class="form-group pull-left margin">
+                                                                <span id="clientType" hidden>{{ $model->client_type }}</span>
+                                                                <button type="button" class="btn btn-sm bg-purple" id="getKIASModal" value="{{ $model->id }}">
+                                                                    Batafsil..
+                                                                </button>
+                                                            </div>
                                                         @else
                                                             <h5 class="text-center text-maroon">Scoring KIAS ma`lumotlari topilmadi!!!</h5>
                                                         @endif
                                                     </div>
                                                 </div>
-                                                <div class="col-md-9">
+                                                <div class="col-md-8">
                                                     @if($kias_table)
-                                                    <table>
-                                                        <tbody>
-                                                        <tr>
-                                                            <td class="text-muted" style="text-align: center; background-color: #bdd6ee; padding: 5px 0px; border: 1px solid #02497f; width: 971px;" colspan="7">
-                                                                ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ
-                                                            </td>
-                                                        </tr>
-                                                        @foreach($kias_table as $key => $value)
-                                                            @if($key == 15 || $key == 16)
-                                                                <tr>
-                                                                    @foreach($value['td'] as $key1 => $value1)
-                                                                        <td rowspan="{{ $value1['rowspan']??1 }}" colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
-                                                                            {{ $value1['content']??'-' }}
-                                                                        </td>
-                                                                    @endforeach
-                                                                </tr>
-                                                            @elseif($key > 16 && $key < 28)
-                                                                <tr>
-                                                                    @foreach($value['td'] as $key1 => $value1)
-                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}" id="{{ $value1['id']??'' }}">
-                                                                            @if($key1 < 2)
-                                                                                {{ $value1['content']??'-' }}
-                                                                            @else
-                                                                                {{ $value1['span']??'-' }}
+                                                        <div class="box box-default collapsed-box">
+                                                            <div class="box-header with-border">
+                                                                <h3 class="box-title">ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ</h3>
+
+                                                                <div class="box-tools pull-right">
+                                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
+                                                                    </button>
+                                                                </div>
+                                                                <!-- /.box-tools -->
+                                                            </div>
+                                                            <!-- /.box-header -->
+                                                            <div class="box-body">
+                                                                <table>
+                                                                    <tbody>
+                                                                    @foreach($kias_table as $key => $value)
+                                                                        @if($model->client_type == 11)
+
+                                                                            @if($key == 17 || $key == 18)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td rowspan="{{ $value1['rowspan']??1 }}" colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            {{ $value1['content']??'-' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key > 18 && $key < 31)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}" id="{{ $value1['id']??'' }}">
+                                                                                            @if($key1 < 2)
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @else
+                                                                                                {{ $value1['span']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key = 31)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            @if($key1 == 2)
+                                                                                                @foreach($value1['span'] as $key2 => $value2)
+                                                                                                    <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
+                                                                                                @endforeach
+                                                                                            @else
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
                                                                             @endif
-                                                                        </td>
-                                                                    @endforeach
-                                                                </tr>
-                                                            @elseif($key = 28)
-                                                                <tr>
-                                                                    @foreach($value['td'] as $key1 => $value1)
-                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
-                                                                            @if($key1 == 2)
-                                                                                @foreach($value1['span'] as $key2 => $value2)
-                                                                                    <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
-                                                                                @endforeach
-                                                                            @else
-                                                                                {{ $value1['content']??'-' }}
+
+                                                                        @else
+                                                                            @if($key == 15 || $key == 16)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td rowspan="{{ $value1['rowspan']??1 }}" colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            {{ $value1['content']??'-' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key > 16 && $key < 28)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}" id="{{ $value1['id']??'' }}">
+                                                                                            @if($key1 < 2)
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @else
+                                                                                                {{ $value1['span']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                            @elseif($key = 28)
+                                                                                <tr>
+                                                                                    @foreach($value['td'] as $key1 => $value1)
+                                                                                        <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
+                                                                                            @if($key1 == 2)
+                                                                                                @foreach($value1['span'] as $key2 => $value2)
+                                                                                                    <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
+                                                                                                @endforeach
+                                                                                            @else
+                                                                                                {{ $value1['content']??'-' }}
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
                                                                             @endif
-                                                                        </td>
+
+                                                                        @endif
                                                                     @endforeach
-                                                                </tr>
-                                                            @endif
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <!-- /.box-body -->
+                                                        </div>
+
                                                     @endif
 
                                                 </div>
@@ -286,192 +382,213 @@
                                     </div>
                                     <!--/.direct-chat -->
                                 </div>
-                                <!-- /.col -->
 
-                                <div class="col-md-6">
-                                    <!-- DIRECT CHAT PRIMARY -->
-                                    <div class="box box-danger box-solid">
-                                        <div class="box-header with-border">
-                                            <h3 class="box-title">Buxgalteriya balansi 1-shakl</h3>
-                                        </div>
-                                        <!-- /.box-header -->
-
-                                        <div class="overlay" id="overlayBalance">
-                                            <i class="fa fa-refresh fa-spin"></i>
-                                        </div>
-                                        <div class="box-body no-padding">
-                                            <div id="data_balance">
-                                                @if($balance)
-                                                    <table class="table table-striped">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td><strong>Tashkilot Nmi:</strong></td>
-                                                            <td colspan="3">{{ $balance->company_name }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2"><strong>STIR:</strong></td>
-                                                            <td colspan="2">{{ $balance->tin }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong>ns10_code:</strong></td>
-                                                            <td>{{ $balance->ns10_code }}</td>
-                                                            <td><strong>Yil:</strong></td>
-                                                            <td>{{ $balance->year }} - yil</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong>ns11_code:</strong></td>
-                                                            <td>{{ $balance->ns11_code }}</td>
-                                                            <td><strong>Kvartal:</strong></td>
-                                                            <td>{{ $balance->quarter }} - chorak</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2"><strong>Yangilangan vaqti:</strong></td>
-                                                            <td colspan="2">{{ \Carbon\Carbon::parse($balance->created_at)->format('d.m.Y H:i')  }}</td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <button type="button" class="btn btn-sm bg-purple margin" id="getBalanceModal" value="{{ $model->id }}">
-                                                        Batafsil..
-                                                    </button>
-                                                @else
-                                                    <h5 class="text-center text-maroon">Balance ma`lumotlari topilmadi!!!</h5>
-                                                @endif
+                                @if($model->client_type != '11')
+                                    <div class="col-md-6">
+                                        <!-- DIRECT CHAT PRIMARY -->
+                                        <div class="box box-danger box-solid">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">Buxgalteriya balansi 1-shakl</h3>
                                             </div>
-                                        </div>
-                                        <!-- /.box-body -->
-                                        <div class="box-footer">
-                                            <div class="form-group pull-right">
-                                                <button class="btn btn-sm btn-danger btn-flat" id="showBalanceForm">
-                                                    <i class="fa fa-refresh"></i> Yangilash</button>
+                                            <!-- /.box-header -->
+
+                                            <div class="overlay" id="overlayBalance">
+                                                <i class="fa fa-refresh fa-spin"></i>
                                             </div>
-                                        </div>
-                                        <div class="box-footer showBalanceForm">
-                                            <div class="box-body">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <select id="year" class="form-control">
-                                                            <option value="2019">2019 yil</option>
-                                                            <option value="2020" selected>2020 yil</option>
-                                                            <option value="2021">2021 yil</option>
-                                                        </select>
-
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <select id="quarter" class="form-control">
-                                                            <option value="1">1 kvartal</option>
-                                                            <option value="2">2 kvartal</option>
-                                                            <option value="3">3 kvartal</option>
-                                                            <option value="4" selected>4 kvartal</option>
-                                                        </select>
-
-                                                    </div>
+                                            <div class="box-body no-padding">
+                                                <div id="data_balance">
+                                                    @if($balance)
+                                                        <table class="table table-striped">
+                                                            <tbody>
+                                                            <tr>
+                                                                <td><strong>Tashkilot Nmi:</strong></td>
+                                                                <td colspan="3">{{ $balance->company_name }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="2"><strong>STIR:</strong></td>
+                                                                <td colspan="2">{{ $balance->tin }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>ns10_code:</strong></td>
+                                                                <td>{{ $balance->ns10_code }}</td>
+                                                                <td><strong>Yil:</strong></td>
+                                                                <td>{{ $balance->year }} - yil</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>ns11_code:</strong></td>
+                                                                <td>{{ $balance->ns11_code }}</td>
+                                                                <td><strong>Kvartal:</strong></td>
+                                                                <td>{{ $balance->quarter }} - chorak</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="2"><strong>Yangilangan vaqti:</strong></td>
+                                                                <td colspan="2">{{ \Carbon\Carbon::parse($balance->created_at)->format('d.m.Y H:i')  }}</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <button type="button" class="btn btn-sm bg-purple margin" id="getBalanceModal" value="{{ $model->id }}">
+                                                            Batafsil..
+                                                        </button>
+                                                    @else
+                                                        <h5 class="text-center text-maroon">Balance ma`lumotlari topilmadi!!!</h5>
+                                                    @endif
                                                 </div>
                                             </div>
-                                            <div class="form-group pull-right">
-                                                <button class="btn btn-sm btn-info btn-flat" id="getBalanceForm" value="{{ $model->id }}">
-                                                    <i class="fa fa-send-o"></i> Submit</button>
+                                            <!-- /.box-body -->
+                                            <div class="box-footer">
+                                                <div class="form-group pull-right">
+                                                    <button class="btn btn-sm btn-danger btn-flat" id="showBalanceForm">
+                                                        <i class="fa fa-refresh"></i> Yangilash</button>
+                                                </div>
                                             </div>
+                                            <div class="box-footer showBalanceForm">
+                                                <div class="box-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <select id="year" class="form-control">
+                                                                <option value="2019">2019 yil</option>
+                                                                <option value="2020" selected>2020 yil</option>
+                                                                <option value="2021">2021 yil</option>
+                                                            </select>
 
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <select id="quarter" class="form-control">
+                                                                <option value="1">1 kvartal</option>
+                                                                <option value="2">2 kvartal</option>
+                                                                <option value="3">3 kvartal</option>
+                                                                <option value="4" selected>4 kvartal</option>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group pull-right">
+                                                    <button class="btn btn-sm btn-info btn-flat" id="getBalanceForm" value="{{ $model->id }}">
+                                                        <i class="fa fa-send-o"></i> Submit</button>
+                                                </div>
+
+                                            </div>
+                                            <!-- /.box-footer-->
                                         </div>
-                                        <!-- /.box-footer-->
+                                        <!--/.direct-chat -->
                                     </div>
-                                    <!--/.direct-chat -->
-                                </div>
-                                <!-- /.col -->
-                                <div class="col-md-6">
-                                    <!-- DIRECT CHAT PRIMARY -->
-                                    <div class="box box-danger box-solid">
-                                        <div class="box-header with-border">
-                                            <h3 class="box-title">Moliyaviy hisobot 2-shakl</h3>
-                                        </div>
-                                        <!-- /.box-header -->
 
-                                        <div class="overlay" id="overlayFBalance">
-                                            <i class="fa fa-refresh fa-spin"></i>
-                                        </div>
-                                        <div class="box-body no-padding">
-                                            <div id="data_fbalance">
-                                                @if($financial)
-                                                    <table class="table table-striped">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td><strong>Tashkilot Nmi:</strong></td>
-                                                            <td colspan="3">{{ $financial->company_name }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2"><strong>STIR:</strong></td>
-                                                            <td colspan="2">{{ $financial->tin }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong>ns10_code:</strong></td>
-                                                            <td>{{ $financial->ns10_code }}</td>
-                                                            <td><strong>Yil:</strong></td>
-                                                            <td>{{ $financial->year }} - yil</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong>ns11_code:</strong></td>
-                                                            <td>{{ $financial->ns11_code }}</td>
-                                                            <td><strong>Kvartal:</strong></td>
-                                                            <td>{{ $financial->quarter }} - chorak</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2"><strong>Yangilangan vaqti:</strong></td>
-                                                            <td colspan="2">{{ \Carbon\Carbon::parse($financial->created_at)->format('d.m.Y H:i')  }}</td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <button type="button" class="btn btn-sm bg-purple margin" id="getFBalanceModal" value="{{ $model->id }}">
-                                                        Batafsil..
-                                                    </button>
-                                                @else
-                                                    <h5 class="text-center text-maroon">Moliyaviy Balance ma`lumotlari topilmadi!!!</h5>
-                                                @endif
+                                    <div class="col-md-6">
+                                        <!-- DIRECT CHAT PRIMARY -->
+                                        <div class="box box-danger box-solid">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">Moliyaviy hisobot 2-shakl</h3>
                                             </div>
-                                        </div>
-                                        <!-- /.box-body -->
-                                        <div class="box-footer">
-                                            <div class="form-group pull-right">
-                                                <button class="btn btn-sm btn-danger btn-flat" id="showFBalanceForm">
-                                                    <i class="fa fa-refresh"></i> Yangilash</button>
+                                            <!-- /.box-header -->
+
+                                            <div class="overlay" id="overlayFBalance">
+                                                <i class="fa fa-refresh fa-spin"></i>
                                             </div>
-                                        </div>
-                                        <div class="box-footer showFBalanceForm">
-                                            <div class="box-body">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <select id="fyear" class="form-control">
-                                                            <option value="2019">2019 yil</option>
-                                                            <option value="2020" selected>2020 yil</option>
-                                                            <option value="2021">2021 yil</option>
-                                                        </select>
-
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <select id="fquarter" class="form-control">
-                                                            <option value="1">1 kvartal</option>
-                                                            <option value="2">2 kvartal</option>
-                                                            <option value="3">3 kvartal</option>
-                                                            <option value="4" selected>4 kvartal</option>
-                                                        </select>
-
-                                                    </div>
+                                            <div class="box-body no-padding">
+                                                <div id="data_fbalance">
+                                                    @if($financial)
+                                                        <table class="table table-striped">
+                                                            <tbody>
+                                                            <tr>
+                                                                <td><strong>Tashkilot Nmi:</strong></td>
+                                                                <td colspan="3">{{ $financial->company_name }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="2"><strong>STIR:</strong></td>
+                                                                <td colspan="2">{{ $financial->tin }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>ns10_code:</strong></td>
+                                                                <td>{{ $financial->ns10_code }}</td>
+                                                                <td><strong>Yil:</strong></td>
+                                                                <td>{{ $financial->year }} - yil</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>ns11_code:</strong></td>
+                                                                <td>{{ $financial->ns11_code }}</td>
+                                                                <td><strong>Kvartal:</strong></td>
+                                                                <td>{{ $financial->quarter }} - chorak</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="2"><strong>Yangilangan vaqti:</strong></td>
+                                                                <td colspan="2">{{ \Carbon\Carbon::parse($financial->created_at)->format('d.m.Y H:i')  }}</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <button type="button" class="btn btn-sm bg-purple margin" id="getFBalanceModal" value="{{ $model->id }}">
+                                                            Batafsil..
+                                                        </button>
+                                                    @else
+                                                        <h5 class="text-center text-maroon">Moliyaviy Balance ma`lumotlari topilmadi!!!</h5>
+                                                    @endif
                                                 </div>
                                             </div>
-                                            <div class="form-group pull-right">
-                                                <button class="btn btn-sm btn-info btn-flat" id="getFBalanceForm" value="{{ $model->id }}">
-                                                    <i class="fa fa-send-o"></i> Submit</button>
+                                            <!-- /.box-body -->
+                                            <div class="box-footer">
+                                                <div class="form-group pull-right">
+                                                    <button class="btn btn-sm btn-danger btn-flat" id="showFBalanceForm">
+                                                        <i class="fa fa-refresh"></i> Yangilash</button>
+                                                </div>
                                             </div>
+                                            <div class="box-footer showFBalanceForm">
+                                                <div class="box-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <select id="fyear" class="form-control">
+                                                                <option value="2019">2019 yil</option>
+                                                                <option value="2020" selected>2020 yil</option>
+                                                                <option value="2021">2021 yil</option>
+                                                            </select>
 
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <select id="fquarter" class="form-control">
+                                                                <option value="1">1 kvartal</option>
+                                                                <option value="2">2 kvartal</option>
+                                                                <option value="3">3 kvartal</option>
+                                                                <option value="4" selected>4 kvartal</option>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group pull-right">
+                                                    <button class="btn btn-sm btn-info btn-flat" id="getFBalanceForm" value="{{ $model->id }}">
+                                                        <i class="fa fa-send-o"></i> Submit</button>
+                                                </div>
+
+                                            </div>
+                                            <!-- /.box-footer-->
                                         </div>
-                                        <!-- /.box-footer-->
+                                        <!--/.direct-chat -->
                                     </div>
-                                    <!--/.direct-chat -->
-                                </div>
-                                <!-- /.col -->
+
+                                    <div class="col-md-12">
+                                        <!-- DIRECT CHAT PRIMARY -->
+                                        <div class="box box-danger box-solid">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">Moliyaviy hisobot xulosasi</h3>
+                                            </div>
+
+                                            <div class="box-body no-padding">
+                                                <table class="table table-striped">
+                                                    <tbody>
+
+                                                    {!! $balance_class !!}
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!--/.direct-chat -->
+                                    </div>
+
+                                @endif
                                 <div class="col-md-12">
                                     <div class="box box-success direct-chat">
                                         <div class="box-header with-border">
@@ -765,6 +882,30 @@
                 </div>
             </div>
 
+            <!-- Modal oborotka -->
+            <div class="modal fade modal-info" id="leadsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document" style="width: 1100px">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div style=" margin: auto; width: 1000px; line-height: normal; background-color: #fff; padding: 10px;">
+                            <h3>Xisob raqam pul aylanmasi</h3>
+                            <table style="width: 1000px;" id="main_info">
+                                <tbody>
+                                <div id="l_data_table"></div>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Modal -->
             <div class="modal fade modal-info" id="tableBalanceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -863,6 +1004,7 @@
         </div>
         <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
         <script>
+            $("#overlayK2").hide();
 
             $("#overlayOnlineReg").hide();
 
@@ -1489,9 +1631,9 @@
                                 '<tr>' +
                                     '<th>#</th>' +
                                     '<th>X/R</th>' +
-                                    '<th>Credit (Jami)</th>' +
+                                    /*'<th>Credit (Jami)</th>' +*/
                                     '<th>Credit (Ohirgi)</th>' +
-                                    '<th>Debit (Jami)</th>' +
+                                    /*'<th>Debit (Jami)</th>' +*/
                                     '<th>Debit (Ohirgi)</th>' +
                                     '<th>Oy</th>' +
                                     '<th>Yang.Sana</th>' +
@@ -1503,9 +1645,9 @@
                                     '<tr>' +
                                     '<td>'+i+'</td>' +
                                     '<td>'+val['acc_external']+'</td>' +
-                                    '<td class="text-green">'+formatPrice(val['all_credit']/100)+'</td>' +
+                                    /*'<td class="text-green">'+formatPrice(val['all_credit']/100)+'</td>' +*/
                                     '<td class="text-maroon">'+formatPrice((val['all_credit']-val['credit'])/100)+'</td>' +
-                                    '<td class="text-green">'+formatPrice(val['all_debit']/100)+'</td>' +
+                                    /*'<td class="text-green">'+formatPrice(val['all_debit']/100)+'</td>' +*/
                                     '<td class="text-maroon">'+formatPrice((val['all_debit']-val['debit'])/100)+'</td>' +
                                     '<td><span class="label label-warning">'+val['saldo_month']+'</span></td>' +
                                     '<td>'+formatDate(val['l_date'])+'</td>' +
@@ -1521,6 +1663,77 @@
                         data+= '</tbody></table>';
 
                         $("#data_saldo").prepend(data);
+
+                    },
+                    complete:function(){
+                        $("#overlaySaldo").hide();
+                    }
+
+                });
+
+            });
+
+
+            $("#getLeads").click(function () {
+
+                let id = $('#getLeads').val();
+
+                $.ajax({
+                    url: '/jur/get-jur-leads',
+                    type: 'GET',
+                    data: {id: id},
+                    dataType: 'json',
+                    beforeSend: function(){
+                        $("#overlaySaldo").show();
+                        $("#l_data_table").empty();
+                    },
+                    success: function(res){
+                        console.log(res);
+
+                        let credit_val = 0;
+
+                        let data = '';
+                        data+= '<table class="table table-striped table-bordered"><tbody>' +
+                            '<tr>' +
+                            '<th>#</th>' +
+                            '<th>X/R</th>' +
+                            '<th>Summa</th>' +
+                            '<th>Davr</th>' +
+                            '</tr>';
+                        if (res.length !== 0){
+                            for (let i = 0; i < res.length; i++) {
+                                let val = res[i];
+                                credit_val+= val['credit']/100;
+                                data+=
+                                    '<tr>' +
+                                    '<td>'+i+'</td>' +
+                                    '<td>'+val['acc']+'</td>' +
+                                    '<td class="text-green">'+formatPrice(val['credit']/100)+'</td>' +
+                                    '<td>'+val['l_date']+'</td>' +
+                                    '</tr>';
+                            }
+
+                            let creditTotal = (credit_val).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                            data+=
+                                '<tfoot>' +
+                                '<tr>' +
+                                '<td><b>Jami:</b><td>' +
+                                '<td><b>'+creditTotal+'</b><td>' +
+                                '</tr>' +
+                                '</tfoot>';
+
+                        } else {
+                            data+=
+                                '<tr>' +
+                                '<td colspan="5" class="text-maroon text-center">Mijoz Pul aylanmasi  topilmadi!!!</td>' +
+                                '</tr>';
+                        }
+                        data+= '</tbody></table>';
+
+                        $("#l_data_table").html(data);
+
+                        $('#leadsModal').modal('show');
 
                     },
                     complete:function(){

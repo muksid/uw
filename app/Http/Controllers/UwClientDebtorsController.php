@@ -233,8 +233,8 @@ class UwClientDebtorsController extends Controller
                     $button .= '&nbsp;&nbsp;';
                     $button .= ' | <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
  <span class="glyphicon glyphicon-trash"></span></a>';
-                    /**$button .= ' | <a href="javascript:void(0);" id="reg-debtor" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="text-green  '.$disabled.'">
- <span class="glyphicon glyphicon-globe"></span></a>';*/
+                    $button .= ' | <a href="javascript:void(0);" id="reg-debtor" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="text-green  '.$disabled.'">
+ <span class="glyphicon glyphicon-globe"></span></a>';
                     return $button;
                 })
                 ->rawColumns(['action'])

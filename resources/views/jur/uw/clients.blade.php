@@ -1,4 +1,4 @@
-@extends('layouts.uw.dashboard')
+@extends('layouts.dashboard')
 <link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
 
 @section('content')
@@ -30,13 +30,16 @@
 
         <div class="box-body">
             <p>
-                <a href="{{ url('jur/uw-clients/2') }}" class="btn bg-maroon btn-flat margin">
+                <a href="{{ url('jur/client/create') }}" class="btn bg-olive-active btn-flat margin">
+                    <i class="fa fa-plus-circle"></i> @lang('blade.add')
+                </a>
+                <a href="{{ url('jur/uw/clients/2') }}" class="btn bg-maroon btn-flat margin">
                     <i class="fa fa-undo"></i> Yangi arizalar
                 </a>
-                <a href="{{ url('jur/uw-clients/3') }}" class="btn bg-navy btn-flat margin">
+                <a href="{{ url('jur/uw/clients/3') }}" class="btn bg-navy btn-flat margin">
                     <i class="fa fa-check-circle"></i> Tasdiqlangan
                 </a>
-                <a href="{{ url('jur/uw-clients/0') }}" class="btn bg-orange btn-flat margin">
+                <a href="{{ url('jur/uw/clients/0') }}" class="btn bg-orange btn-flat margin">
                     <i class="fa fa-pencil"></i> Taxrirlashda
                 </a>
             </p>
@@ -53,7 +56,7 @@
 
                     <div class="box-body">
 
-                        <form action="{{url('/jur/uw-clients/'.$status.'')}}" method="POST" role="search">
+                        <form action="{{url('/jur/uw/clients/'.$status.'')}}" method="POST" role="search">
                             {{ csrf_field() }}
 
                             <div class="row">
@@ -148,7 +151,7 @@
                                         <td>{{ $model->client_code }}</td>
                                         <td>{{ $model->claim_id }}</td>
                                         <td class="text-uppercase">
-                                            <a href="{{ url('/jur/uw/client-view', ['id' => $model->id]) }}">
+                                            <a href="{{ url('/jur/uw/view-client', ['id' => $model->id]) }}">
                                                 {{ $model->jur_name }}
                                             </a>
                                         </td>

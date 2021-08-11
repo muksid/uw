@@ -2,30 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\MWorkUsers;
+use App\UnDistricts;
 use Illuminate\Http\Request;
 use App\Department;
-use Auth;
-use DB;
+use Illuminate\Support\Facades\Input;
 
 
 class DepartmentController extends Controller
 {
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
 
     public function index(Request $request)
     {
-        $departments = Department::orderBy('id','ASC')->get();
+        //
+        $search = Department::orderBy('branch_code', 'ASC');
 
-        $allDepartments = Department::all();
+        $query = Input::get ( 'query' );
 
-        // count() //
-        @include('count_message.php');
+        if($query) {
+            $search->where('branch_code', 'LIKE', '%'.$query.'%');
+            $search->orWhere('local_code', 'LIKE', '%'.$query.'%');
+            $search->orWhere('title', 'LIKE', '%'.$query.'%');
+        }
 
-        return view('departments.index',compact('departments','allDepartments'));
+        $models = $search->paginate(20);
+
+        $models->appends ( array (
+            'query' => Input::get ( 'query' )
+        ) );
+
+        return view('madmin.departments.index',
+            compact('models','query'))
+            ->withDetails ( $models )->withQuery ( $query );
 
     }
 
@@ -33,15 +41,13 @@ class DepartmentController extends Controller
     {
 
         $filial = Department::where('parent_id', 0)
-            ->where('status', '=', 1)
+            ->where('status', 1)
             ->orderBy('id', 'ASC')->get();
 
-        // count() //
-        @include('count_message.php');
-
-        return view('departments.create',compact('filial'));
+        return view('madmin.departments.create',compact('filial'));
 
     }
+
     public function userDepartment(Request $request){
 
         $id = $request->input('id');
@@ -51,48 +57,55 @@ class DepartmentController extends Controller
         return response()->json(array('success' => true, 'msg' => $model, 'branch' => $id));
     }
 
-    // Jamshid 2020-03-25 18:07:03 changed $req and added $branch
-    public function department(Request $request){
+    public function getDepartment(Request $request){
 
         $branch = $request->input('branch_code');
 
-        $req = DB::table('departments')
-            ->select('id')
-            ->where('branch_code', $branch)
+        $depart_id = Department::select('id')
+            ->where('branch_code', '=', $branch)
             ->where('parent_id', 0)
             ->first();
 
-        $model = Department::where('parent_id', $req->id)->where('status', 1)->get();
+        $models = Department::where('parent_id', $depart_id->id)->where('status', 1)->get();
 
-        return response()->json(array('success' => true, 'msg' => $model, 'branch' => $branch, 'req' => $req->id));
+        return response()->json(array(
+            'success' => true,
+            'models' => $models,
+            'branch' => $branch,
+            'depart_id' => $depart_id->id
+        ));
     }
 
-    // Jamshid Sub departments
-    public function subdep(Request $request){
+    public function subDepartment(Request $request){
 
-        $req = $request->input('name');
+        $depart_id = $request->input('depart_id');
 
-        $sub_depart = Department::where('parent_id', $req)->get();
+        $subDepartment = Department::where('parent_id', $depart_id)->get();
 
-        return response()->json(array('success' => true, 'msg' => $sub_depart, 'req' => $req));
+        return response()->json(array(
+            'success' => true,
+            'subDepartment' => $subDepartment,
+            'depart_id' => $depart_id));
     }
 
+    public function getDistricts(Request $request){
 
-    public function branch(Request $request){
-        // Jamshid call only departments
-        $input = $request->input('name');
-        // $depart = Department::where('branch_code', '=', $input)              //call all info of departments
+        $region_code = $request->input('region_code');
 
-        $depart = Department::where('branch_code', '=', $input)
-            ->whereIn('parent_id',function($query){
-            $query->select('id')
-                ->from('departments as d')
-                ->where('parent_id',0);
-        })
-            ->get();
+        $districts = UnDistricts::where('region_code', $region_code)->where('status', 1)->get();
 
-        return response()->json(array('success' => true, 'msg' => $depart, 'branch' => $input));
+        return response()->json($districts);
     }
+
+    public function getRegDistricts(Request $request){
+
+        $region_code = $request->input('reg_region_code');
+
+        $districts = UnDistricts::where('region_code', $region_code)->where('status', 1)->get();
+
+        return response()->json($districts);
+    }
+
 
     public function store(Request $request)
     {
@@ -104,8 +117,11 @@ class DepartmentController extends Controller
         ]);
 
         $input = $request->all();
+
         $input['parent_id'] = empty($input['parent_id']) ? 0 : $input['parent_id'];
+
         $d = Department::where('id',$request['parent_id'])->first();
+
         // If a new created department is in 'Bosh Bank' and is a department
         if($request['branch_code'] == '09011' && $d->id == 1){
             $lastId = Department::orderBy('id', 'DESC')->first();
@@ -114,31 +130,33 @@ class DepartmentController extends Controller
         else{
             $request['depart_id'] = $d->depart_id;
         }
+
         Department::create($request->all());
-        return back()->with('success', 'New Department added successfully.');
+
+        return back()->with('success', 'Yangi yozuv qo`shildi');
     }
 
 
     public function show(Department $department)
     {
 
-        return view('departments.show',compact('department'));
+        return view('madmin.departments.show',compact('department'));
     }
 
     public function view(Department $department)
     {
 
-        return view('departments.show',compact('department'));
+        return view('madmin.departments.show',compact('department'));
     }
 
     public function edit(Department $department)
     {
 
-        $filials = Department::where('parent_id', '=', 0)->where('status', '=', 1)->orderBy('id','ASC')->get();
+        $filials = Department::where('parent_id', 0)->where('status', 1)->orderBy('id','ASC')->get();
 
-        $departments = Department::where('status', '=', 1)->where('parent_id', '=', 0)->get();
+        $departments = Department::where('status', 1)->where('parent_id', 0)->get();
 
-        return view('departments.edit',compact('filials', 'department','departments'));
+        return view('madmin.departments.edit',compact('filials', 'department','departments'));
     }
 
     public function update(Request $request, Department $department)
@@ -165,9 +183,19 @@ class DepartmentController extends Controller
 
     public function destroy(Department $department)
     {
-        $department->delete();
+        $depart_id = $department->id;
 
-        return redirect()->route('departments.index')->with('success','Department deleted successfully.');
+        $isCheck = MWorkUsers::where('depart_id', $depart_id)->first();
+
+        if ($isCheck) {
+            $message = 'Ushbu Yozuvni o`chirish mumkin emas!!!';
+        } else {
+            $message = 'Ushbu Yozuv o`chirildi';
+            $department->delete();
+
+        }
+
+        return back()->with('success',$message);
     }
 
 }

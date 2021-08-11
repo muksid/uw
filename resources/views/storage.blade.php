@@ -1,28 +1,32 @@
-@extends('layouts.uw.dashboard')
+@extends('layouts.dashboard')
 @section('content')
-    <!-- Content Header (Page header) -->
+
     <section class="content-header">
         <h1>
             Bosh sahifa {{ $_SERVER['REMOTE_ADDR'] }}
             <small>nazorat paneli</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> WebEDO</a></li>
+            <li><a href="#"><i class="fa fa-dashboard"></i> Uw</a></li>
             <li class="active">bosh sahifa</li>
         </ol>
-        @if (count($errors) > 0)
-            <div class="alert alert-danger">
-                <strong>Xatolik!</strong> xatolik bor.<br><br>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+
+        @if(session('message'))
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-success">
+                                <h4 class="modal-title"> {{ session('message') }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         @endif
 
     </section>
-    <!-- Main content -->
+
     <section class="content">
         <!-- Small boxes (Stat box) -->
         <div class="row">
@@ -37,9 +41,9 @@
                     <div class="icon">
                         <i class="ion ion-alert"></i>
                     </div>
-                    <a href="{{ url('storage',['log'=> 'laravel.log']) }}" class="small-box-footer"
-                       target="_blank" class="mailbox-attachment-name"
-                       onclick="window.open('<?php echo ('/storage/'. 'laravel.log'); ?>',
+                    <a href="{{ url('/madmin/get-log-file') }}" class="small-box-footer"
+                       target="_blank"
+                       onclick="window.open('<?php echo ('/madmin/get-log-file'); ?>',
                                'modal',
                                'width=800,height=900,top=30,left=500');
                                return false;">
@@ -100,7 +104,7 @@
 
                     <div class="info-box-content">
                         <span class="info-box-text">Route</span>
-                        <a href="{{url('/route-cache')}}">Route Cache</a>
+                        <a href="{{ url('/madmin/cache/route') }}">Route Clear</a>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -113,7 +117,7 @@
 
                     <div class="info-box-content">
                         <span class="info-box-text">Config</span>
-                        <a href="{{url('/config-cache')}}">Config Cache</a>
+                        <a href="{{ url('/madmin/cache/config') }}">Config Cache</a>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -126,7 +130,7 @@
 
                     <div class="info-box-content">
                         <span class="info-box-text">Cache</span>
-                        <a href="{{url('/clear-cache')}}">Clear Cache</a>
+                        <a href="{{url('/madmin/cache/clear')}}">Clear Cache</a>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -139,7 +143,7 @@
 
                     <div class="info-box-content">
                         <span class="info-box-text">View</span>
-                        <a href="{{url('/view-clear')}}">View Clear</a>
+                        <a href="{{url('/madmin/cache/view')}}">View Cache</a>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -147,24 +151,6 @@
             </div>
             <!-- /.col -->
         </div>
-        <!-- /.row -->
-        <script type="text/javascript">
-            $(document).ready(function () {
-
-            });
-        </script>
-
-        <!-- Ionicons -->
-        <link href="{{ asset("/admin-lte/bootstrap/css/ionicons.min.css") }}" rel="stylesheet" >
-
-        <link href="{{ asset("/admin-lte/bootstrap/css/font-awesome.min.css") }}" rel="stylesheet" >
-
-        <script src="{{ asset("/admin-lte/dist/js/jquery-ui.min.js") }}"></script>
-
-
-        <script src="{{ asset("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
 
     </section>
 @endsection

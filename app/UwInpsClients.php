@@ -27,7 +27,6 @@ class UwInpsClients extends Model
         'NUM',
         'PERIOD',
         'ORGNAME',
-        'report_json',
         'status'
     ];
 }
