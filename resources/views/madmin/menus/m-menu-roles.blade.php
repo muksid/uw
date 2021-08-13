@@ -369,7 +369,7 @@
 
                 <div class="modal-body">
                     <h4 class="text-center"><span class="glyphicon glyphicon-info-sign"></span>
-                        Siz, tanlagan xatlar o`chiriladi!
+                        Siz tanlagan qator o`chiriladi!
                     </h4>
                 </div>
 

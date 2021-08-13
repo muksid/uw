@@ -6,12 +6,12 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Barcha Yuridik mijozlar
-            <small>jadval</small>
+            Jismoniy shaxslar
+            <small>Talabnomalar</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">juridical</a></li>
+            <li><a href="#">physical</a></li>
             <li class="active">index</li>
         </ol>
         @if(session('success'))
@@ -33,6 +33,7 @@
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
+            <div id="loading" class="loading-gif" style="display: none"></div>
 
                 <div class="box box-primary">
 
@@ -42,27 +43,12 @@
                             {{ csrf_field() }}
 
                             <div class="row">
+
                                 <div class="col-md-2">
-                                    <div class="form-group">
-                                        <select name="u" class="form-control select2" style="width: 100%;">
-                                            @if(!empty($searchUser))
-                                                <option value="{{$searchUser->id}}" selected>
-                                                    {{$searchUser->branch_code??''}} - {{ $searchUser->personal->l_name??'' }} {{$searchUser->personal->f_name??'-'}}
-                                                </option>
-                                            @else
-                                                <option value="" selected>
-                                                    @lang('blade.select_employee')
-                                                </option>
-                                            @endif
-
-                                            @if(!empty($users))
-                                                
-                                            @endif
-
-                                        </select>
-                                    </div>
+                                    <button type="button" class="btn bg-olive-active btn-flat margin" data-toggle="modal" data-target="#modalForm">
+                                        <i class="fa fa-plus"></i> @lang('blade.add')
+                                    </button>
                                 </div>
-
                                 <div class="col-md-4">
                                     <div class="form-group has-success">
                                         <input type="text" class="form-control" name="t" value="{{ $t??'' }}"
@@ -101,60 +87,60 @@
                         </form>
                     </div>
                     <div class="box-body">
-                        <b>@lang('blade.overall'){{--': '. ($models->total()??'')--}} @lang('blade.group_edit_count').</b>
+                        @if ($models)
+                            <b>@lang('blade.overall'){{': '. ($models->total()??'')}} @lang('blade.group_edit_count').</b>
+                        @else
+                            <b>@lang('blade.overall'): 0 @lang('blade.group_edit_count').</b>
+                        @endif
                         <table class="table table-striped table-bordered">
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Kredit Turi</th>
-                                <th>IABS #</th>
-                                <th>Ariza #</th>
-                                <th>Mijoz nomi</th>
-                                <th>STIR</th>
-                                <th>Summa</th>
-                                <th class="text-center">@lang('blade.status')</th>
-                                <th class="text-center"><i class="fa fa-bank"></i></th>
-                                <th>Filial (BXO)</th>
-                                <th class="text-center">Inspektor</th>
-                                <th>Sana</th>
+                                <th>FIO</th>
+                                <th>Guar Type</th>
+                                <th>Template</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Show</th>
+                                <th class="text-bold text-center text-red"><i class="fa fa-trash"></i></th>
                             </tr>
                             </thead>
                             <tbody id="roleTable">
                             <?php $i = 1 ?>
-                            @if($models->count())
+                            @if($models)
                                 @foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}">
-                                        <td>{{ $i++ }}</td>
-                                        <td class="text-sm">{{ $model->loanType->title??'' }}</td>
-                                        <td>{{ $model->client_code }}</td>
-                                        <td>{{ $model->claim_id }}</td>
-                                        <td class="text-uppercase">
-                                            <a href="{{ route('client.show', ['id' => $model->id]) }}">
-                                                {{ $model->jur_name}}
-                                            </a>
+                                        <td>{{ $models->firstItem() + $key }}</td>
+                                        <td class="text-sm text-bold text-blue">
+                                            {{ $model->uwPhyClients->family_name??'-' }} {{ $model->uwPhyClients->name??'-' }}
+                                            {{ $model->uwPhyClients->patronymic??'-' }}
                                         </td>
-                                        <td>{{ $model->inn }}</td>
-                                        <td><b>{{ number_format($model->summa, 2) }}</b></td>
-
-                                        <td>
-                                            @if($model->status == 0)
-                                                <span class="badge bg-red-active">Taxrirlashda</span>
-                                            @elseif($model->status == 1)
-                                                <span class="badge bg-yellow-active">Yangi</span>
-                                            @elseif($model->status == 2)
-                                                <span class="badge bg-aqua-active">Yuborilgan</span>
-                                            @elseif($model->status == 3)
-                                                <span class="badge bg-aqua-active">Tasdiqlangan</span>
+                                        <td class="text-sm text-center text-bold text-blue">
+                                            {{ $model->guarTypes->title }}
+                                        </td>
+                                        <td class="text-sm text-center text-bold">
+                                            {{ $model->appTemplatePhy->title }}
+                                        </td>
+                                        <td class="text-center">
+                                            @if($model->status == 'A')
+                                                <i class="fa fa-check text-green"></i>
+                                            @elseif($model->status == 'P')
+                                                <i class="fa fa-ban text-red"></i>
+                                            @else
+                                                <span class="text-sm text-bold">Unknown</span>
                                             @endif
                                         </td>
-                                        <td><span class="badge bg-light-blue">{{ $model->department->branch_code??'-' }}</span></td>
-                                        <td class="text-sm">{{ $model->department->title_ru??'' }}</td>
-                                        <td class="text-sm text-center text-bold text-blue">
-                                            {{ $model->user->personal->l_name??'-' }}
-                                            {{ mb_substr($model->user->personal->f_name??'-', 0, 1) }}.</td>
                                         <td class="text-sm">
                                             {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                             <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
+                                        </td>
+                                        <td>
+                                            <a href="{{url('/madmin/app-get-template-phy/'.$model->uw_client_id.'/'.$model->template_id)}}" target="_blank" class="btn btn-info text-bold appButton">App</button>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-danger text-bold deleteButton" data-id="{{$model->id}}" data-toggle="modal" data-target="#ConfirmModal">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach @else
@@ -163,61 +149,58 @@
                             @endif
                             </tbody>
                         </table>
-                        <span class="paginate">{{-- $models->links() --}}</span>
+                        <span class="paginate">{{ $models->links() }}</span>
                     </div>
 
-                    <div class="modal fade" id="resultKATMModal" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" style="width: auto; max-width: 1100px">
-                            <div class="modal-content">
-                                <div class="modal-header bg-aqua-active">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title text-center" id="success">Mijozning kredit tarixi (KATM)</h4>
-                                </div>
-                                <div id="reportBase64Modal"></div>
-                                <form id="roleForm14" name="roleForm14">
-                                    <div class="modal-body">
-                                        <input type="hidden" name="claim_id" id="katmClaimId">
-                                        <input type="hidden" name="katmSumm" id="katmSumm" value="">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-flat pull-right btn-default" data-dismiss="modal">@lang('blade.close')</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{--create/updte modal--}}
-                    <div class="modal fade modal-primary" id="modalForm" aria-hidden="true">
-                        <div class="modal-dialog modal-sm">
+                    {{--create modal--}}
+                    <div class="modal fade modal-info" id="modalForm" aria-hidden="true">
+                        <div class="modal-dialog modal-md">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span></button>
                                     <h4 class="modal-title" id="modalHeader"></h4>
                                 </div>
-                                <form id="roleForm" name="roleForm">
+                                <form id="createForm" name="createForm">
+                                    @csrf
                                     <div class="modal-body">
-                                        <input type="hidden" name="model_id" id="model_id">
                                         <div class="form-group">
-                                            <label for="name" class="control-label">Inn</label>
-                                            <input type="text" class="form-control" style="width: 100%" id="inn"
-                                                   name="inn" value="" required="">
+                                            <label for="unique_code">Select client <span class="text-red">*</span></label>
+                                            <select class="form-control select_clients" id="unique_code" name="uw_client_id" style="width: 100%" required>
+                                            </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="name" class="control-label">INPS</label>
-                                            <input type="text" class="form-control" style="width: 100%" id="pin"
-                                                   name="pin" value="" required="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="name" class="control-label">summa</label>
-                                            <input type="text" class="form-control" style="width: 100%" id="summa"
-                                                   name="summa" value="" required="">
+                                            <label for="create_template_id">Select template <span class="text-red">*</span></label>
+                                            <select class="form-control select_template" id="create_template_id" name="template_id" style="width: 100%" required>
+                                                @foreach ($templates as $template)
+                                                    <option value="{{$template->id}}">{{$template->title}}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
 
+                                        <div class="form-group">
+                                            <label for="create_guar_type_id">Ta'minot turi <span class="text-red">*</span></label>
+                                            <select class="form-control select2" id="create_guar_type_id" name="guar_type_id" style="width: 100%" required>
+                                                <option value="">Ta`minot turini tanlang</option>
+                                                @foreach ($guar_types as $guar_type)
+                                                    <option value="{{$guar_type->id}}">{{$guar_type->title}}</option>
+                                                @endforeach                                            
+                                            </select>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <label for="">Status <span class="text-red">*</span></label>
+                                            <input class="form-check-input" type="radio" name="status" id="create_status_active" value="A" checked>
+                                            <label class="form-check-label" for="create_status_active">
+                                                Active
+                                            </label>
+                                            <input class="form-check-input" type="radio" name="status" id="create_status_passive" value="P">
+                                            <label class="form-check-label" for="create_status_passive">
+                                                Passive
+                                            </label>
+                                        </div>
                                     </div>
+
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-outline pull-left"
                                                 data-dismiss="modal">@lang('blade.cancel')</button>
@@ -257,6 +240,7 @@
                         </div>
                     </div>
 
+                    {{-- success modal --}}
                     <div class="modal fade modal-success" id="successModal" tabindex="-1" role="dialog"
                          aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-sm">
@@ -267,7 +251,7 @@
                                     </h4>
                                 </div>
                                 <div class="modal-body">
-                                    <h5>Client Successfully deleted</h5>
+                                    <h5 id="successMessage"></h5>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-outline" data-dismiss="modal">@lang('blade.close')
@@ -293,6 +277,7 @@
 
         <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
         <script>
+            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
             $(function () {
                 $("#example1").DataTable();
@@ -320,14 +305,103 @@
 
             // crud form
             $(document).ready(function () {
-
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                
+                $('.select2').select2()
+                $('.select_template').select2({
+                    placeholder: 'Select a template',
+                })
+                $('.select_clients').select2({
+                    minimumInputLength: 8,
+                    placeholder: 'Unikal kod',
+                    ajax: {
+                        url: '/madmin/app-list-phy-get-uwclient',
+                        dataType: 'json',
+                        delay: 250,
+                        processResults: function (data) {
+                        return {
+                            results:  $.map(data, function (item) {
+                                return {
+                                    text: item.family_name+" "+item.name+" "+item.patronymic,
+                                    id: item.id
+                                }
+                            })
+                        };
+                        },
+                        cache: true
                     }
                 });
+                
+            })
+
+            $('#createForm').on('submit', function(e){
+
+                e.preventDefault();
+
+                var $this = $(this);
+
+                $.ajax({
+                    url: '/madmin/app-list-phy',
+                    method: 'POST',
+                    data: $this.serialize(),
+                    beforeSend: function(){
+                        $("#loading").show()
+                    },
+                }).done(function(response){
+
+                    $('#createModal').modal('toggle');
+                    $("#loading").hide()
+                    $('#successMessage').text(response);
+                    $('#successModal').modal('toggle');
+                    $('#successModal').on('hidden.bs.modal', function () {
+                        location.reload();
+                    })
+
+                    setTimeout(function() {
+                        location.reload();
+                    }, 2500);
+
+
+
+                }).error(function(err){
+                    console.log(err)
+                })
 
             })
+
+            $('.deleteButton').on('click',function () {
+                let id = $(this).data('id')
+
+                $('#yesDelete').on('click',function () {
+                    $.ajax({
+                    url: '/madmin/app-list-phy/'+id,
+                    method: 'DELETE',
+                    data: {_token: CSRF_TOKEN},
+                    beforeSend: function(){
+                        $("#loading").show()
+                    },
+                    }).done(function(response){
+
+                        $('#ConfirmModal').modal('toggle');
+                        $("#loading").hide()
+                        $('#successMessage').text(response);
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hidden.bs.modal', function () {
+                            location.reload();
+                        })
+
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2500);
+
+
+
+                    }).error(function(err){
+                        console.log(err)
+                    })
+                })
+                console.log(id)
+            })
+
         </script>
     </section>
     <!-- /.content -->

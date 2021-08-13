@@ -4,19 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\UwClientApps;
+use App\UwClients;
+use App\UwClientGuars;
 
 class UwClientAppsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         //
-        $models = UwClientApps::orderBy('created_at')->get();
-
+        $models = UwClientsAppLists::orderBy('created_at')->get();
+        dd($model);
         return view('madmin.apps.index', compact('models'));
     }
 
@@ -28,6 +25,7 @@ class UwClientAppsController extends Controller
     public function create()
     {
         //
+        return view('madmin.apps.create');
     }
 
     /**
@@ -39,7 +37,15 @@ class UwClientAppsController extends Controller
     public function store(Request $request)
     {
         //
-        dd($request->all());
+        $this->validate($request, [
+            'title'     => 'required|max:512',
+            'type'      => 'required',
+            'body'      => 'required',
+            'status'    => 'required',
+        ]);
+
+        $claim = UwClientApps::create($request->all());
+        return redirect()->route('app.show',['id' => $claim->id])->with('message', 'Record Successfully Stored!');
     }
 
     /**
@@ -51,6 +57,9 @@ class UwClientAppsController extends Controller
     public function show($id)
     {
         //
+        $model = UwClientApps::findOrFail($id);
+
+        return view('madmin.apps.show', compact('model'));
     }
 
     /**
@@ -62,6 +71,8 @@ class UwClientAppsController extends Controller
     public function edit($id)
     {
         //
+        $model = UwClientApps::findOrFail($id);
+        return view('madmin.apps.edit',compact('model'));
     }
 
     /**
@@ -74,6 +85,17 @@ class UwClientAppsController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $this->validate($request, [
+            'title'     => 'required|max:512',
+            'type'      => 'required',
+            'body'      => 'required',
+            'status'    => 'required',
+        ]);
+        $model = UwClientApps::findOrFail($id);
+        $input = $request->all();
+        $model->update($input);
+        
+        return redirect()->route('app.show',['id' => $id])->with('message', 'Record Successfully Updated!');
     }
 
     /**
@@ -85,5 +107,18 @@ class UwClientAppsController extends Controller
     public function destroy($id)
     {
         //
+        $model = UwClientApps::findOrFail($id);
+        $model->delete();
+        return response()->json(['message' => 'Record Successfully Deleted!']);
     }
+
+    public function appGetPhyTemplate($id,$template_id)
+    {
+        $model = UwClients::findOrFail($id);
+        $guard = UwClientGuars::where('uw_clients_id',$id)->get();
+        $app = UwClientApps::find($template_id);
+        
+        return view('madmin.apps.temp-phy', compact('model','app','guard'));
+    }
+
 }

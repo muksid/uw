@@ -6,8 +6,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Barcha Yuridik mijozlar
-            <small>jadval</small>
+            App Templetes
+            <small>lists</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
@@ -35,8 +35,8 @@
             <div class="col-xs-12">
 
                 <div>
-                    <a class="btn bg-olive-active btn-flat margin" data-toggle="modal" data-target="#modalFormCreate">
-                        <i class="fa fa-plus-circle"></i> @lang('blade.add')
+                    <a href="{{ url('/madmin/app/create') }}" class="btn bg-olive-active btn-flat margin">
+                        <i class="fa fa-plus"></i> @lang('blade.add')
                     </a>
                 </div>
 
@@ -45,7 +45,7 @@
 
                     <div class="box-body">
                     @if($models->count())
-                        <b>@lang('blade.overall'): {{ $models->total()??''}} @lang('blade.group_edit_count').</b>
+                        <b>@lang('blade.overall'): {{ $models->count()??''}} @lang('blade.group_edit_count').</b>
                         <table id="example1" class="table table-striped table-bordered">
                             <thead>
                             <tr>
@@ -63,22 +63,28 @@
                                 @foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}">
                                         <td>{{ $i++ }}</td>
-                                        <td>{{ $model->title}}</td>
-                                        <td>{{ $model->type}}</td>
+                                        <td><a href="{{ url('/madmin/app/'.$model->id)}}">{{ $model->title}}</a></td>
                                         <td>
-                                            @if($model->status == 0)
-                                                <span class="badge bg-red-active">Taxrirlashda</span>
-                                            @elseif($model->status == 1)
-                                                <span class="badge bg-yellow-active">Yangi</span>
-                                            @elseif($model->status == 2)
-                                                <span class="badge bg-aqua-active">Yuborilgan</span>
-                                            @elseif($model->status == 3)
-                                                <span class="badge bg-aqua-active">Tasdiqlangan</span>
+                                            @if($model->type == 'P')
+                                                <span class="text-orange text-bold">Physical</span>
+                                            @elseif($model->type == 'J')
+                                                <span class="text-green text-bold">Juridical</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if($model->status == 'A')
+                                                <span class="badge bg-green-active"><i class="fa fa-check"></i></span>
+                                            @elseif($model->status == 'P')
+                                                <span class="badge bg-red-active"><i class="fa fa-ban"></i></span>
                                             @endif
                                         </td>
                                         <td>{{ $model->created_at}}</td>
-                                        <td class="text-orange">edit</td>
-                                        <td class="text-red">delete</td>
+                                        <td class="text-orange text-center"> <a href="{{ url('/madmin/app/'.$model->id.'/edit')}}"><i class="fa fa-pencil"></i></a></td>
+                                        <td class="text-red">
+                                            <a type="button" class="btn btn-danger deleteButton" data-id="{{$model->id}}" data-toggle="modal" data-target="#ConfirmModal">
+                                                <i class="fa fa-trash" ></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -86,28 +92,6 @@
                     @else
                     <h4 class="text-red">@lang('blade.not_found')</h4>
                     @endif
-                    </div>
-
-                    <div class="modal fade" id="resultKATMModal" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" style="width: auto; max-width: 1100px">
-                            <div class="modal-content">
-                                <div class="modal-header bg-aqua-active">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title text-center" id="success">Mijozning kredit tarixi (KATM)</h4>
-                                </div>
-                                <div id="reportBase64Modal"></div>
-                                <form id="roleForm14" name="roleForm14">
-                                    <div class="modal-body">
-                                        <input type="hidden" name="claim_id" id="katmClaimId">
-                                        <input type="hidden" name="katmSumm" id="katmSumm" value="">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-flat pull-right btn-default" data-dismiss="modal">@lang('blade.close')</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     </div>
 
 
@@ -127,10 +111,10 @@
 
                                 <div class="modal-footer">
                                     <center>
-                                        <button type="button" class="btn btn-outline pull-left"
-                                                data-dismiss="modal">@lang('blade.cancel')</button>
-                                        <button type="button" class="btn btn-outline" id="yesDelete"
-                                                value="create">Ha, O`chirish
+                                        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+                                            @lang('blade.cancel')
+                                        </button>
+                                        <button type="button" class="btn btn-outline" id="yesDelete" value="create">Ha, O`chirish
                                         </button>
                                     </center>
                                 </div>
@@ -158,6 +142,24 @@
                         </div>
                     </div>
 
+                    <!--Response Modal -->
+                    <div class="modal fade modal-success" id="responseModal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="responseModalLabel"></h5>
+                                    
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline" data-dismiss="modal" aria-label="Close">
+                                        @lang('blade.close')
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <!-- /.box -->
             </div>
@@ -173,13 +175,10 @@
 
         <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
 
-        <!-- ckeditor -->
-
-        <script src="{{ asset ('/admin-lte/plugins/ckeditor/ckeditor.js') }}"></script>
-        <script src="{{ asset ('/admin-lte/plugins/ckeditor/samples/js/sample.js') }}"></script>
 
 
         <script>
+            let CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
             $(function () {
                 //Initialize Select2 Elements
@@ -204,25 +203,54 @@
                 });
             });
 
-            function clearForm(){
-                $("#createForm").trigger('reset');
-                CKEDITOR.instances.editor1.setData('');                // $('#createForm').find("input[type=text], textarea").val("");
-            }
 
             // crud form
             $(document).ready(function () {
-                $("#example1").DataTable();
+                $("#example1").DataTable()
 
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     }
-                });
-                CKEDITOR.replace('editor1', {
-                    height: 400,
-                    baseFloatZIndex: 10005
-                });
+                })
 
+            })
+
+            $('.deleteButton').on('click',function () {
+                let id = $(this).data('id')
+                $('#yesDelete').on('click',function () {
+                    $.ajax({
+                        url: '/madmin/app/'+id,
+                        type: 'DELETE',
+                        data: {_token: CSRF_TOKEN},
+                        dataType: 'JSON',
+                        beforeSend: function(){
+                            $("#loading").show();
+                        },
+                        success: function(res){
+                            
+                            $('#ConfirmModal').modal('toggle')
+                            $('#responseModalLabel').text(res.message)
+                            $('#responseModal').modal('toggle')
+
+                            $('#responseModal').on('hidden.bs.modal', function () {
+                                location.reload();
+                            })
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2500);
+
+                        },
+                        complete:function(res){
+                            $("#loading").hide();
+                        },
+
+                        error: function (data) {
+                            console.log(data)
+                        }
+                    });
+                })
             })
 
         </script>

@@ -478,6 +478,7 @@ return [
     // Uw Menus
     'phy_clients'            => 'Физические клиенты',
     'jur_clients'            => 'Юридические клиенты',
+    'template_name'          => 'Наименования шаблона',
 
 
 ];

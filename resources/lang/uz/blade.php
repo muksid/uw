@@ -478,6 +478,7 @@ return [
     'administrator'         => 'Администратор',
     'admin'                 => 'Админ',
     'control_db'            => 'Контроль БД',
+    'template_name'         => 'Андоза номи',
 
 
 ];

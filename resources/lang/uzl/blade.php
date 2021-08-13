@@ -472,6 +472,7 @@ return [
     'administrator'         => 'Administrator',
     'admin'                 => 'Admin',
     'control_db'            => 'Control DB',
+    'template_name'         => 'Andoza nomi',
 
 
 ];
