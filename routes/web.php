@@ -59,6 +59,10 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('users-update','UserController@updateUser');
         Route::get('ora-emp-search','UwJuridicalClientsController@getOraEmpSearch');
 
+        // ORA USERS
+        Route::get('ora-index','UserController@oraIndex');
+        Route::get('update-user-info/{id}','HomeController@updateUserInfo');
+
         // WORK USERS
         Route::resource('work-users','MWorkUsersController');
         Route::get('work-users-tab_num-check/{tab_num}','MWorkUsersController@tab_numCheck');

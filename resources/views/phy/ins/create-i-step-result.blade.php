@@ -999,7 +999,7 @@
                         <h4 class="modal-title text-center" id="salaryVersion">Oylik daromadi natijasi</h4>
                     </div>
                     <div class="modal-body">
-                        <div id="resultDataINPS"></div>
+                        <!-- <div id="resultDataINPS"></div> -->
                     </div>
                 </div>
             </div>
@@ -1510,9 +1510,10 @@
 
                             } else {
 
-                                salaryVersion = 'Oylik daromadi natijasi (XALQBANK)';
+                                salaryVersion = 'Oylik daromadi natijashfi (XALQBANK)';
 
-                                table+= '<div class="box-body no-padding">' +
+                                table+= 
+                                    '<div class="box-body no-padding">' +
                                     '<table class="table table-striped">' +
                                     '<tr>' +
                                     '<th style="width: 10px">#</th>' +

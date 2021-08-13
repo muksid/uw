@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\ChatMessage;
+use App\MPersonalUsers;
+use App\MUserRoles;
 use App\MWorkUsers;
 use App\User;
 use App\Message;
+use App\UwClients;
+use App\UwJuridicalClient;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -46,12 +51,101 @@ class HomeController extends Controller
 
         } else {
 
-            return view('home');
+            $user_personal = MPersonalUsers::where('user_id', $user->id)->where('doc_number', '=', null)->first();
+
+            if ($user_personal) {
+
+                $array = array('emp_code' => $checkUserWork->tab_num, 'type' => 'emp_upd');
+
+                $oraEmp =  UwJuridicalClientsController::curlHttpPost($array);
+
+                if ($oraEmp) {
+
+                    $oraEmpDecode = json_decode($oraEmp, true);
+
+                    $oraValue = $oraEmpDecode[0];
+
+                    $user_personal->update([
+                        'emp_id' => $oraValue['emp_id'],
+                        'f_name' => $oraValue['first_name'],
+                        'l_name' => $oraValue['last_name'],
+                        'm_name' => $oraValue['middle_name'],
+                        'birthday' => date('Y-m-d', strtotime($oraValue['birth_date'])),
+                        'email' => $oraValue['mail_address'],
+                        'pinfl' => $oraValue['inps'],
+                        'inn' => $oraValue['inn'],
+                        'doc_series' => $oraValue['passport_seria'],
+                        'doc_number' => $oraValue['passport_number'],
+                        'doc_begin_date' => date('Y-m-d', strtotime($oraValue['passport_date_begin'])),
+                        'doc_end_date' => date('Y-m-d', strtotime($oraValue['passport_date_end'])),
+                        'doc_address' => $oraValue['passport_issued'],
+                        'mobile_phone' => $oraValue['phone'],
+                        'address' => $oraValue['address'],
+                    ]);
+
+                }
+
+            }
+
+            $userInfo = MPersonalUsers::where('user_id', $user->id)->first();
+
+            $phyClients = UwClients::where('work_user_id', $checkUserWork->id)->get()->count();
+
+            $jurClients = UwJuridicalClient::where('work_user_id', $checkUserWork->id)->get()->count();
+
+            $roles = MUserRoles::where('user_id', $checkUserWork->id)->get();
+
+            $to_date = Carbon::now();
+            $from_date = Carbon::createFromFormat('Y-m-d', $userInfo->doc_end_date);
+            $pass_diff = $to_date->diff($from_date);
+
+            return view('home', compact('checkUserWork','userInfo', 'phyClients', 'jurClients', 'roles', 'pass_diff'));
+
         }
 
         Auth::logout();
 
         return Redirect::to('/login')->with('message', $message);
+
+    }
+
+    public function updateUserInfo($tab_num)
+    {
+
+        $array = array('emp_code' => $tab_num, 'type' => 'emp_upd');
+
+        $oraEmp =  UwJuridicalClientsController::curlHttpPost($array);
+
+        if ($oraEmp) {
+
+            $oraEmpDecode = json_decode($oraEmp, true);
+
+            $oraValue = $oraEmpDecode[0];
+
+            $user = Auth::user();
+
+            $user_personal = MPersonalUsers::where('user_id', $user->id)->first();
+
+            $user_personal->update([
+                'f_name' => $oraValue['first_name'],
+                'l_name' => $oraValue['last_name'],
+                'm_name' => $oraValue['middle_name'],
+                'birthday' => date('Y-m-d', strtotime($oraValue['birth_date'])),
+                'email' => $oraValue['mail_address'],
+                'pinfl' => $oraValue['inps'],
+                'inn' => $oraValue['inn'],
+                'doc_series' => $oraValue['passport_seria'],
+                'doc_number' => $oraValue['passport_number'],
+                'doc_begin_date' => date('Y-m-d', strtotime($oraValue['passport_date_begin'])),
+                'doc_end_date' => date('Y-m-d', strtotime($oraValue['passport_date_end'])),
+                'doc_address' => $oraValue['passport_issued'],
+                'mobile_phone' => $oraValue['phone'],
+                'address' => $oraValue['address'],
+            ]);
+
+        }
+
+        return back()->with('success', 'Sizning ma`lumotlaringiz IABS tizimidan muvaffaqiyatli yangilandi');
 
     }
 
@@ -107,53 +201,5 @@ class HomeController extends Controller
 
         return back()->with('message', $message);
     }
-
-    public $URL = "http://91.204.239.44/broker-api/send";
-    private $USERNAME = "turonbank2";
-    private $PASSWORD = 'e76rKR3Li2';
-
-    public function smsSend(){
-
-        $isError = 0;
-
-        $errorMessage = true;
-
-        $postData = array(
-            "messages" => array([
-                "recipient" => "998973253420",
-                "message-id" => "mabc000000008",
-                "sms" => array(
-                    "originator" => "2800",
-                    "content" => array(
-                        "text" => "test sms Muksid 8"
-                    )
-                )
-            ]),
-        );
-
-        $ch = curl_init($this->URL);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_USERPWD, $this->USERNAME . ":" . $this->PASSWORD);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_exec($ch);
-
-        //Print error if any
-        if (curl_errno($ch)) {
-            $isError = true;
-            $errorMessage = curl_error($ch);
-        }
-        curl_close($ch);
-
-        if($isError){
-            return array('error' => 1 , 'message' => $errorMessage);
-        }else{
-            return array('error' => 0 );
-        }
-    }
-
 
 }

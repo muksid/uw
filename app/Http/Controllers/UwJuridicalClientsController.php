@@ -450,7 +450,7 @@ class UwJuridicalClientsController extends Controller
         //
     }
 
-    public function curlHttpPost($array)
+    public static function curlHttpPost($array)
     {
         $user = 'muksid_iabs';
         $pass = 'zz0102031!@#$';
@@ -554,6 +554,14 @@ class UwJuridicalClientsController extends Controller
             and a.emp_id = d.emp_id 
             and d.work_now = 'Y' 
             and (a.emp_id like '".$emp_code."' or upper(a.last_name|| ' ' || a.first_name|| ' ' || a.middle_name) like '%".$emp_code."%')            
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'emp_upd'){
+            $emp_code = $array['emp_code'];
+            $query = "
+            select a.* from hr_emps a
+            where 1=1 and a.emp_id = '".$emp_code."' and  A.CONDITION != 'P'          
             ";
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';

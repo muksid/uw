@@ -40,115 +40,127 @@
 
     <!-- Main content -->
     <section class="content">
-        <!-- Main row -->
+
         <div class="row">
-            <!-- Left col -->
-            <section class="col-lg-5 connectedSortable">
+            <div class="col-md-3">
+
+                <!-- Profile Image -->
                 <div class="box box-primary">
-                    <div class="box-header">
-                        <i class="ion ion-clipboard"></i>
+                    <div class="box-body box-profile">
+                        <img class="profile-user-img img-responsive img-circle" src="{{ url('/admin-lte/dist/img/user.png') }}" alt="User profile picture">
 
-                        <h3 class="box-title">@lang('blade.tasks')</h3>
-                        <div class="box-tools pull-right">
-                            <ul class="pagination pagination-sm inline">
-                                <li><a href="#">&laquo;</a></li>
-                                <li><a href="#">1</a></li>
-                                <li><a href="#">2</a></li>
-                                <li><a href="#">3</a></li>
-                                <li><a href="#">4</a></li>
-                                <li><a href="#">&raquo;</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- /.box-header -->
-                    <div class="box-body">
-                        <ul class="todo-list">
+                        <h4 class="profile-username text-center">{{ $userInfo->l_name }}</h4>
 
-                            <li>
-                                    <span class="handle">
-                                        <i class="fa fa-ellipsis-v"></i>
-                                        <i class="fa fa-ellipsis-v"></i>
-                                    </span>
+                        <p class="text-muted text-center">{{ $userInfo->f_name .' '. $userInfo->m_name }}</p>
 
-                                <input type="checkbox" value="">
-
-                                <span class="text">@lang('blade.overdue')</span>
-
-                                <small class="label label-danger"><i class="fa fa-clock-o"></i> 2 @lang('blade.minute')
-                                </small>
-
-                                <div class="tools">
-                                    <i class="fa fa-edit"></i>
-                                    <i class="fa fa-trash-o"></i>
-                                </div>
+                        <ul class="list-group list-group-unbordered">
+                            <li class="list-group-item">
+                                <b>Jismoniy shaxs arizalar</b> <a class="pull-right"><span class="label label-success">{{ $phyClients }}</span></a>
                             </li>
-
-                            <li>
-                                    <span class="handle">
-                                        <i class="fa fa-ellipsis-v"></i>
-                                        <i class="fa fa-ellipsis-v"></i>
-                                    </span>
-
-                                <input type="checkbox" value="">
-
-                                <span class="text">@lang('blade.term')</span>
-
-                                <small class="label label-info"><i class="fa fa-clock-o"></i> 4 @lang('blade.hour')
-                                </small>
-
-                                <div class="tools">
-                                    <i class="fa fa-edit"></i>
-                                    <i class="fa fa-trash-o"></i>
-                                </div>
+                            <li class="list-group-item">
+                                <b>Yuridik shaxs arizalar</b> <a class="pull-right"><span class="label label-success">{{ $jurClients }}</span></a>
                             </li>
                         </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-9">
+
+                <div class="box box-primary">
+
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Men haqimda</h3>
+                    </div>
+
+                    <div class="box-body">
+
+                        <strong><i class="fa fa-bank margin-r-5"></i> Ish joyi va Lavozimi</strong>
+
+                        <h5 class="text-green">{{ $checkUserWork->filial->title??'-' }}<span>, {{ $checkUserWork->department->title??'-' }} {{ $checkUserWork->job_title }}</span></h5>
+
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="fa fa-book margin-r-5"></i> Passport ma`lumotlari</strong>
+
+                                <h5><b>PINFL: </b>{{ $userInfo->pinfl }}</h5>
+                                <h5><b>STIR: </b>{{ $userInfo->inn }}</h5>
+
+                                <h5><b>Passport: </b>{{ $userInfo->doc_series.' '.$userInfo->doc_number }}</h5>
+
+                                <h5><b>Berilgan vaqti: </b>{{ date('d.m.Y', strtotime($userInfo->doc_begin_date))}} йил.</h5>
+
+                                <h5><b>Amal qilish muddati: </b>{{ date('d.m.Y', strtotime($userInfo->doc_end_date))}} йилгача.</h5>
+
+                                <h5><b>Kim tomonidan: </b>{{ $userInfo->doc_address }} томонидан берилган.</h5>
+
+                                <h5><b>Telefon: </b>{{ $userInfo->mobile_phone }}</h5>
+
+                                <h5><b>e-mail: </b>{{ $userInfo->email }}</h5>
+
+                                <h5><b>Tug`ilgan kun: </b>{{ date('d.m.Y', strtotime($userInfo->birthday)) }} йил.</h5>
+
+                                <hr>
+
+                                <strong><i class="fa fa-map-marker margin-r-5"></i> Manzil ma`lumotlari</strong>
+
+                                <h5><b>Yashash manzili: </b>{{ $userInfo->address }}</h5>
+
+                                <hr>
+
+                                <strong><i class="fa fa-pencil margin-r-5"></i> Maqomi (roles)</strong>
+
+                                <p>
+                                    @if($roles)
+                                        @foreach($roles as $role)
+
+                                            <span class="label label-info">{{ $role->getRoleName->title_ru??'-' }}</span>
+
+                                        @endforeach
+                                    @endif
+                                </p>
+
+                                <hr>
+
+                                <a href="{{ url('/madmin/update-user-info', $userInfo->emp_id) }}" class="btn btn-flat btn-success"><i class="fa fa-refresh"></i> Yangilash</a>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="col-md-12">
+                                    <div class="info-box bg-red">
+                                        <span class="info-box-icon"><i class="fa fa-calendar"></i></span>
+
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Passport muddati tugashiga (kun qoldi)</span>
+                                            <span class="info-box-number">{{ $pass_diff->y.' йил. '.$pass_diff->m.' ой. '.$pass_diff->d.' кун.' }}</span>
+
+                                            <div class="progress">
+                                                <div class="progress-bar" style="width: {!! $pass_diff->y/10*100 !!}%"></div>
+                                            </div>
+                                            <span class="progress-description">
+                                                {!! $pass_diff->y/10*100 !!}% {{ date('d.m.Y', strtotime($userInfo->doc_end_date))}} йилгача.
+                                            </span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
                     <!-- /.box-body -->
-                    <div class="box-footer clearfix no-border">
-                        <button type="button" class="btn btn-default pull-right">
-                            <i class="fa fa-plus"></i> @lang('blade.add_task')
-                        </button>
-                    </div>
                 </div>
-            </section>
-            <!-- /.Left col -->
 
-            <section class="col-lg-7 connectedSortable">
-                <div class="box box-info">
-                    <div class="box-header">
-                        <i class="fa fa-envelope"></i>
-
-                        <h3 class="box-title">@lang('blade.request_to_admin')</h3>
-                        <!-- tools box -->
-                        <div class="pull-right box-tools">
-                            <button type="button" class="btn btn-info btn-sm" data-widget="remove"
-                                    data-toggle="tooltip" title="Remove">
-                                <i class="fa fa-times"></i></button>
-                        </div>
-                        <!-- /. tools -->
-                    </div>
-                    <div class="box-body">
-                        <form action="#" method="post">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="subject"
-                                       placeholder="@lang('blade.subject')">
-                            </div>
-                            <div>
-                                    <textarea class="textarea" placeholder="@lang('blade.text')"
-                                              style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="box-footer clearfix">
-                        <button type="button" class="pull-right btn btn-default" id="sendEmail">@lang('blade.send')
-                            <i class="fa fa-arrow-circle-right"></i></button>
-                    </div>
-                </div>
-            </section>
-            <!-- right col -->
+            </div>
         </div>
-        <!-- /.row -->
 
     </section>
-    <!-- /.content -->
+
 @endsection

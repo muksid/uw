@@ -570,6 +570,15 @@ class UwInquiryEntityController extends Controller
                 $json_decode_arr = json_decode($base64_decode, true);
                 $base_data = $json_decode_arr['report']['data'];
 
+                $clientComment = new UwJurClientComment();
+                $clientComment->jur_clients_id = $id;
+                $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
+                $clientComment->code = $result_code;
+                $clientComment->title = '(code:'.$code.') Moliyaviy hisobot muvaffaqiyatli saqlandi ('.$type.')';
+                $clientComment->json_data = '';
+                $clientComment->process_type = 'BAL';
+                $clientComment->save();
+
                 if ($pReportId == '060'){
 
                     $balance = new UwJurBalanceForm();

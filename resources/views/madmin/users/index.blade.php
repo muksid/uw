@@ -63,7 +63,9 @@
                                 </a>
                             </div>
                             <div class="col-md-1">
-                                <button type="button" id="openDiv" class="btn bg-olive btn-flat"><i class="fa fa-database"></i> @lang('blade.add')</button>
+                                <a href="{{ url('/madmin/ora-index') }}" class="btn bg-olive btn-flat">
+                                    <i class="fa fa-database"></i> @lang('blade.add')
+                                </a>
                             </div>
                         </div>
 
