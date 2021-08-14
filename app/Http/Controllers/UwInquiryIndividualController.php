@@ -455,6 +455,13 @@ class UwInquiryIndividualController extends Controller
                     $clientComment->process_type = 'KS';
                     $clientComment->save();
 
+                    // save katm base file
+                    $katmBaseFile = new UwPhyKatmBaseFile();
+                    $katmBaseFile->uw_clients_id = $id;
+                    $katmBaseFile->uw_katm_id = $katm->id;
+                    $katmBaseFile->base_file = $txt_base64;
+                    $katmBaseFile->save();
+
                     // save katm file (base64 txt)
                     $katmFile = new UwPhyKatmFile();
                     $katmFile->uw_clients_id = $id;
@@ -1014,37 +1021,19 @@ class UwInquiryIndividualController extends Controller
         //
         $model = UwClients::find($id);
 
+        $KATM = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
         $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
-        $isVersion = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        if ($isVersion && $isVersion->isVersion == 2) {
-
-            $clientTotalSumMonthly  = DB::select(
-                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
+        $clientTotalSumMonthly  = DB::select(
+            DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
             where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum'));
 
-            $clientTotalSumMonthly = count($clientTotalSumMonthly);
+        $clientTotalSumMonthly = count($clientTotalSumMonthly);
 
-            $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-                ->groupBy('uw_clients_id')
-                ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
-
-        } else {
-
-            $clientTotalSumMonthly  = DB::select(
-                DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
-                where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum')
-            );
-
-            $clientTotalSumMonthly = count($clientTotalSumMonthly);
-
-            $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
-                ->groupBy('uw_clients_id')->sum('INCOME_SUMMA');
-        }
-
-        $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
-
-        $scoringBall = json_decode($clientK['katm_score'], true);
+        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+            ->groupBy('uw_clients_id')
+            ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
 
         // Client Debtors Payment Calculate
         $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
@@ -1057,10 +1046,24 @@ class UwInquiryIndividualController extends Controller
 
         $creditDebt = 0;
         $creditCanBe = 0;
-        if ($clientK){
-            $creditDebt = $clientK->summa;
-            $scoringBall = $clientK->scoring_ball;
+        $arr_row_7 = 0;
+        $arr_row_8 = 0;
+        $arr_row_9 = 0;
+
+        if ($KATM){
+            $creditDebt = $KATM->summa;
+            $scoringBall = $KATM->scoring_ball;
+            $katm_base_file = UwPhyKatmBaseFile::where('uw_katm_id', $KATM->id)->where('base_file', '!=', null)->first();
+            if ($katm_base_file) {
+                $base_file = base64_decode($katm_base_file->base_file);
+                $base_arr = json_decode($base_file, true);
+
+                $arr_row_7 = $base_arr['25']['td']['4']['span'];
+                $arr_row_8 = $base_arr['26']['td']['4']['span'];
+                $arr_row_9 = $base_arr['27']['td']['4']['span'];
+            }
         }
+
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
             if ($sch_type == 1){
@@ -1071,7 +1074,7 @@ class UwInquiryIndividualController extends Controller
             }
         }
 
-        if (!$clientK){
+        if (!$KATM){
             $status = 0;
             $modal_style = 'warning';
             $message = 'KATMga so`rov yuboring!!!';
@@ -1080,6 +1083,21 @@ class UwInquiryIndividualController extends Controller
             $status = 0;
             $modal_style = 'warning';
             $message = 'Skoring bali (200 ball) dan yuqori emas!!!';
+        }
+        elseif ($arr_row_7 > 0){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Просрочки от 30 до 60 дней!!!';
+        }
+        elseif ($arr_row_8 > 0){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Просрочки от 60 до 90 дней!!!';
+        }
+        elseif ($arr_row_9 > 0){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Просрочки от 90 дней и более!!!';
         }
         elseif ($model->is_inps == 1 && $model->summa >= intval($creditCanBe)){
             $status = 0;

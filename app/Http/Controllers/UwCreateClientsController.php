@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\DataTables;
 
 class UwCreateClientsController extends Controller
 {
@@ -344,16 +345,22 @@ class UwCreateClientsController extends Controller
 
             return datatables()->of(UwClientGuars::where('uw_clients_id', $id)->get())
                 ->addColumn('action', function($data) use ($disabled) {
-                    $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-guar '.$disabled.'">
-<span class="glyphicon glyphicon-pencil"></span></a>';
+
+                    $button ='<a href="javascript:void(0)" data-id="'.$data->id.'" class="edit edit-guar '.$disabled.'">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                              </a>';
                     $button .= '&nbsp;&nbsp;';
-                    $button .= ' | <a href="javascript:void(0);" id="delete-guar" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
- <span class="glyphicon glyphicon-trash"></span></a>';
+
+                    $button .= ' | <a href="javascript:void(0);" id="delete-guar" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                 </a>';
+
                     return $button;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
+
     }
 
     /**

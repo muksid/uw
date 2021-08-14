@@ -999,7 +999,7 @@
                         <h4 class="modal-title text-center" id="salaryVersion">Oylik daromadi natijasi</h4>
                     </div>
                     <div class="modal-body">
-                        <!-- <div id="resultDataINPS"></div> -->
+                        <div id="resultDataINPS"></div>
                     </div>
                 </div>
             </div>
@@ -1017,7 +1017,7 @@
                 opacity: 0.5;
             }
             table{ border-collapse:collapse; width:100%; }
-            table td, th{ border:1px solid #d0d0d0; }
+            table td, th{ border:1px solid black; }
 
             #main_block table {font-size:9px;}
             .header-color {background-color:#8EB2E2;}
@@ -1035,6 +1035,7 @@
                 mywindow.document.write('</head><body >');
                 mywindow.document.write(document.getElementById(elem).innerHTML);
                 mywindow.document.write('<link rel="stylesheet" href="/admin-lte/dist/css/AdminLTE.min.css" type="text/css" />');
+                mywindow.document.write('<link rel="stylesheet" href="/admin-lte/bootstrap/css/bootstrap.css" type="text/css" />');
                 mywindow.document.write('</body></html>');
 
                 mywindow.document.close(); // necessary for IE >= 10
@@ -1510,9 +1511,9 @@
 
                             } else {
 
-                                salaryVersion = 'Oylik daromadi natijashfi (XALQBANK)';
+                                salaryVersion = 'Oylik daromadi natijasi (XALQBANK)';
 
-                                table+= 
+                                table+=
                                     '<div class="box-body no-padding">' +
                                     '<table class="table table-striped">' +
                                     '<tr>' +
@@ -2164,17 +2165,6 @@
                     }
                 });
             });
-
-            function print(id)
-            {
-                var divToPrint=document.getElementById(id);
-                var newWin=window.open('',id, 'height=700,width=800');
-                newWin.document.write('<html><body onload="window.print()">'+divToPrint.innerHTML);
-                newWin.document.write('<link rel="stylesheet" href="/admin-lte/dist/css/AdminLTE.min.css" type="text/css" />');
-                newWin.document.write('<link rel="stylesheet" href="/admin-lte/bootstrap/css/bootstrap.css" type="text/css" />');
-                newWin.document.write('</body></html>');
-                newWin.document.close();
-            }
 
             $(function () {
                 $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
