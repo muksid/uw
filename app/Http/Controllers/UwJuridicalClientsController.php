@@ -233,7 +233,7 @@ class UwJuridicalClientsController extends Controller
 
             $branchCode = $currentWorkUser->branch_code;
 
-            $localCode = Department::find($currentWorkUser->depart_id);
+            //$localCode = Department::find($currentWorkUser->depart_id);
 
             $lastModelId = UwJuridicalClient::where('branch_code', '=', $branchCode)->latest()->first();
             $claim_id = 1000;
@@ -273,7 +273,7 @@ class UwJuridicalClientsController extends Controller
             $model->loan_type_id = $request->loan_type_id;
             $model->work_user_id = $currentWorkUser->id;
             $model->branch_code = $branchCode;
-            $model->local_code = $localCode->local_code;
+            $model->local_code = $currentWorkUser->local_code;
             $model->save();
 
             return Redirect::to('/jur/clients/1')
@@ -320,6 +320,8 @@ class UwJuridicalClientsController extends Controller
         $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
 
         $balance_class = $this->balanceClass($id);
+
+        //print_r($kias_table); die;
 
         return view('jur.ins.view',
             compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'k2','credit_result',
@@ -553,15 +555,82 @@ class UwJuridicalClientsController extends Controller
             where 1=1 and A.CONDITION != 'P' and a.staffing_id = b.staffing_id and b.department_code = c.code 
             and a.emp_id = d.emp_id 
             and d.work_now = 'Y' 
-            and (a.emp_id like '".$emp_code."' or upper(a.last_name|| ' ' || a.first_name|| ' ' || a.middle_name) like '%".$emp_code."%')            
+            and (a.tab_num like '".$emp_code."' or upper(a.last_name|| ' ' || a.first_name|| ' ' || a.middle_name) like '%".$emp_code."%')            
             ";
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        } elseif ($type == 'emp_upd'){
-            $emp_code = $array['emp_code'];
+        } elseif ($type == 'emp_upd_personal'){
+            $cb_id = $array['cb_id'];
             $query = "
             select a.* from hr_emps a
-            where 1=1 and a.emp_id = '".$emp_code."' and  A.CONDITION != 'P'          
+            where 1=1 and a.cb_id = '".$cb_id."' and  A.CONDITION != 'P'          
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'get_emp_insert'){
+            $cb_id = $array['cb_id'];
+            $query = "
+            select a.*,b.department_code,c.department_name,d.begin_date as begin_work_date,d.work_dep,d.work_post 
+            from hr_emps a
+            left join hr_staffing b on a.staffing_id = b.staffing_id
+            left join hr_s_departments c on b.department_code = c.code
+            left join hr_emp_works d on a.emp_id = d.emp_id and d.work_now = 'Y'
+            where 1=1 and a.cb_id = '".$cb_id."' and  A.CONDITION != 'P'          
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'dep_upd'){
+            $branch_code = $array['branch_code'];
+            $query = "
+            select a.filial,a.code,a.parent_code,a.condition,a.order_by,b.code,b.department_name from hr_departments a
+            left join hr_s_departments b on a.code = b.code
+            where 1=1 and a.condition = 'A' and a.filial = '".$branch_code."' and b.code != '000000'      
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'filial_upd'){
+            $query = "
+            select a.* from vl_filials a
+            where 1=1 and a.condition = 'A' and a.code_level in (1,2,3)
+            order by a.code_level, a.code
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'sdep_upd'){
+            $query = "
+            select a.* from hr_s_departments a
+            where 1=1
+            order by a.code
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'role_dep_upd'){
+            $branch_code = $array['branch_code'];
+            $query = "
+            select a.* from hr_departments a
+            where a.filial = '".$branch_code."'
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'emp_get_last_work'){
+            $cb_id = $array['cb_id'];
+            $query = "
+            select a.filial,a.emp_id,a.tab_num,a.last_name,c.parent_code,c.code,c.condition,d.work_now,d.begin_date,d.end_date,
+            d.work_post,d.bank_branch_code from hr_emps a
+            left join hr_staffing b on a.staffing_id = b.staffing_id
+            left join hr_departments c on c.code = b.department_code and b.filial = c.filial
+            left join hr_emp_works d on a.emp_id = d.emp_id
+            where 1=1 and a.cb_id = '".$cb_id."' and d.work_now = 'Y'
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'emp_get_cb_ids'){
+            $filial = $array['filial'];
+            //$emp_code = $array['emp_code'];
+            $query = "
+            select a.cb_id, max(a.emp_id) as emp_id, max(a.tab_num) as tab_num, max(a.filial) as filial from hr_emps a
+            where a.condition != 'P' and a.filial = '".$filial."'
+            group  by a.cb_id
             ";
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';

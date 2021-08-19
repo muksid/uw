@@ -489,11 +489,11 @@
                         for (let j = 0; j < data.checkedModel.length; j++){
                             let res = data.checkedModel[j];
                             exp+= '<tr>' +
-                                '<td><input type="checkbox" checked name="filial_id[]" value="'+res.id+'">' +
+                                '<td><input type="checkbox" checked name="filial_id[]" value="'+res.filial_code+'">' +
                                 '</td>' +
                                 '<td class="mailbox-star"><a href="#"><i class="fa fa-star text-yellow"></i></a>' +
                                 '</td>' +
-                                '<td class="mailbox-subject"><b>'+res.branch_code+'</b> - '+res.title_ru+ '</td>' +
+                                '<td class="mailbox-subject"><b>'+res.filial_code+'</b> - '+res.title+ '</td>' +
                                 '</tr>';
                         }
 
@@ -501,11 +501,11 @@
 
                             dataFilials+=
                                 '<tr>' +
-                                    '<td><input type="checkbox" name="filial_id[]" value="'+itemData.id+'">' +
+                                    '<td><input type="checkbox" name="filial_id[]" value="'+itemData.filial_code+'">' +
                                 '</td>' +
                                 '<td class="mailbox-star"><a href="#"><i class="fa fa-star-o text-yellow"></i></a>' +
                                 '</td>' +
-                                    '<td class="mailbox-subject"><b>'+itemData.branch_code+'</b> - '+itemData.title_ru+ '</td>' +
+                                    '<td class="mailbox-subject"><b>'+itemData.filial_code+'</b> - '+itemData.title+ '</td>' +
                                 '</tr>';
                         });
 

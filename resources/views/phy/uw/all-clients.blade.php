@@ -67,7 +67,7 @@
 
                                             @if(!empty($users))
                                                 @foreach($users as $key => $value)
-                                                    <option value="{{ $value->currentWork->id??0 }}">
+                                                    <option value="{{ $value->id }}">
                                                         {{ $value->currentWork->branch_code??'-' }} - {{ $value->personal->l_name??'-' }} {{ $value->personal->f_name??'-' }}
                                                     </option>
                                                 @endforeach
@@ -190,8 +190,8 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td><span class="badge bg-light-blue-active">{{ $model->filial->filial_code??'' }}</span>
-                                            - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
+                                        <td><span class="badge bg-light-blue-active">{{ $model->branch_code??'' }}</span>
+                                            - {!! \Illuminate\Support\Str::words($model->filial->title??'Филиал', '3') !!}
                                         </td>
                                         <td class="text-green">{{ $model->currentWork->personal->l_name??'-' }} {{ $model->currentWork->personal->f_name??'-' }}</td>
                                         <td>

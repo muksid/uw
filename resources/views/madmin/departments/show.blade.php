@@ -18,7 +18,9 @@
 
         <div class="box box-success">
             <div class="box-header with-border">
-                <h3 class="box-title margin">{{ $department->title }} </h3>
+                <h3 class="box-title margin">{{ $department->title }}
+                    <a href="{{ url('/madmin/update-department', $department->branch_code) }}" class="btn btn-sm btn-success"><i class="fa fa-refresh"></i> Yangilash</a>
+                </h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -28,13 +30,29 @@
 
                                 <h3 class="margin">{{ $department->title }}</h3>
 
-                                <ul id="tree1">
+                                <ul id="tree1 active">
 
                                     @foreach($department->childs as $department)
 
                                         <li>
 
-                                            {{ $department->title }}
+                                            @if($department->ora_condition === 'A')
+                                                <h5>
+                                            <span class="text-sm text-green">{{ $department->ora_parent_code }} -
+                                                {{ $department->ora_code }} ({{ $department->ora_condition }})
+                                            </span>
+                                                    - {{ $department->title }}
+
+                                                </h5>
+                                            @else
+                                                <h5 class="text-maroon">
+                                            <span class="text-sm">{{ $department->ora_parent_code }} -
+                                                {{ $department->ora_code }} ({{ $department->ora_condition }})
+                                            </span>
+                                                    - {{ $department->title }}
+
+                                                </h5>
+                                            @endif
 
                                             @if(count($department->childs))
 

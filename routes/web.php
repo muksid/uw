@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Session;
 Route::get('/', function () {
     return view('auth.login');
 });
-
 Route::get('locale/{locale}', function ($locale){
     Session::put('locale', $locale);
     return redirect()->back();
@@ -20,6 +19,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/', 'HomeController@index')->name('home');
     Route::get('/home', 'HomeController@index')->name('home');
 
+    Route::get('cbids','HomeController@updateUserCBIds');
     // ADMIN
     Route::group(['prefix'=>'madmin'], function(){
         // LOG CACHE
@@ -29,11 +29,20 @@ Route::group(['middleware' => ['auth']], function() {
 
         // DEPARTMENT
         Route::resource('departments','DepartmentController');
+        Route::any('filials','DepartmentController@filials');
+        Route::get('update-filial','DepartmentController@updateFilial');
+        Route::get('filial/{id}','DepartmentController@getFilial');
+        Route::post('filial-update','DepartmentController@filialUpdate');
+        Route::get('filial/view/{code}','DepartmentController@viewFilial');
+        Route::get('update-role-department/{code}','DepartmentController@updateRoleDepartment');
+        Route::any('s-departments','DepartmentController@sDepartments');
+        Route::get('update-s-departments','DepartmentController@updateSDepartments');
         Route::any('departments','DepartmentController@index');
         Route::post('get-department','DepartmentController@getDepartment');
         Route::post('get-sub-department','DepartmentController@subDepartment');
         Route::post('get-districts','DepartmentController@getDistricts');
         Route::post('get-reg-districts','DepartmentController@getRegDistricts');
+        Route::get('update-department/{id}','DepartmentController@updateDepartment');
 
         // ROLES
         Route::resource('roles', 'RoleController');
@@ -57,17 +66,24 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('users-username-check/{username}','UserController@usernameCheck');
         Route::get('users-get-branch/{id}','UserController@getBranch');
         Route::post('users-update','UserController@updateUser');
+        Route::post('user/username-update/{user_id}','UserController@usernameUpdate');
         Route::get('ora-emp-search','UwJuridicalClientsController@getOraEmpSearch');
+        Route::get('user/profile/{id}','UserController@profile');
+        Route::post('user/profile-update/{id}','UserController@profileUpdate');
 
         // ORA USERS
         Route::get('ora-index','UserController@oraIndex');
-        Route::get('update-user-info/{id}','HomeController@updateUserInfo');
+        Route::get('update-user-info/{id}','UserController@updateUserInfo');
+        Route::get('update-user-work/{user_id}','UserController@updateUserWork');
+        Route::post('user/role-update/{user_id}','UserController@updateUserRoles');
+        Route::get('get-user-info/{id}','UserController@getUserInfo');
+        Route::get('users/delete/{id}','UserController@destroy');
+        Route::post('users/store-new','UserController@storeNew');
 
         // WORK USERS
         Route::resource('work-users','MWorkUsersController');
         Route::get('work-users-tab_num-check/{tab_num}','MWorkUsersController@tab_numCheck');
         Route::get('work-users/get-roles/{id}','MWorkUsersController@getRoles');
-        Route::get('work-users/get-history/{id}','MWorkUsersController@getHistory');
         Route::get('work-users/get-history-roles/{id}','MWorkUsersController@getHistoryRoles');
         Route::get('work-users/activate-user/{id}','MWorkUsersController@activateUser');
 
@@ -220,4 +236,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/uw/get-app-blank/{claim_id}','UwClientsController@getAppBlank');*/
 
 });
+
+
 

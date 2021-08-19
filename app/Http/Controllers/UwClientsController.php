@@ -60,19 +60,18 @@ class UwClientsController extends Controller
     public function CsIndex($status)
     {
         //
-        $currentWorkUser = MWorkUsers::with('department')->where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
+        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
         $models = UwClients::where('id', 0)->get();
+
         if ($currentWorkUser){
+
             $user = MWorkUsers::where('user_id', Auth::id())->get()->pluck('id');
+
             $workUserIds = $user->toArray();
 
-            $local_code_id = $currentWorkUser->department->id??0;
-
-            $local_code = Department::find($local_code_id);
-
-            $models = UwClients::where('branch_code', '=',$local_code->branch_code)
-                ->where('local_code', '=',$local_code->local_code)
+            $models = UwClients::where('branch_code', '=',$currentWorkUser->branch_code)
+                //->where('local_code', '=',$currentWorkUser->local_code)
                 ->whereIn('work_user_id', $workUserIds)
                 ->where('status', $status)
                 ->orderBy('id', 'DESC')
@@ -138,7 +137,11 @@ class UwClientsController extends Controller
         $d = Input::get ( 'd' );
 
         if($u) {
-            $search->where('work_user_id', $u);
+            //print_r($u); die;
+            $user = MWorkUsers::where('user_id', $u)->get()->pluck('id');
+            $workUserIds = $user->toArray();
+
+            $search->whereIn('work_user_id', $workUserIds);
         }
 
         if($t) {

@@ -59,15 +59,9 @@ class UwClients extends Model
         return $this->belongsTo(Department::class,'local_code','local_code')->where('status', 1);
     }
 
-
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
-    }
-
-    public function uwUser()
-    {
-        return $this->belongsTo(UwUsers::class,'user_id', 'user_id')->where('status', 1);
     }
 
     public function filial()

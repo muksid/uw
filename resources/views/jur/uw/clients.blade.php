@@ -169,8 +169,8 @@
                                                 <span class="badge bg-aqua-active">Tasdiqlangan</span>
                                             @endif
                                         </td>
-                                        <td><span class="badge bg-light-blue">{{ $model->department->branch_code??'-' }}</span></td>
-                                        <td class="text-sm">{{ $model->department->title_ru??'' }}</td>
+                                        <td><span class="badge bg-light-blue">{{ $model->branch_code??'-' }}</span></td>
+                                        <td class="text-sm">{{ $model->filial->title??'' }}</td>
                                         <td class="text-sm text-center text-bold text-blue">
                                             {{ $model->user->personal->l_name??'-' }}
                                             {{ mb_substr($model->user->personal->f_name??'-', 0, 1) }}.</td>

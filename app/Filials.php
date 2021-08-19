@@ -12,15 +12,27 @@ class Filials extends Model
         'title_ru',
         'filial_code',
         'local_code',
-        'parent_id',
-        'f_sort',
-        'status'
+        'code_header',
+        'code_level',
+        'isActive'
     ];
 
-    // parent filial
-    public function filial() {
+    public function getReplace($str)
+    {
 
-        return $this->hasOne(Filials::class,'id','parent_id');
+        $res1 = str_replace('&#1170;', 'Ғ', $str);
 
+        $res2 = str_replace('&#1171;', 'ғ', $res1);
+
+        $res3 = str_replace('&#1178;', 'Қ', $res2);
+
+        $res4 = str_replace('&#1179;', 'қ', $res3);
+
+        $res5 = str_replace('"&#1202;', 'Ҳ', $res4);
+
+        $res6 = str_replace('&#1203;', 'ҳ', $res5);
+
+        return $res6;
     }
+
 }

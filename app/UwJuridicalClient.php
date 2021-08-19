@@ -45,6 +45,11 @@ class UwJuridicalClient extends Model
         return $this->belongsTo(MWorkUsers::class,'work_user_id')->where('isActive', 'A');
     }
 
+    public function filial()
+    {
+        return $this->belongsTo(Filials::class,'branch_code', 'filial_code');
+    }
+
     public function department()
     {
         return $this->belongsTo(Department::class,'local_code', 'local_code');

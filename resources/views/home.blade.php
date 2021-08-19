@@ -79,8 +79,11 @@
                     <div class="box-body">
 
                         <strong><i class="fa fa-bank margin-r-5"></i> Ish joyi va Lavozimi</strong>
-
-                        <h5 class="text-green">{{ $checkUserWork->filial->title??'-' }}<span>, {{ $checkUserWork->department->title??'-' }} {{ $checkUserWork->job_title }}</span></h5>
+                        <h5 class="text-green">{{ $checkUserWork->filial->title??'-' }},
+                            <span>
+                                {{ $checkUserWork->department->title??'-' }} {{ $checkUserWork->job_title }}
+                            </span>
+                        </h5>
 
                         <hr>
                         <div class="row">
@@ -126,7 +129,7 @@
 
                                 <hr>
 
-                                <a href="{{ url('/madmin/update-user-info', $userInfo->emp_id) }}" class="btn btn-flat btn-success"><i class="fa fa-refresh"></i> Yangilash</a>
+                                <a href="{{ url('/madmin/update-user-info', $user->cb_id) }}" class="btn btn-flat btn-success"><i class="fa fa-refresh"></i> Yangilash</a>
 
                             </div>
 

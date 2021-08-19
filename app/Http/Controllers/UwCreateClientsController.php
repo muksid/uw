@@ -17,7 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Yajra\DataTables\DataTables;
 
 class UwCreateClientsController extends Controller
 {
@@ -46,7 +45,7 @@ class UwCreateClientsController extends Controller
             } else {
                 $models = UwLoanTypes::whereHas('banks',
                     function ($query) use ($depart) {
-                        $query->where('depart_id', $depart->gen_dep_id);
+                        $query->where('branch_code', $depart->branch_code);
                         $query->where('isActive', 1);
                     })
                     ->where('credit_type', $request->credit_type)
@@ -251,7 +250,7 @@ class UwCreateClientsController extends Controller
         $summa = str_replace(' ', '', $str_summa);
 
         $branchCode = $currentWorkUser->branch_code;
-        $localCode = Department::find($currentWorkUser->depart_id);
+        //$localCode = Department::find($currentWorkUser->depart_id);
 
         $lastModelId = UwClients::where('branch_code', '=', $branchCode)->latest()->first();
 
@@ -260,8 +259,8 @@ class UwCreateClientsController extends Controller
         $claim_number = $lastModelId->claim_number + 1;
         $claim_id = '1'.$branchCode.$claim_number;
         $model->work_user_id = $currentWorkUser->id;
-        $model->branch_code = $branchCode;
-        $model->local_code = $localCode->local_code;
+        $model->branch_code = $branchCode;;
+        $model->local_code = $currentWorkUser->local_code;
         $model->claim_id = $claim_id;
         $model->claim_date = today();
         $model->claim_number = $claim_number;

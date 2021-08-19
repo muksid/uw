@@ -25,25 +25,16 @@
         @endif
 
         @if ($message = Session::get('success'))
-            <div class="modal fade in" id="myModal" role="dialog" style="display: block">
-                <div class="modal-dialog modal-sm">
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                        <div class="modal-header bg-aqua-active">
-                            <h4 class="modal-title">
-                                @lang('blade.users') <i class="fa fa-check-circle"></i>
-                            </h4>
-                        </div>
-                        <div class="modal-body">
-                            <h5>{{ $message }}</h5>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-info closeModal" data-dismiss="modal"><i
-                                        class="fa fa-check-circle"></i> Ok
-                            </button>
+
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-success">
+                                <h4 class="modal-title"> {{ session('success') }}</h4>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -62,57 +53,6 @@
                                     <i class="fa fa-plus-circle"></i> @lang('blade.add')
                                 </a>
                             </div>
-                            <div class="col-md-1">
-                                <a href="{{ url('/madmin/ora-index') }}" class="btn bg-olive btn-flat">
-                                    <i class="fa fa-database"></i> @lang('blade.add')
-                                </a>
-                            </div>
-                        </div>
-
-                        <div id="oraTableDiv">
-                            <div class="box box-primary">
-                                <div class="container h-100">
-                                    <div class="row h-100 justify-content-center align-items-center">
-                                        <form class="col-12">
-                                            <div class="form-group">
-                                                <div class="col-sm-3 col-xs-offset-3">
-                                                    <input type="text" class="form-control" id="emp_code" placeholder="% CARD_NUM, FULL_NAME">
-                                                </div>
-
-                                                <div class="col-sm-2">
-                                                    <button type="button" id="search" class="btn btn-success btn-flat"><i class="fa fa-search"></i> @lang('blade.search')</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                </div>
-
-                                <div class="box-body">
-                                    <b>@lang('blade.overall') @lang('blade.group_edit_count').</b>
-                                    <table class="table table-striped table-bordered">
-                                        <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Emp ID</th>
-                                            <th>TabNum</th>
-                                            <th>F.I.O.</th>
-                                            <th>Holati</th>
-                                            <th>Filial</th>
-                                            <th>D.Code</th>
-                                            <th>D.Nomi</th>
-                                            <th>Ish.Joyi</th>
-                                            <th>Lavozimi</th>
-                                            <th>Lav.Sana</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody class="data-table">
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                            </div>
-
                         </div>
 
                         <div class="box-body usersDiv">
@@ -193,7 +133,6 @@
                                     <th>@lang('blade.username')</th>
                                     <th>@lang('blade.branch')</th>
                                     <th>Office (BXO)-@lang('blade.position')</th>
-                                    <th>Hr/Uw</th>
                                     <th>@lang('blade.role')</th>
                                     <th>@lang('blade.status')</th>
                                     <th><i class="fa fa-pencil-square-o text-blue"></i></th>
@@ -203,7 +142,7 @@
                                 </thead>
                                 <tbody>
                                 @foreach($models as $key => $model)
-                                    <tr>
+                                    <tr id="rowId_{{ $model->id }}">
                                         <td>{{ $models->firstItem()+$key }}</td>
                                         <td>
                                             {{ $model->personal->l_name??'-' }} {{ $model->personal->f_name??'-' }}
@@ -218,12 +157,6 @@
                                                 {{ $model->currentWork->job_title??'-' }}
                                             </span>
                                         </td>
-                                        <td>@if($model->isUw == 0)
-                                                <span class="label label-danger">Hr</span>
-                                            @else
-                                                <span class="label label-info">Uw</span>
-                                            @endif
-                                        </td>
                                         <td>
                                             @if($model->currentWork->roleId??'')
                                             @foreach($model->currentWork->roleId as $value)
@@ -232,14 +165,17 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @switch($model->status)
-                                                @case(0)
+                                            @switch($model->isActive)
+                                                @case('P')
                                                 <span class="label label-warning">passive</span>
                                                 @break
-                                                @case(1)
+                                                @case('A')
                                                 <span class="label label-success">active</span>
                                                 @break
-                                                @case(2)
+                                                @case('H')
+                                                <span class="label label-danger">hr</span>
+                                                @break
+                                                @case('D')
                                                 <span class="label label-danger">deleted</span>
                                                 @break
                                                 @default
@@ -252,7 +188,11 @@
                                             </a>
                                         </td>
                                         <td>
-                                            @if($model->status == 2)
+                                            <button type="button" class="btn btn-xs btn-danger" id="deleteRole"
+                                                    data-id="{{ $model->id }}">
+                                                <i class="glyphicon glyphicon-trash"></i>
+                                            </button>
+                                            {{--@if($model->isActive == 'D')
 
                                                 <a href="javascript:;" data-toggle="modal"
                                                    data-target="#DeleteModal" class="btn btn-xs btn-danger disabled">
@@ -264,7 +204,7 @@
                                                    data-target="#DeleteModal" class="btn btn-xs btn-danger">
                                                     <span class="glyphicon glyphicon-trash"></span>
                                                 </a>
-                                            @endif
+                                            @endif--}}
 
                                         </td>
                                         <td style="min-width: 110px">
@@ -279,33 +219,52 @@
                         </div>
                         <!-- /.box-body -->
 
-                        <div id="DeleteModal" class="modal fade text-danger" role="dialog">
+                        {{--delete modal--}}
+                        <div id="ConfirmModal" class="modal fade modal-danger" role="dialog">
                             <div class="modal-dialog modal-sm">
                                 <!-- Modal content-->
-                                <form action="" id="deleteForm" method="post">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-danger">
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                            <h4 class="modal-title text-center">O`chirishni tasdiqlash</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                            {{ csrf_field() }}
-                                            {{ method_field('DELETE') }}
-                                            <p class="text-center">Siz xodimni o`chirmoqchimisiz?</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <center>
-                                                <button type="button" class="btn btn-success" data-dismiss="modal">Bekor
-                                                    qilish
-                                                </button>
-                                                <button type="submit" name="" class="btn btn-danger"
-                                                        data-dismiss="modal"
-                                                        onclick="formSubmit()">Ha, O`chirish
-                                                </button>
-                                            </center>
-                                        </div>
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title text-center">O`chirishni tasdiqlash</h4>
                                     </div>
-                                </form>
+
+                                    <div class="modal-body">
+                                        <h4 class="text-center"><span class="glyphicon glyphicon-info-sign"></span> Xodim
+                                            serverdan o`chiriladi!</h4>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <center>
+                                            <button type="button" class="btn btn-outline pull-left"
+                                                    data-dismiss="modal">@lang('blade.cancel')</button>
+                                            <button type="button" class="btn btn-outline" id="yesDelete"
+                                                    value="create">Ha, O`chirish
+                                            </button>
+                                        </center>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade modal-success" id="successModal" tabindex="-1" role="dialog"
+                             aria-labelledby="myModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-aqua-active">
+                                        <h4 class="modal-title">
+                                            <i class="fa fa-check-circle"></i> <span id="successHeader"></span>
+                                        </h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h4 id="successBody"></h4>
+                                        <h5 id="resultData1"></h5>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline"
+                                                data-dismiss="modal">@lang('blade.close')
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -397,6 +356,43 @@
                     $('#search').trigger('click');
 
                 }
+            });
+
+            $('body').on('click', '#deleteRole', function (e) {
+
+                e.preventDefault();
+                var id = $(this).data("id");
+
+                $('#ConfirmModal').data('id', id).modal('show');
+            });
+
+            $('#yesDelete').click(function () {
+
+                let user_id = $('#ConfirmModal').data('id');
+
+                $.ajax(
+                    {
+                        type: 'GET',
+                        url: "{{ url('/madmin/users/delete') }}"+'/' + user_id,
+                        beforeSend: function(){
+                            $("#loading").show();
+                        },
+                        success: function (data) {
+                            console.log(data.data)
+                            $('#successModal').modal('show');
+                            $('#successHeader').html(data.success);
+                            $('#successBody').html(data.success);
+                            $('#resultData1').html(data.data.id);
+                            if (data.status === 'P'){
+                                $("#rowId_" + user_id).remove();
+                            }
+                        },
+                        complete:function(){
+                            $("#loading").hide();
+                        }
+                    });
+
+                $('#ConfirmModal').modal('hide');
             });
 
             function formatDate(date) {

@@ -1,5 +1,5 @@
 @extends('layouts.dashboard')
-
+<link href="{{asset('/admin-lte/css/main.css')}}" rel="stylesheet">
 @section('content')
 
     <section class="content-header">
@@ -953,11 +953,11 @@
             <div class="modal-dialog modal-lg" role="document" style="width: 1100px">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="btn btn-outline pull-right" onclick="print('tableModal')">
+                        <button type="button" class="btn btn-outline pull-right noPrint" onclick="window.print('tableModal')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
                     </div>
-                    <div id="ckoring_k" style=" margin: auto; width: 1000px; line-height: normal; background-color: #fff; padding: 10px;">
+                    <div id="ckoring_k" style=" margin: auto; width: 1000px; background-color: #fff; padding: 10px;">
                         <table style="width: 1000px;">
                             <tbody>
                             <tr>
@@ -993,7 +993,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header bg-light-blue-active">
-                        <button type="button" class="btn btn-outline pull-right" onclick="print('resultINPSModal')">
+                        <button type="button" class="btn btn-outline pull-right noPrint" onclick="window.print('resultINPSModal')">
                             <i class="fa fa-print"></i> @lang('blade.print')
                         </button>
                         <h4 class="modal-title text-center" id="salaryVersion">Oylik daromadi natijasi</h4>
@@ -1017,7 +1017,7 @@
                 opacity: 0.5;
             }
             table{ border-collapse:collapse; width:100%; }
-            table td, th{ border:1px solid black; }
+            table td, th{ border:1px solid #e3fbf7; }
 
             #main_block table {font-size:9px;}
             .header-color {background-color:#8EB2E2;}

@@ -202,11 +202,13 @@ class UwInquiryEntityController extends Controller
 
         if ($isKATM){
 
-            return response()->json([
+            $isKATM->update(['status' => 0]);
+
+            /*return response()->json([
                     'success' => 'Mijoz KATM Scoring ma`lumotlari yangilandi!',
                     'code' => '05000',
                     'data' => $isKATM
-                ]);
+                ]);*/
         }
         $model = UwJuridicalClient::find($id);
 
