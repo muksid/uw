@@ -1,26 +1,30 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
+
 use App\UwClientApps;
-use App\UwClients;
+use App\UwJuridicalClient;
 use App\UwClientGuars;
 use App\UwClientsAppLists;
 use App\UwGuarType;
 
-class UwClientsAppListsController extends Controller
+class UwJurClientsAppListsController extends Controller
 {
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index(Request $request)
     {
         $search_t = $request->search_t;
-        
-        $templates = UwClientApps::where('type','P')->where('status', 'A')->orderBy('created_at','DESC')->get();
 
+        $templates = UwClientApps::where('type','J')->where('status', 'A')->orderBy('created_at','DESC')->get();
+        
         if ($search_t) {
-            $search = UwClientsAppLists::where('client_type','phy');
+            $search = UwClientsAppLists::where('client_type','jur');
 
             $search->whereHas('uwPhyClients',function ($query) use($search_t)
             {
@@ -33,7 +37,7 @@ class UwClientsAppListsController extends Controller
             })
             ->orWhereHas('appTemplate',function ($query) use($search_t)
             {
-                $query->where('type','P')->where('title','like','%'.$search_t.'%');
+                $query->where('type','J')->where('title','like','%'.$search_t.'%');
             });
 
             $models = $search->orderBy('created_at','DESC')->paginate(25);
@@ -41,14 +45,13 @@ class UwClientsAppListsController extends Controller
             $models->appends ( array (
                 'search_t' => $search_t
             ));
+            
             return view('madmin.apps.app-list', compact('models','templates','search_t'));
         }
 
+        $models = UwClientsAppLists::where('client_type','jur')->orderBy('created_at','DESC')->paginate(25);
 
-        $models = UwClientsAppLists::where('client_type','phy')->orderBy('created_at','DESC')->paginate(25);
-
-
-        return view('madmin.apps.app-list', compact('models','templates','search_t'));
+        return view('madmin.apps.app-list-jur', compact('models','templates','search_t'));
     }
 
     /**
@@ -69,7 +72,6 @@ class UwClientsAppListsController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'uw_client_id'  => 'required',
             'client_type'   => 'required',
@@ -79,7 +81,7 @@ class UwClientsAppListsController extends Controller
         $input = $request->all();
         
         $new = UwClientsAppLists::create($input);
-
+        
         $message = "Successfully created!";
 
         return response()->json($message);
@@ -127,16 +129,13 @@ class UwClientsAppListsController extends Controller
      */
     public function destroy($id)
     {
-        $model = UwClientsAppLists::findOrFail($id);
-        $model->delete();
-        $message = "Successfully deleted!";
-        return response()->json($message);
+        //
     }
 
-    public function getUwClient(Request $request)
+    public function getJurUwClient(Request $request)
     {
-        $data = (is_numeric($request->input('term'))) ? UwClients::where('iabs_num',$request->input('term'))->get(): [];
-
-        return response()->json($data);
+        $data = (is_numeric($request->input('term'))) ? UwJuridicalClient::where('claim_id',$request->input('term'))->get(): [];
+        
+        return response()->json($data);    
     }
 }

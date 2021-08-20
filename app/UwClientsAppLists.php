@@ -9,7 +9,7 @@ class UwClientsAppLists extends Model
     //
     protected $fillable = [
         'uw_client_id',
-        'guar_type_id',
+        'client_type',
         'template_id',
         'status'
     ];
@@ -19,12 +19,7 @@ class UwClientsAppLists extends Model
         return $this->belongsTo(UwClients::class,'uw_client_id','id');
     }
 
-    public function guarTypes()
-    {
-        return $this->belongsTo(UwGuarType::class,'guar_type_id','id');
-    }
-
-    public function appTemplatePhy()
+    public function appTemplate()
     {
         return $this->belongsTo(UwClientApps::class,'template_id','id');
     }

@@ -6,14 +6,16 @@ use Illuminate\Http\Request;
 use App\UwClientApps;
 use App\UwClients;
 use App\UwClientGuars;
+use App\UwJuridicalClient;
+use App\UwJurClientGuars;
 
 class UwClientAppsController extends Controller
 {
     public function index()
     {
         //
-        $models = UwClientsAppLists::orderBy('created_at')->get();
-        dd($model);
+        $models = UwClientApps::orderBy('created_at')->get();
+
         return view('madmin.apps.index', compact('models'));
     }
 
@@ -112,13 +114,27 @@ class UwClientAppsController extends Controller
         return response()->json(['message' => 'Record Successfully Deleted!']);
     }
 
-    public function appGetPhyTemplate($id,$template_id)
+    public function appGetTemplate($id,$template_id,$client_type)
     {
-        $model = UwClients::findOrFail($id);
-        $guard = UwClientGuars::where('uw_clients_id',$id)->get();
-        $app = UwClientApps::find($template_id);
-        
-        return view('madmin.apps.temp-phy', compact('model','app','guard'));
+        if ($client_type == 'phy') {
+            
+            $model = UwClients::findOrFail($id);
+            $guard = UwClientGuars::where('uw_clients_id',$id)->get();
+            $app   = UwClientApps::find($template_id);
+            $client_type = 'phy';
+
+            return view('madmin.apps.temp-app', compact('model','app','guard','client_type'));
+
+        } else {
+            
+            $model = UwJuridicalClient::findOrFail($id);
+            $guard = UwJurClientGuars::where('jur_clients_id',$id)->get();
+            $app   = UwClientApps::find($template_id);
+            $client_type = 'jur';
+
+            return view('madmin.apps.temp-app', compact('model','app','guard','client_type'));
+
+        }
     }
 
 }

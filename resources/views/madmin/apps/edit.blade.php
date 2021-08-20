@@ -71,40 +71,133 @@
                                     Passive
                                 </label>
                             </div>
-                            <br>
-                            <div class="form-group">
-                                <label for="editor1">Body</label>
-                                <textarea class="form-control"  class="text create_body" id="editor1" name="body" required>{!! $model->body !!}</textarea>
+                            <br><br><br>
+                            
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label for="editor1"></label>
+                                        <textarea class="form-control"  class="text create_body" id="editor1" name="body" required>{!! $model->body !!}</textarea>
+                                    </div>
+                                    <div class="col-md text-center">
+                                        <button type="button" class="btn btn-orange text-center" onclick="clearForm()">Clear</button>
+                                        <button type="submit" class="btn btn-success text-center">Save</button>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <table id="phy_table" class="table" hidden>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col">Replace code</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">1</th>
+                                                <td>client_address</td>
+                                                <td>[[CLIENT_ADDRESS]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">2</th>
+                                                <td>filial_name</td>
+                                                <td>[[FILIAL_NAME]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">3</th>
+                                                <td>client_name</td>
+                                                <td>[[CLIENT_FULLNAME]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">4</th>
+                                                <td>client_date</td>
+                                                <td>[[CLAIM_DATE]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">5</th>
+                                                <td>loan_exemtion</td>
+                                                <td>[[LOAN_EXEMTION]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">6</th>
+                                                <td>loan_duration</td>
+                                                <td>[[LOAN_DURATION]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">7</th>
+                                                <td>loan_name</td>
+                                                <td>[[LOAN_NAME]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">8</th>
+                                                <td>loan_percentage</td>
+                                                <td>[[LOAN_PERCENTAGE]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">9</th>
+                                                <td>summa</td>
+                                                <td>[[LOAN_SUMM]]</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+        
+                                    <table id="jur_table" class="table" hidden>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col">Replace code</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">2</th>
+                                                <td>filial_name</td>
+                                                <td>[[FILIAL_NAME]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">3</th>
+                                                <td>client_name</td>
+                                                <td>[[CLIENT_FULLNAME]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">4</th>
+                                                <td>client_date</td>
+                                                <td>[[CLAIM_DATE]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">5</th>
+                                                <td>loan_exemtion</td>
+                                                <td>[[LOAN_EXEMTION]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">6</th>
+                                                <td>loan_duration</td>
+                                                <td>[[LOAN_DURATION]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">7</th>
+                                                <td>loan_name</td>
+                                                <td>[[LOAN_NAME]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">8</th>
+                                                <td>loan_percentage</td>
+                                                <td>[[LOAN_PERCENTAGE]]</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">9</th>
+                                                <td>summa</td>
+                                                <td>[[LOAN_SUMM]]</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="col-md text-center">
-                                <button type="button" class="btn btn-orange text-center" onclick="clearForm()">Clear</button>
-                                <button type="submit" class="btn btn-success text-center">Save</button>
-                            </div>
+
                         </form>
                     </div>
-
-                    <div class="modal fade" id="resultKATMModal" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" style="width: auto; max-width: 1100px">
-                            <div class="modal-content">
-                                <div class="modal-header bg-aqua-active">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title text-center" id="success">Mijozning kredit tarixi (KATM)</h4>
-                                </div>
-                                <div id="reportBase64Modal"></div>
-                                <form id="roleForm14" name="roleForm14">
-                                    <div class="modal-body">
-                                        <input type="hidden" name="claim_id" id="katmClaimId">
-                                        <input type="hidden" name="katmSumm" id="katmSumm" value="">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-flat pull-right btn-default" data-dismiss="modal">@lang('blade.close')</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
         
                     <div class="modal fade modal-success" id="successModal" tabindex="-1" role="dialog"
                          aria-labelledby="myModalLabel" aria-hidden="true">
@@ -148,7 +241,6 @@
 
 
         <script>
-
             $(function () {
                 //Initialize Select2 Elements
                 $(".select2").select2();
@@ -181,11 +273,7 @@
             // crud form
             $(document).ready(function () {
                 $("#example1").DataTable();
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
+
                 CKEDITOR.replace('editor1', {
                     height: 400,
                     baseFloatZIndex: 10005,
@@ -193,12 +281,45 @@
                     extraPlugins : 'lineheight',
                     line_height:"1em;1.2em;1.4em;1.6em;1.8em;2em;2.5em;2.5em;",
                 });
-                
-                
 
+                let client_type = $('#create_type').val();
+
+                switch (client_type) {
+                    case 'P':
+                        $('#phy_table').show()
+                        $('#jur_table').hide()
+                        break;
+
+                    case 'J':
+                        $('#jur_table').show()
+                        $('#phy_table').hide()
+
+                        break;
+                
+                    default:
+                        break;
+                }
+                
+                $('#create_type').on('change',function () {
+                    
+                    client_type = $('#create_type').val()
+                    switch (client_type) {
+                        case 'P':
+                            $('#phy_table').show()
+                            $('#jur_table').hide()
+                            break;
+
+                        case 'J':
+                            $('#jur_table').show()
+                            $('#phy_table').hide()
+
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                })
             })
-
-
         </script>
     </section>
     <!-- /.content -->

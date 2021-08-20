@@ -6,7 +6,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Jismoniy shaxslar
+            Yuridik shaxslar
             <small>Talabnomalar</small>
         </h1>
         <ol class="breadcrumb">
@@ -39,7 +39,7 @@
 
                     <div class="box-body">
 
-                        <form action="{{url('/madmin/app-list-phy-search')}}" method="POST" role="search" >
+                        <form action="{{url('/madmin/app-list-jur-search')}}" method="POST" role="search" >
                             {{ csrf_field() }}
 
                             <div class="row">
@@ -58,7 +58,7 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <a href="{{url('/madmin/app-list-phy')}}" class="btn btn-flat border-success">
+                                        <a href="{{url('/madmin/app-list-jur')}}" class="btn btn-flat border-success">
                                             <i class="fa fa-refresh"></i> @lang('blade.reset')
                                         </a>
                                         <button type="submit" class="btn btn-success btn-flat">
@@ -116,7 +116,7 @@
                                             <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
                                         </td>
                                         <td>
-                                            <a href="{{url('/madmin/app-get-template/'.$model->uw_client_id.'/'.$model->template_id.'/phy')}}" 
+                                            <a href="{{url('/madmin/app-get-template/'.$model->uw_client_id.'/'.$model->template_id.'/jur')}}" 
                                                 target="_blank" class="btn btn-info text-bold appButton">
                                                 App
                                             </a>
@@ -162,7 +162,7 @@
                                             </select>
                                         </div>
 
-                                        <input type="text" name="client_type" id="client_type" value="phy" required hidden>
+                                        <input type="text" name="client_type" id="client_type" value="jur" required hidden>
 
                                         <div class="form-check">
                                             <label for="">Status <span class="text-red">*</span></label>
@@ -287,17 +287,17 @@
                     placeholder: 'Select a template',
                 })
                 $('.select_clients').select2({
-                    minimumInputLength: 8,
+                    minimumInputLength: 10,
                     placeholder: 'Unikal kod',
                     ajax: {
-                        url: '/madmin/app-list-phy-get-uwclient',
+                        url: '/madmin/app-list-jur-get-uwclient',
                         dataType: 'json',
                         delay: 250,
                         processResults: function (data) {
                         return {
                             results:  $.map(data, function (item) {
                                 return {
-                                    text: item.family_name+" "+item.name+" "+item.patronymic,
+                                    text: item.jur_name,
                                     id: item.id
                                 }
                             })
@@ -316,7 +316,7 @@
                 var $this = $(this);
 
                 $.ajax({
-                    url: '/madmin/app-list-phy',
+                    url: '/madmin/app-list-jur',
                     method: 'POST',
                     data: $this.serialize(),
                     beforeSend: function(){
