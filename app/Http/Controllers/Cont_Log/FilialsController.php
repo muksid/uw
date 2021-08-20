@@ -3,102 +3,146 @@
 namespace App\Http\Controllers;
 
 use App\Filials;
-use App\Role;
-use App\User;
-use App\UwUsers;
+use App\RoleDepartments;
+use App\SDepartments;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 
 class FilialsController extends Controller
 {
     //
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $admin = UwUsers::where('user_id', Auth::id())->where('status', 1)->firstorFail();
-        $admin_role = Role::find($admin->role_id);
-        if ($admin_role->role_code == 'super_admin' || $admin_role->role_code == 'risk_adminstrator') {
+        $search = Filials::orderBy('code_level', 'ASC')->orderBy('filial_code');
 
-            $models = Filials::orderBy('filial_code', 'ASC')->get();
+        $query = Input::get ( 'query' );
 
-            $parent = Filials::where('parent_id', 0)
-                ->where('status', 1)
-                ->orderBy('id', 'ASC')->get();
-            return view('uw.filials.index', compact('models', 'parent'));
-
-        } else {
-
-            return redirect('/uw/home');
+        if($query) {
+            $search->where('filial_code', 'LIKE', '%'.$query.'%');
+            $search->orWhere('local_code', 'LIKE', '%'.$query.'%');
+            $search->orWhere('title', 'LIKE', '%'.$query.'%');
         }
 
+        $models = $search->paginate(25);
+
+        $models->appends ( array (
+            'query' => Input::get ( 'query' )
+        ) );
+
+        return view('madmin.filial.index',
+            compact('models','query'))
+            ->withDetails ( $models )->withQuery ( $query );
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(Request $request)
+    public function viewFilial(RoleDepartments $roleDepartments, $code)
+    {
+        //
+        $filial = Filials::where('filial_code', '=', $code)->firstOrFail();
+
+        $models = RoleDepartments::where('filial_code', '=', $code)
+            ->where('isActive', '=', 'A')
+            ->where('parent_code','=', '000000')
+            ->where('parent_code','!=', null)
+            ->orderBy('order_by', 'ASC')->get();
+
+        return view('madmin.departments.view-filial', compact('filial','models', 'roleDepartments'));
+
+    }
+
+    public function updateFilial()
+    {
+
+        $array = array('type' => 'filial_upd');
+
+        $oraDep =  UwJuridicalClientsController::curlHttpPost($array);
+
+        if ($oraDep) {
+
+            $oraDepDecode = json_decode($oraDep, true);
+
+            foreach ($oraDepDecode as $value) {
+
+                $depart_info = Filials::where('filial_code', '=', $value['code'])->where('isActive', '=', 'A')->first();
+
+                if ($depart_info) {
+
+                    $depart_info->update([
+                        'title' => $value['name'],
+                        'title_ru' => $value['name'],
+                        'code_header' => $value['code_header'],
+                        'filial_code' => $value['code'],
+                        'local_code' => $value['code_local'],
+                        'code_level' => $value['code_level'],
+                        'isActive' => $value['condition']
+                    ]);
+
+                } else {
+
+                    $create_depart = new Filials();
+                    $create_depart->title = $value['name'];
+                    $create_depart->title_ru = $value['name'];
+                    $create_depart->code_header = $value['code_header'];
+                    $create_depart->filial_code = $value['code'];
+                    $create_depart->local_code = $value['code_local'];
+                    $create_depart->code_level = $value['code_level'];
+                    $create_depart->isActive = $value['condition'];
+                    $create_depart->save();
+
+                }
+
+            }
+
+        }
+
+        return back()->with('success', 'Filiallar IABS tizimidan muvaffaqiyatli yangilandi');
+
+    }
+
+    public function getFilial($id, $type)
+    {
+        //
+        if ($type == 'f'){
+
+            $model = Filials::find($id);
+
+        } elseif ($type == 'd') {
+
+            $model = SDepartments::find($id);
+
+        }
+
+        return response()->json($model);
+    }
+
+    public function filialUpdate(Request $request)
     {
         $row_id = $request->model_id;
 
-        $parent = 0;
-        if ($request->parent_id > 0) {
-            $parent = $request->parent_id;
-        }
+        $type = $request->type;
 
-        $user = Filials::updateOrCreate(['id' => $row_id],
-            [
+        if ($type == 'f') {
+
+            $model = Filials::find($row_id);
+
+            $model->update([
                 'title' => $request->title,
-                'title_ru' => $request->title_ru,
-                'filial_code' => $request->filial_code,
-                'local_code' => $request->local_code,
-                'parent_id' => $parent,
-                'f_sort' => $request->f_sort,
-                'status' => $request->status
+                'isActive' => $request->isActive
             ]);
 
-        return response()->json($user);
-    }
+        } elseif ($type == 'd') {
 
-    public function edit($id)
-    {
-        //
-        $user = Filials::find($id);
+            $model = SDepartments::find($row_id);
 
-        return response()->json($user);
-    }
+            $model->update([
+                'title' => $request->title,
+                'local_code' => $request->local_code,
+                'isActive' => $request->isActive
+            ]);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $role = Filials::find($id);
+        }
 
-        return response()->json($role);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //Filials::find($id)->delete();
-
-        return response()->json(['success'=>'Filial Deleted successfully']);
+        return response()->json($model);
     }
 }

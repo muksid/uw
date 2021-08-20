@@ -538,15 +538,6 @@ class UwJuridicalClientsController extends Controller
 
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        } elseif ($type == 'q'){
-            $query = "
-            select * from saldo a
-            where a.id = 3539110 and a.lead_last_date between to_date('14.07.2020', 'dd.MM.yyyy') and to_date('14.07.2021', 'dd.MM.yyyy')
-            order by a.lead_last_date desc
-            ";
-
-            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
-            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
         } elseif ($type == 'emp'){
             $emp_code = $array['emp_code'];
             $query = "
@@ -576,15 +567,6 @@ class UwJuridicalClientsController extends Controller
             left join hr_s_departments c on b.department_code = c.code
             left join hr_emp_works d on a.emp_id = d.emp_id and d.work_now = 'Y'
             where 1=1 and a.cb_id = '".$cb_id."' and  A.CONDITION != 'P'          
-            ";
-            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
-            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        } elseif ($type == 'dep_upd'){
-            $branch_code = $array['branch_code'];
-            $query = "
-            select a.filial,a.code,a.parent_code,a.condition,a.order_by,b.code,b.department_name from hr_departments a
-            left join hr_s_departments b on a.code = b.code
-            where 1=1 and a.condition = 'A' and a.filial = '".$branch_code."' and b.code != '000000'      
             ";
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
@@ -624,7 +606,9 @@ class UwJuridicalClientsController extends Controller
             ";
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        } elseif ($type == 'emp_get_cb_ids'){
+        }
+
+        /*elseif ($type == 'emp_get_cb_ids'){
             $filial = $array['filial'];
             //$emp_code = $array['emp_code'];
             $query = "
@@ -634,7 +618,26 @@ class UwJuridicalClientsController extends Controller
             ";
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        }
+        } elseif ($type == 'dep_upd'){
+            $branch_code = $array['branch_code'];
+            $query = "
+            select a.filial,a.code,a.parent_code,a.condition,a.order_by,b.code,b.department_name from hr_departments a
+            left join hr_s_departments b on a.code = b.code
+            where 1=1 and a.condition = 'A' and a.filial = '".$branch_code."' and b.code != '000000'
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'q'){
+            $query = "
+            select * from saldo a
+            where a.id = 3539110 and a.lead_last_date between to_date('14.07.2020', 'dd.MM.yyyy') and to_date('14.07.2021', 'dd.MM.yyyy')
+            order by a.lead_last_date desc
+            ";
+
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        }*/
+
 
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_URL, $url);

@@ -56,7 +56,7 @@ class UwClients extends Model
 
     public function department()
     {
-        return $this->belongsTo(Department::class,'local_code','local_code')->where('status', 1);
+        return $this->belongsTo(SDepartments::class,'local_code','local_code');
     }
 
     public function user()

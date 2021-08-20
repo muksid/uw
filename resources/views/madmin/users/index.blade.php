@@ -56,18 +56,20 @@
                         </div>
 
                         <div class="box-body usersDiv">
-                            <form action="{{url('/madmin/users-search')}}" method="POST" role="search">
+                            <form action="{{route('users.index')}}" method="POST" role="search">
                                 {{ csrf_field() }}
 
                                 <div class="row">
                                     <div class="col-md-1">
                                         <div class="form-group">
-                                            <select name="uw" class="form-control" style="width: 100%;">
+                                            <select name="s" class="form-control" style="width: 100%;">
                                                 <option value="" selected>
-                                                    Select type
+                                                    {{ $s }}
                                                 </option>
-                                                <option value="1">is Uw</option>
-                                                <option value="0">is Hr</option>
+                                                <option value="A">Active</option>
+                                                <option value="P">Passive</option>
+                                                <option value="D">Deleted</option>
+                                                <option value="H">Hr</option>
 
                                             </select>
                                         </div>

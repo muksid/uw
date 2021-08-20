@@ -140,7 +140,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Last Name</label>
-                                    <input type="text" class="form-control" value="{{ $personal_user->getReplace($personal_user->l_name??'-')??'-' }}">
+                                    <input type="text" class="form-control" value="{{ $personal_user->l_name??'-' }}">
                                 </div>
                             </div>
                         </div>
@@ -148,7 +148,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>First Name</label>
-                                    <input type="text" class="form-control" value="{{ $personal_user->getReplace($personal_user->f_name??'-')??'-' }}">
+                                    <input type="text" class="form-control" value="{{ $personal_user->f_name??'-' }}">
                                 </div>
                             </div>
                         </div>
@@ -156,7 +156,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Middle Name</label>
-                                    <input type="text" class="form-control" value="{{ $personal_user->getReplace($personal_user->m_name??'-')??'-' }}">
+                                    <input type="text" class="form-control" value="{{ $personal_user->m_name??'-' }}">
                                 </div>
                             </div>
                         </div>
@@ -277,16 +277,16 @@
                         <div class="col-md-2">
                             <div class="box-body">
                                 <div class="form-group">
-                                    <label>Tabel Number</label>
-                                    <input type="text" class="form-control" value="{{ $current_work_user->tab_num??'-' }}">
+                                    <label>Branch Code</label>
+                                    <input type="text" class="form-control" value="{{ $current_work_user->branch_code??'-' }}" readonly>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="box-body">
                                 <div class="form-group">
-                                    <label>Branch Code</label>
-                                    <input type="text" class="form-control" value="{{ $current_work_user->branch_code??'-' }}">
+                                    <label>Local Code</label>
+                                    <input type="text" class="form-control" value="{{ $current_work_user->local_code??'-' }}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -294,7 +294,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Filial Name</label>
-                                    <input type="text" class="form-control" value="{{ $current_work_user->filial->title??'-' }}">
+                                    <input type="text" class="form-control" value="{{ $current_work_user->filial->title??'-' }}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -302,7 +302,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Date Begin</label>
-                                    <input type="date" class="form-control" value="{{ $current_work_user->date_begin??'-' }}">
+                                    <input type="date" class="form-control" value="{{ $current_work_user->date_begin??'-' }}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -310,7 +310,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Department Parent</label>
-                                    <textarea class="form-control" rows="2">{{ $current_work_user->parent->title??'-' }}</textarea>
+                                    <textarea class="form-control" rows="1" readonly>{{ $current_work_user->parent->title??'-' }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -318,7 +318,7 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Department</label>
-                                    <textarea class="form-control" rows="2">{{ $current_work_user->department->title??'-' }}</textarea>
+                                    <textarea class="form-control" rows="1" readonly>{{ $current_work_user->department->title??'-' }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -326,16 +326,10 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <label>Job title</label>
-                                    <textarea class="form-control" rows="2">{{ $current_work_user->job_title??'-' }}</textarea>
+                                    <textarea class="form-control" rows="1" readonly>{{ $current_work_user->job_title??'-' }}</textarea>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="box-footer">
-                        <a href="#"
-                           class="btn btn-danger pull-right">
-                            <i class="fa fa-pencil"></i> @lang('blade.update')
-                        </a>
                     </div>
 
                 </div>
@@ -356,8 +350,8 @@
                         <tr>
                             <th>#</th>
                             <th>BranchCode</th>
-                            <th>Filial</th>
                             <th>LocalCode</th>
+                            <th>Filial</th>
                             <th>Parent</th>
                             <th>Department</th>
                             <th>TabNum</th>
@@ -374,8 +368,8 @@
                             <tr>
                                 <td>{{ $i++ }}</td>
                                 <td>{{ $model->branch_code }}</td>
-                                <td class="text-sm text-info">{{ $model->filial->title??'-' }}</td>
                                 <td>{{ $model->local_code }}</td>
+                                <td class="text-sm text-info">{{ $model->filial->title??'-' }}</td>
                                 <td>{{ $model->parent_code }} - <span class="text-sm text-purple">{{ $model->parent->title??'-' }}</span></td>
                                 <td>{{ $model->depart_code }} - <span class="text-sm text-purple">{{ $model->department->title??'-' }}</span></td>
                                 <td>{{ $model->tab_num }}</td>
@@ -388,7 +382,7 @@
                                         @endforeach
                                     @endif
                                 </td>
-                                <td>{{ $model->date_begin }}</td>
+                                <td>{{ date('d.m.Y', strtotime($model->date_begin))  }}</td>
                                 <td class="text-center">
                                     {{ $model->isActive }}
                                 </td>

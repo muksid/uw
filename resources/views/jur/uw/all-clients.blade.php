@@ -57,7 +57,7 @@
 
                                             @if(!empty($users))
                                                 @foreach($users as $key => $value)
-                                                    <option value="{{$value->currentWork->id}}">
+                                                    <option value="{{$value->currentWork->id??0}}">
                                                         {{$value->currentWork->branch_code??''}} - {{$value->personal->l_name??''}} {{$value->personal->f_name??''}}
                                                     </option>
                                                 @endforeach

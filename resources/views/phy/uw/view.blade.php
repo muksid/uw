@@ -273,7 +273,7 @@
                                             <tr>
                                                 <td>2.</td>
                                                 <td>BXO</td>
-                                                <td class="text-bold">- {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}</td>
+                                                <td class="text-bold">{{ $model->department->title??'-' }}</td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>
                                                 </td>

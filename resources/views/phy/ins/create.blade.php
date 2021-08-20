@@ -6,6 +6,7 @@
         <h1>
             Jismoniy shaxlar
             <small>ariza yaratish</small>
+            <a href="{{ url('/phy/client/create/new') }}" class="btn bg-purple">Create New</a>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>

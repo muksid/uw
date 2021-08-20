@@ -3,7 +3,7 @@
 @section('content')
     <section class="content-header">
         <h1>
-            filial
+            Filial departament va bo`linmalari
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
@@ -18,6 +18,9 @@
 
         <div class="box box-success">
             <div class="box-header with-border">
+                <a href="{{route('filial.index')}}" class="btn btn-xs btn-primary margin">
+                    <i class="fa fa-bank"></i> Filials
+                </a>
                 <h3 class="box-title margin"><span class="badge badge-secondary">{{ $filial->filial_code }}</span> {{ $filial->title }}
                     <a href="{{ url('/madmin/update-role-department', $filial->filial_code) }}"
                        class="btn btn-sm btn-success"><i class="fa fa-refresh"></i> @lang('blade.refresh')</a>

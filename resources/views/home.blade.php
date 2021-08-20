@@ -78,9 +78,9 @@
 
                     <div class="box-body">
 
-                        <strong><i class="fa fa-bank margin-r-5"></i> Ish joyi va Lavozimi</strong>
-                        <h5 class="text-green">{{ $checkUserWork->filial->title??'-' }},
-                            <span>
+                        <strong><i class="fa fa-bank margin-r-5"></i> Ish joyi va Lavozimingiz</strong>
+                        <h5 class="text-green">{{ $checkUserWork->branch_code??'-' }} {{ $checkUserWork->filial->title??'-' }},
+                            <span class="text-primary">
                                 {{ $checkUserWork->department->title??'-' }} {{ $checkUserWork->job_title }}
                             </span>
                         </h5>
@@ -88,7 +88,7 @@
                         <hr>
                         <div class="row">
                             <div class="col-md-6">
-                                <strong><i class="fa fa-book margin-r-5"></i> Passport ma`lumotlari</strong>
+                                <strong><i class="fa fa-book margin-r-5"></i> Passport ma`lumotlaringiz</strong>
 
                                 <h5><b>PINFL: </b>{{ $userInfo->pinfl }}</h5>
                                 <h5><b>STIR: </b>{{ $userInfo->inn }}</h5>
@@ -109,9 +109,9 @@
 
                                 <hr>
 
-                                <strong><i class="fa fa-map-marker margin-r-5"></i> Manzil ma`lumotlari</strong>
+                                <strong><i class="fa fa-map-marker margin-r-5"></i> Manzil ma`lumotlaringiz</strong>
 
-                                <h5><b>Yashash manzili: </b>{{ $userInfo->address }}</h5>
+                                <h5><b>Yashash manzilingiz: </b>{{ $userInfo->address }}</h5>
 
                                 <hr>
 
@@ -128,8 +128,8 @@
                                 </p>
 
                                 <hr>
-
-                                <a href="{{ url('/madmin/update-user-info', $user->cb_id) }}" class="btn btn-flat btn-success"><i class="fa fa-refresh"></i> Yangilash</a>
+                                <h4 class="text-maroon">Filial, Departament, Lavozimingiz o`zgarishlarini yangilang!!!</h4>
+                                <a href="{{ url('/madmin/update-user-work', $user->id) }}" class="btn btn-flat btn-success"><i class="fa fa-refresh"></i> Yangilash</a>
 
                             </div>
 

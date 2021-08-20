@@ -27,22 +27,26 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('get-log-file', 'HomeController@getLogFile');
         Route::get('cache/{type}', 'HomeController@cacheClear');
 
-        // DEPARTMENT
+        // FILIAL
+        Route::resource('filial','FilialController');
+        Route::any('filial','FilialController@index');
+        Route::get('filial-get-update-ora','FilialController@getUpdateOra');
+        Route::get('update-role-department/{code}','FilialController@updateRoleDepartment');
+
+        // OLD DEPARTMENT
         Route::resource('departments','DepartmentController');
-        Route::any('filials','DepartmentController@filials');
-        Route::get('update-filial','DepartmentController@updateFilial');
-        Route::get('filial/{id}','DepartmentController@getFilial');
-        Route::post('filial-update','DepartmentController@filialUpdate');
-        Route::get('filial/view/{code}','DepartmentController@viewFilial');
-        Route::get('update-role-department/{code}','DepartmentController@updateRoleDepartment');
-        Route::any('s-departments','DepartmentController@sDepartments');
-        Route::get('update-s-departments','DepartmentController@updateSDepartments');
         Route::any('departments','DepartmentController@index');
         Route::post('get-department','DepartmentController@getDepartment');
+        //Route::get('update-department/{id}','DepartmentController@updateDepartment');
+
+        // DEPARTMENT
+        Route::any('s-departments','DepartmentController@sDepartments');
+        Route::get('update-s-departments','DepartmentController@updateSDepartments');
+        Route::get('get-s-department/{id}','DepartmentController@getSDepartment');
+        Route::post('edit-s-department','DepartmentController@editSDepartment');
         Route::post('get-sub-department','DepartmentController@subDepartment');
         Route::post('get-districts','DepartmentController@getDistricts');
         Route::post('get-reg-districts','DepartmentController@getRegDistricts');
-        Route::get('update-department/{id}','DepartmentController@updateDepartment');
 
         // ROLES
         Route::resource('roles', 'RoleController');
@@ -62,7 +66,7 @@ Route::group(['middleware' => ['auth']], function() {
 
         // USERS
         Route::resource('users','UserController');
-        Route::any('users-search','UserController@index');
+        Route::any('users','UserController@index');
         Route::get('users-username-check/{username}','UserController@usernameCheck');
         Route::get('users-get-branch/{id}','UserController@getBranch');
         Route::post('users-update','UserController@updateUser');

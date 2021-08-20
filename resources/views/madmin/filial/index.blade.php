@@ -9,7 +9,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">departments</a></li>
+            <li><a href="#">filial</a></li>
             <li class="active">index</li>
         </ol>
 
@@ -39,24 +39,14 @@
                 <div class="box box-primary">
 
                     <div class="box-header">
-                        <div class="col-md-2">
-                            <a href="{{ route('departments.index') }}" class="btn btn-primary btn-flat">
-                                <i class="fa fa-bank"></i> <b> Departments</b>
-                            </a>
-                        </div>
-                        <div class="col-md-2">
-                            <a href="{{ url('/madmin/s-departments') }}" class="btn btn-primary btn-flat">
-                                <i class="fa fa-bank"></i> <b> S Departments</b>
-                            </a>
-                        </div>
                         <div class="col-md-1">
-                            <a href="{{ url('/madmin/update-filial') }}" class="btn btn-success btn-flat">
+                            <a href="{{ url('/madmin/filial-get-update-ora') }}" class="btn btn-success btn-flat">
                                 <i class="fa fa-refresh"></i> <b> @lang('blade.refresh')</b>
                             </a>
                         </div>
                     </div>
 
-                    <form action="{{url('/madmin/filials')}}" method="POST" role="search">
+                    <form action="{{ route('filial.index') }}" method="POST" role="search">
                         {{ csrf_field() }}
 
                         <div class="row">
@@ -70,7 +60,7 @@
 
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <a href="{{url('/madmin/filials')}}" class="btn btn-flat border-success">
+                                    <a href="{{route('filial.index')}}" class="btn btn-flat border-success">
                                         <i class="fa fa-refresh"></i>
                                     </a>
                                     <button type="submit" class="btn btn-success btn-flat">
@@ -117,7 +107,7 @@
                                     </td>
                                     <td class="text-center">
                                         <a class="btn btn-xs btn-primary"
-                                           href="{{ url('/madmin/filial/view', $model->filial_code) }}"><i
+                                           href="{{ route('filial.edit', $model->id) }}"><i
                                                     class="fa fa-eye-slash"></i></a>
                                     </td>
                                     <td class="text-center">
@@ -147,6 +137,7 @@
                                 <form id="filialForm" name="filialForm">
                                     <div class="modal-body">
                                         <input type="hidden" name="model_id" id="model_id">
+                                        <input type="hidden" name="type" id="type" value="f">
                                         <div class="form-group">
                                             <label for="name" class="control-label">@lang('blade.title_uz')</label>
                                             <input type="text" class="form-control" style="width: 100%" id="title"
@@ -240,9 +231,9 @@
                         $.ajax({
                             data: $('#filialForm').serialize(),
 
-                            url: "{{ url('/madmin/filial-update') }}",
+                            url: "{{ route('filial.update', 1) }}",
 
-                            type: "POST",
+                            type: "put",
 
                             dataType: 'json',
 

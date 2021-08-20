@@ -127,7 +127,6 @@
                                 <th>IABS</th>
                                 <th>Ariza #</th>
                                 <th>Mijoz FIO</th>
-                                <th>STIR</th>
                                 <th>Summa</th>
                                 <th>Status</th>
                                 <th>OnReg</th>
@@ -158,7 +157,6 @@
                                                {{ $model->family_name. ' '.$model->name. ' '.$model->patronymic}}
                                             </a>
                                         </td>
-                                        <td>{{ $model->inn }}</td>
                                         <td>{{ number_format($model->summa) }}</td>
                                         <td>
                                             @if($model->status == 0)
@@ -191,7 +189,7 @@
                                             </div>
                                         </td>
                                         <td><span class="badge bg-light-blue-active">{{ $model->branch_code??'' }}</span>
-                                            - {!! \Illuminate\Support\Str::words($model->filial->title??'Филиал', '3') !!}
+                                            - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
                                         </td>
                                         <td class="text-green">{{ $model->currentWork->personal->l_name??'-' }} {{ $model->currentWork->personal->f_name??'-' }}</td>
                                         <td>
