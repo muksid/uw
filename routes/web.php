@@ -101,6 +101,7 @@ Route::group(['middleware' => ['auth']], function() {
         Route::delete('loan-types/{id}', 'UwLoanTypesController@destroy');
         Route::get('get-loan-banks/{id}', 'UwLoanTypesController@getBanks');
         Route::post('store-loan-banks', 'UwLoanTypesController@storeBanks');
+        Route::get('get-loans/{code}', 'UwLoanTypesController@getLoans');
 
         // GUAR TYPES
         Route::resource('guar-type', 'UwGuarTypesController');
@@ -148,6 +149,10 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('client-send-to-uw', 'UwClientsController@csAppSend');
         //INS CREATE NEW
         Route::get('client/create/new', 'PhysicalClientCreateController@index');
+        Route::post('client/create/personal', 'PhysicalClientCreateController@createPersonal');
+        Route::get('client/form/{id}', 'PhysicalClientCreateController@clientForm');
+        Route::post('client/create/app', 'PhysicalClientCreateController@createApp');
+        Route::get('client/image/{id}', 'PhysicalClientCreateController@displayImage');
 
 
         // DEBTORS

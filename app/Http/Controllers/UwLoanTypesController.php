@@ -222,4 +222,12 @@ class UwLoanTypesController extends Controller
             'code'=>201
         ]);
     }
+
+    public function getLoans($code){
+
+        $models = UwLoanTypes::where('credit_type', '=', $code)->where('isActive', 1)->get();
+
+        return response()->json($models);
+    }
+
 }

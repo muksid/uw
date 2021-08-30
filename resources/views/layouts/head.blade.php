@@ -35,3 +35,5 @@
 
     <!-- ajax validate form -->
     <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
+
+    <script src="{{ asset ("/js/webcamjs/webcam.min.js") }}"></script>

@@ -40,8 +40,13 @@
                                         <table class="table table-bordered">
                                             <tbody>
                                             <tr>
-                                                <th style="width: 10px">#</th>
-                                                <th colspan="3"><i class="fa fa-user"></i> Mijoz pasport ma`lumotlari</th>
+                                                <th colspan="2">
+                                                    @if($myIdClient)
+                                                    <img src="{{ url('/phy/client/image',$myIdClient->id) }}" alt=""
+                                                         class="img-responsive img-rounded img-thumbnail" style="max-width: 240px;">
+                                                    @endif
+                                                </th>
+                                                <th class="text-center"><i class="fa fa-user"></i> Mijoz pasport ma`lumotlari</th>
                                             </tr>
                                             <tr>
                                                 <td>1.</td>

@@ -274,6 +274,7 @@ class UwCreateClientsController extends Controller
         $model->phone = $phone;
         $model->katm_sir = "";
         $model->loan_type_id = $loanType->id;
+        $model->credit_type = $loanType->credit_type;
         $model->summa = $summa;
         $model->status = 1;
 

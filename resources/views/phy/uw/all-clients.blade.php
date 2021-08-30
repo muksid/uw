@@ -439,10 +439,14 @@
 
                         $('#cs_user_id').empty();
 
-                        $('#cs_user_id').append('<option value="'+data.user.work_user_id+'" selected>'+data.user.filial_code+' - '+data.user.full_name+' - '+data.user.filial_name+ '</option>');
+                        if (data.user) {
+
+                            $('#cs_user_id').append('<option value="'+data.user.work_user_id+'" selected>'+data.user.filial_code+' - '+data.user.full_name+ '</option>');
+
+                        }
 
                         $.each( data.csUsers, function(k, v) {
-                            $('#cs_user_id').append($('<option>', {value:v.work_user_id, text:v.filial_code+' - '+v.full_name+' - '+v.filial_name}));
+                            $('#cs_user_id').append($('<option>', {value:v.work_user_id, text:v.filial_code+' - '+v.full_name}));
                         });
 
                     })

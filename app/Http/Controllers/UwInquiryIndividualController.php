@@ -79,6 +79,7 @@ class UwInquiryIndividualController extends Controller
         $creditCanBeAnn = 0;
         $monthlyPay = 0;
         $monthlyPayAnn = 0;
+        $scoringBall = 0;
         $pv = 0;
         if ($clientK){
             $creditDebt = $clientK->summa;
@@ -1054,14 +1055,18 @@ class UwInquiryIndividualController extends Controller
             $creditDebt = $KATM->summa;
             $scoringBall = $KATM->scoring_ball;
             $katm_base_file = UwPhyKatmBaseFile::where('uw_katm_id', $KATM->id)->where('base_file', '!=', null)->first();
-            if ($katm_base_file) {
+            /*if ($katm_base_file) {
                 $base_file = base64_decode($katm_base_file->base_file);
                 $base_arr = json_decode($base_file, true);
+                $newstring = substr($base_arr, -5);
+                //print_r($base_file."\"]}}]"); die;
+
+
 
                 $arr_row_7 = $base_arr['25']['td']['4']['span'];
                 $arr_row_8 = $base_arr['26']['td']['4']['span'];
                 $arr_row_9 = $base_arr['27']['td']['4']['span'];
-            }
+            }*/
         }
 
         if ($clientTotalSum){

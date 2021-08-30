@@ -289,6 +289,15 @@ class UserController extends Controller
 
                 $oraEmpDecode = json_decode($oraEmp, true);
 
+                if (!$oraEmpDecode) {
+
+                    $user->update(['isActive' => 'D']);
+
+                    return back()->with('success', 'Tizimidan ma`lumot topilmadi!!! (Уволенные)');
+
+                } else {
+
+
                 $oraValue = $oraEmpDecode[0];
 
                 $checkUser = MWorkUsers::where('emp_id', '=', $oraValue['emp_id'])
@@ -310,7 +319,6 @@ class UserController extends Controller
                     if ($sDepartment) {
                         $local_code = $sDepartment->local_code;
                     }
-
                     $create_user_work = new MWorkUsers();
                     $create_user_work->user_id = $user_id;
                     $create_user_work->emp_id = $oraValue['emp_id'];
@@ -325,15 +333,40 @@ class UserController extends Controller
                     $create_user_work->save();
 
                     // CREATE ROLE
-                    $role = new MUserRoles();
-                    $role->user_id = $create_user_work->id;
-                    $role->role_id = 28;
-                    $role->isActive = 'A';
-                    $role->save();
+                    $oldWorkUser = MWorkUsers::where('user_id', '=', $user_id)->where('isActive', '=', 'P')->orderBy('created_at', 'DESC')->first();
+                    //print_r($oldWorkUser); die;
+                    if ($oldWorkUser) {
+                        $oldRoles = MUserRoles::where('user_id', $oldWorkUser->id)->get();
+                        if ($oldRoles) {
+                            foreach ($oldRoles as $index => $oldRole) {
+                                $role = new MUserRoles();
+                                $role->user_id = $create_user_work->id;
+                                $role->role_id = $oldRole->role_id;
+                                $role->isActive = 'A';
+                                $role->save();
+                            }
+                        } else {
+                            $role = new MUserRoles();
+                            $role->user_id = $create_user_work->id;
+                            $role->role_id = 28;
+                            $role->isActive = 'A';
+                            $role->save();
+                        }
+
+                    } else {
+
+                        $role = new MUserRoles();
+                        $role->user_id = $create_user_work->id;
+                        $role->role_id = 28;
+                        $role->isActive = 'A';
+                        $role->save();
+
+                    }
 
                 }
 
                 return $this->updateUserInfo($user->cb_id);
+                }
             }
         } else {
 
@@ -549,6 +582,7 @@ class UserController extends Controller
             ]);
         }
 
+        $password = Hash::make($password);
         $user->update([
             'username' => $username,
             'password' => $password,

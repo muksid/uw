@@ -1055,12 +1055,15 @@ class UwJuridicalClientsController extends Controller
         if ($credit_sum >= $credit_canBe){
             $code = 0;
             $message = 'Kredit summasi yetarli emas!!!';
+        } elseif ($model->summa > 500000000){
+            $code = 0;
+            $message = 'Kredit maksimal summasi 500 mln so`m!!!';
         } elseif (!$model->katm_sir){
             $code = 0;
             $message = 'Mijoz KATM dasturidan ro`yhatdan o`tmagan!!!';
         } elseif (!$kias){
             $code = 0;
-            $message = 'KATM KIAS Scoring natijasi tpilmadi!!!';
+            $message = 'KATM KIAS Scoring natijasi topilmadi!!!';
         } else {
             $model = UwJuridicalClient::find($id);
             $model->update(['status' => 2]);
