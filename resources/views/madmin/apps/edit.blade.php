@@ -152,42 +152,42 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <th scope="row">2</th>
+                                                <th scope="row">1</th>
                                                 <td>filial_name</td>
                                                 <td>[[FILIAL_NAME]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">3</th>
+                                                <th scope="row">2</th>
                                                 <td>client_name</td>
                                                 <td>[[CLIENT_FULLNAME]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">4</th>
+                                                <th scope="row">3</th>
                                                 <td>client_date</td>
                                                 <td>[[CLAIM_DATE]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">5</th>
+                                                <th scope="row">4</th>
                                                 <td>loan_exemtion</td>
                                                 <td>[[LOAN_EXEMTION]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">6</th>
+                                                <th scope="row">5</th>
                                                 <td>loan_duration</td>
                                                 <td>[[LOAN_DURATION]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">7</th>
+                                                <th scope="row">6</th>
                                                 <td>loan_name</td>
                                                 <td>[[LOAN_NAME]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">8</th>
+                                                <th scope="row">7</th>
                                                 <td>loan_percentage</td>
                                                 <td>[[LOAN_PERCENTAGE]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">9</th>
+                                                <th scope="row">8</th>
                                                 <td>summa</td>
                                                 <td>[[LOAN_SUMM]]</td>
                                             </tr>

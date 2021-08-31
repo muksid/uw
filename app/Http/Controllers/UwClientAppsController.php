@@ -8,6 +8,8 @@ use App\UwClients;
 use App\UwClientGuars;
 use App\UwJuridicalClient;
 use App\UwJurClientGuars;
+use App\UwClientsAppLists;
+
 
 class UwClientAppsController extends Controller
 {
@@ -114,27 +116,12 @@ class UwClientAppsController extends Controller
         return response()->json(['message' => 'Record Successfully Deleted!']);
     }
 
-    public function appGetTemplate($id,$template_id,$client_type)
+    public function appGetTemplate($id,$template_id)
     {
-        if ($client_type == 'phy') {
-            
-            $model = UwClients::findOrFail($id);
-            $guard = UwClientGuars::where('uw_clients_id',$id)->get();
-            $app   = UwClientApps::find($template_id);
-            $client_type = 'phy';
+        $model      = UwClientsAppLists::find($id);
+        $template   = UwClientApps::find($template_id);
 
-            return view('madmin.apps.temp-app', compact('model','app','guard','client_type'));
-
-        } else {
-            
-            $model = UwJuridicalClient::findOrFail($id);
-            $guard = UwJurClientGuars::where('jur_clients_id',$id)->get();
-            $app   = UwClientApps::find($template_id);
-            $client_type = 'jur';
-
-            return view('madmin.apps.temp-app', compact('model','app','guard','client_type'));
-
-        }
+        return view('madmin.apps.temp-app', compact('model','template'));
     }
 
 }

@@ -6,8 +6,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Jismoniy shaxslar
-            <small>Talabnomalar</small>
+            Mijozlar
+            <small>Talabnomasi</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
@@ -39,7 +39,7 @@
 
                     <div class="box-body">
 
-                        <form action="{{url('/madmin/app-list-phy-search')}}" method="POST" role="search" >
+                        <form action="{{url('/madmin/app-list-search')}}" method="POST" role="search" >
                             {{ csrf_field() }}
 
                             <div class="row">
@@ -58,7 +58,7 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <a href="{{url('/madmin/app-list-phy')}}" class="btn btn-flat border-success">
+                                        <a href="{{url('/madmin/app-list')}}" class="btn btn-flat border-success">
                                             <i class="fa fa-refresh"></i> @lang('blade.reset')
                                         </a>
                                         <button type="submit" class="btn btn-success btn-flat">
@@ -81,7 +81,13 @@
                             <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Loan ID</th>
+                                <th>Client code</th>
+                                <th>Contract</th>
+                                <th>Date</th>
+                                <th>Sum</th>
                                 <th>FIO</th>
+                                <th>Type</th>
                                 <th>Template</th>
                                 <th>Status</th>
                                 <th>Date</th>
@@ -95,12 +101,15 @@
                                 @foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}">
                                         <td>{{ $models->firstItem() + $key }}</td>
-                                        <td class="text-sm text-bold text-blue">
-                                            {{ $model->uwPhyClients->family_name??'-' }} {{ $model->uwPhyClients->name??'-' }}
-                                            {{ $model->uwPhyClients->patronymic??'-' }}
-                                        </td>
+                                        <td class="text-center">{{$model->loan_id}}</td>
+                                        <td class="text-center">{{$model->client_code}}</td>
+                                        <td class="text-center">{{$model->contract_code}}</td>
+                                        <td class="text-center">{{$model->contract_date}}</td>
+                                        <td class="text-center">{{$model->summ_loan}} sum</td>
+                                        <td class="text-sm text-bold text-blue">{{ $model->client_name??'Not Found' }}</td>
+                                        <td class="text-center">{{$model->subject}}</td>
                                         <td class="text-sm text-center text-bold">
-                                            {{ $model->appTemplate->title }}
+                                            {{ $model->appTemplate->title??'' }}
                                         </td>
                                         <td class="text-center">
                                             @if($model->status == 'A')
@@ -116,7 +125,7 @@
                                             <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
                                         </td>
                                         <td>
-                                            <a href="{{url('/madmin/app-get-template/'.$model->uw_client_id.'/'.$model->template_id.'/phy')}}" 
+                                            <a href="{{url('/madmin/app-get-template/'.$model->id.'/'.$model->template_id)}}" 
                                                 target="_blank" class="btn btn-info text-bold appButton">
                                                 App
                                             </a>
@@ -148,9 +157,22 @@
                                 <form id="createForm" name="createForm">
                                     @csrf
                                     <div class="modal-body">
+                                        <input type="text" name="loan_id"       id="loan_id" hidden>
+                                        <input type="text" name="client_code"   id="client_code" hidden>
+                                        <input type="text" name="contract_code" id="contract_code" hidden>
+                                        <input type="text" name="contract_date" id="contract_date" hidden>
+                                        <input type="text" name="summ_loan"     id="summ_loan" hidden>
+                                        <input type="text" name="client_name"   id="client_name" hidden>
+                                        <input type="text" name="address"       id="address" hidden>
+                                        <input type="text" name="typeof"        id="typeof" hidden>
+                                        <input type="text" name="subject"       id="subject" hidden>
+                                        <input type="text" name="filial_code"   id="filial_code" hidden>
+                                        <input type="text" name="saldo_in_5"    id="saldo_in_5" hidden>
+                                        <input type="text" name="saldo_in_all"  id="saldo_in_all" hidden>
+
                                         <div class="form-group">
                                             <label for="unique_code">Select client <span class="text-red">*</span></label>
-                                            <select class="form-control select_clients" id="unique_code" name="uw_client_id" style="width: 100%" required>
+                                            <select class="form-control select_clients" id="unique_code" style="width: 100%" required>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -287,27 +309,44 @@
                     placeholder: 'Select a template',
                 })
                 $('.select_clients').select2({
-                    minimumInputLength: 8,
-                    placeholder: 'Unikal kod',
+                    minimumInputLength: 6,
+                    placeholder: 'id',
                     ajax: {
-                        url: '/madmin/app-list-phy-get-uwclient',
+                        url: '/madmin/app-list-get-client',
                         dataType: 'json',
-                        delay: 250,
+                        delay: 300,
                         processResults: function (data) {
-                        return {
-                            results:  $.map(data, function (item) {
-                                return {
-                                    text: item.family_name+" "+item.name+" "+item.patronymic,
-                                    id: item.id
-                                }
-                            })
-                        };
+                            console.log(data)
+                            $('#loan_id').val(data.loan_id)
+                            $('#client_code').val(data.client_code)
+                            $('#contract_code').val(data.contract_code)
+                            $('#contract_date').val(data.contract_date)
+                            $('#summ_loan').val(data.summ_loan)
+                            $('#client_name').val(data.client_name)
+                            $('#address').val(data.address)
+                            $('#typeof').val(data.typeof)
+                            $('#subject').val(data.subject)
+                            $('#filial_code').val(data.filial_code)
+                            $('#saldo_in_5').val(data.saldo_in_5)
+                            $('#saldo_in_all').val(data.saldo_in_all)
+                            $('#loan_id').val(data.loan_id)
+
+                            return {
+                                results: [
+                                    {
+                                        "id" : data.loan_id,
+                                        "text" : data.client_name
+                                    }
+                                ]
+                            }; 
+                            
                         },
                         cache: true
                     }
                 });
                 
             })
+            // 305761
 
             $('#createForm').on('submit', function(e){
 
@@ -316,7 +355,7 @@
                 var $this = $(this);
 
                 $.ajax({
-                    url: '/madmin/app-list-phy',
+                    url: '/madmin/app-list',
                     method: 'POST',
                     data: $this.serialize(),
                     beforeSend: function(){
@@ -336,8 +375,6 @@
                         location.reload();
                     }, 2500);
 
-
-
                 }).error(function(err){
                     console.log(err)
                 })
@@ -349,7 +386,7 @@
 
                 $('#yesDelete').on('click',function () {
                     $.ajax({
-                    url: '/madmin/app-list-phy/'+id,
+                    url: '/madmin/app-list/'+id,
                     method: 'DELETE',
                     data: {_token: CSRF_TOKEN},
                     beforeSend: function(){

@@ -45,7 +45,6 @@
                                 <div class="form-group">
                                     <label for="create_title">Title</label>
                                     <input type="text" class="form-control" id="create_title" name="title" aria-describedby="emailHelp" placeholder="Templete title ..." required>
-                                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
                                 </div>
                             </div>
 
@@ -95,55 +94,59 @@
                                         <tbody>
                                             <tr>
                                                 <th scope="row">1</th>
-                                                <td>client_address</td>
-                                                <td>[[CLIENT_ADDRESS]]</td>
+                                                <td>loan_id</td>
+                                                <td>[[loan_id]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">2</th>
-                                                <td>filial_name</td>
-                                                <td>[[FILIAL_NAME]]</td>
+                                                <td>client_code</td>
+                                                <td>[[client_code]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">3</th>
-                                                <td>client_name</td>
-                                                <td>[[CLIENT_FULLNAME]]</td>
+                                                <td>contract_code</td>
+                                                <td>[[contract_code]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">4</th>
-                                                <td>client_date</td>
-                                                <td>[[CLAIM_DATE]]</td>
+                                                <td>contract_date</td>
+                                                <td>[[contract_date]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">5</th>
-                                                <td>loan_type</td>
-                                                <td>[[LOAN_TYPE]]</td>
+                                                <td>summ_loan</td>
+                                                <td>[[summ_loan]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">6</th>
-                                                <td>loan_exemtion</td>
-                                                <td>[[LOAN_EXEMTION]]</td>
+                                                <td>client_name</td>
+                                                <td>[[client_name]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">7</th>
-                                                <td>loan_duration</td>
-                                                <td>[[LOAN_DURATION]]</td>
+                                                <td>address</td>
+                                                <td>[[address]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">8</th>
-                                                <td>loan_name</td>
-                                                <td>[[LOAN_NAME]]</td>
+                                                <td>saldo_in_5</td>
+                                                <td>[[saldo_in_5]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">9</th>
-                                                <td>loan_percentage</td>
-                                                <td>[[LOAN_PERCENTAGE]]</td>
+                                                <td>saldo_in_all</td>
+                                                <td>[[saldo_in_all]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">10</th>
-                                                <td>summa</td>
-                                                <td>[[LOAN_SUMM]]</td>
+                                                <th scope="row">10.</th>
+                                                <td>filial_code</td>
+                                                <td>[[filial_code]]</td>
                                             </tr>
-                                            
+                                            <tr>
+                                                <th scope="row">11.</th>
+                                                <td>saldo_added</td>
+                                                <td>[[saldo_added]]</td>
+                                            </tr>
                                         </tbody>
                                     </table>
         
@@ -157,51 +160,60 @@
                                         </thead>
                                         <tbody>
                                             <tr>
+                                                <th scope="row">1</th>
+                                                <td>loan_id</td>
+                                                <td>[[loan_id]]</td>
+                                            </tr>
+                                            <tr>
                                                 <th scope="row">2</th>
-                                                <td>filial_name</td>
-                                                <td>[[FILIAL_NAME]]</td>
+                                                <td>client_code</td>
+                                                <td>[[client_code]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">3</th>
-                                                <td>client_name</td>
-                                                <td>[[CLIENT_FULLNAME]]</td>
+                                                <td>contract_code</td>
+                                                <td>[[contract_code]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">4</th>
-                                                <td>client_date</td>
-                                                <td>[[CLAIM_DATE]]</td>
+                                                <td>contract_date</td>
+                                                <td>[[contract_date]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">5</th>
-                                                <td>loan_type</td>
-                                                <td>[[LOAN_TYPE]]</td>
+                                                <td>summ_loan</td>
+                                                <td>[[summ_loan]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">6</th>
-                                                <td>loan_exemtion</td>
-                                                <td>[[LOAN_EXEMTION]]</td>
+                                                <td>client_name</td>
+                                                <td>[[client_name]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">7</th>
-                                                <td>loan_duration</td>
-                                                <td>[[LOAN_DURATION]]</td>
+                                                <td>address</td>
+                                                <td>[[address]]</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">8</th>
-                                                <td>loan_name</td>
-                                                <td>[[LOAN_NAME]]</td>
+                                                <td>saldo_in_5</td>
+                                                <td>[[saldo_in_5]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">9</th>
-                                                <td>loan_percentage</td>
-                                                <td>[[LOAN_PERCENTAGE]]</td>
+                                                <th scope="row">9.</th>
+                                                <td>saldo_in_all</td>
+                                                <td>[[saldo_in_all]]</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">10</th>
-                                                <td>summa</td>
-                                                <td>[[LOAN_SUMM]]</td>
+                                                <th scope="row">10.</th>
+                                                <td>filial_code</td>
+                                                <td>[[filial_code]]</td>
                                             </tr>
-                                            
+                                            <tr>
+                                                <th scope="row">11.</th>
+                                                <td>saldo_added</td>
+                                                <td>[[saldo_added]]</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>

@@ -88,15 +88,11 @@ Route::group(['middleware' => ['auth']], function() {
 
         // APPLICATION
         Route::resource('app','UwClientAppsController');
-        Route::get('app-get-template/{id}/{template_id}/{client_type}','UwClientAppsController@appGetTemplate');
+        Route::get('app-get-template/{id}/{template_id}','UwClientAppsController@appGetTemplate');
         
-        Route::resource('app-list-phy','UwClientsAppListsController');
-        Route::get('app-list-phy-get-uwclient','UwClientsAppListsController@getUwClient');
-        Route::post('app-list-phy-search','UwClientsAppListsController@index');
-
-        Route::resource('app-list-jur','UwJurClientsAppListsController');
-        Route::get('app-list-jur-get-uwclient','UwJurClientsAppListsController@getJurUwClient');
-        Route::post('app-list-jur-search','UwJurClientsAppListsController@index');
+        Route::resource('app-list','UwClientsAppListsController');
+        Route::get('app-list-get-client','UwClientsAppListsController@getUwClient');
+        Route::post('app-list-search','UwClientsAppListsController@index');
 
     });
 

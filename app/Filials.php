@@ -20,7 +20,7 @@ class Filials extends Model
     // parent filial
     public function filial() {
 
-        return $this->hasOne(Filials::class,'id','parent_id');
+        return $this->hasOne(Filials::class,'filial_code','filial_code');
 
     }
 }
