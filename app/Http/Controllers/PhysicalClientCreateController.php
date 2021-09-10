@@ -25,11 +25,11 @@ class PhysicalClientCreateController extends Controller
     private $PASSWORD   = 'xJ8oTq2fiIj8T8Opw2BAFNUx6bdjKTxU9PQypcYLkT57ztcChAej2Ncg5AaVD3c6';
     private $CLIENT_ID  = 'turonbank_inplace-lUUmzndTpHCk5R6e7EcgJZ7QYpYA33y2olqc4ZMF';
 
-    public $URL_ACCESS_TOKEN  = 'https://myid.uz/api/v1/oauth2/access-token';
+    public $URL_ACCESS_TOKEN  = 'http://10.22.48.186:443/api/v1/oauth2/access-token';
 
-    public $URL_REQUEST_TASK  = 'https://myid.uz/api/v1/authentication/simple-inplace-authentication-request-task';
+    public $URL_REQUEST_TASK  = 'http://10.22.48.186:443/api/v1/authentication/simple-inplace-authentication-request-task';
 
-    public $URL_REQUEST_STATUS  = 'https://myid.uz/api/v1/authentication/simple-inplace-authentication-request-status';
+    public $URL_REQUEST_STATUS  = 'http://10.22.48.186:443/api/v1/authentication/simple-inplace-authentication-request-status';
 
     public function index()
     {
@@ -38,9 +38,30 @@ class PhysicalClientCreateController extends Controller
 
     }
 
+    public function curlHttpPost($array)
+    {
+        $url = $array['url'];
+        $post = $array['data'];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
+        curl_setopt($ch, CURLOPT_PROXY, '10.22.48.186:443');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $post);
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        return $result;
+
+    }
+
     public function createPersonal(Request $request)
     {
-        //print_r($request->all());
 
         $passport = $request->pass_data;
 
@@ -94,27 +115,15 @@ class PhysicalClientCreateController extends Controller
                     'totalDuration' => $totalDuration,
                 );
 
-                /*if ($request->job_id) {
-
-                    return $this->getClientData($arr);
-
-                }*/
-
                 return $this->getJobId($arr);
 
             } else {
-                $ch = curl_init($this->URL_ACCESS_TOKEN);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-                curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-                curl_setopt($ch, CURLOPT_PROXY, '192.168.2.111:3128');
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $post);
-                $result = curl_exec($ch);
-                curl_close($ch);
+
+                $arr_curl = array(
+                    'url' => $this->URL_ACCESS_TOKEN,
+                    'data' => $post
+                );
+                $result = $this->curlHttpPost($arr_curl);
 
                 $result_req = json_decode($result, true);
 
@@ -146,19 +155,11 @@ class PhysicalClientCreateController extends Controller
 
         } else {
 
-            $ch = curl_init($this->URL_ACCESS_TOKEN);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-            curl_setopt($ch, CURLOPT_PROXY, '192.168.2.111:3128');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $post);
-            $result = curl_exec($ch);
-            curl_close($ch);
-            //return response()->json($result);
+            $arr_curl = array(
+                'url' => $this->URL_ACCESS_TOKEN,
+                'data' => $post
+            );
+            $result = $this->curlHttpPost($arr_curl);
             $result_req = json_decode($result, true);
 
             $access_token = $result_req['access_token'];
@@ -217,7 +218,7 @@ class PhysicalClientCreateController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch, CURLOPT_PROXY, '192.168.2.111:3128');
+        curl_setopt($ch, CURLOPT_PROXY, '10.22.48.186:443');
 
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -260,7 +261,7 @@ class PhysicalClientCreateController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch, CURLOPT_PROXY, '192.168.2.111:3128');
+        curl_setopt($ch, CURLOPT_PROXY, '10.22.48.186:443');
 
         $header = array('Content-Type: application/json',
             'Authorization: Bearer ' . $arr['token']);
@@ -413,6 +414,7 @@ class PhysicalClientCreateController extends Controller
         $pass_number = substr($myid_client->pass_data, 2, 7);
 
         $json_decode_region = json_decode($myid_client->permanent_registration, true);
+
         $regions = MyidRegions::where('code', '=', $json_decode_region['region_id'])->first();
         $districts = MyidDistricts::where('code', '=', $json_decode_region['district_id'])->first();
 

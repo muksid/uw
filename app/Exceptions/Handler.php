@@ -45,7 +45,7 @@ class Handler extends ExceptionHandler
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response
      */
 
     /*public function render($request, Exception $exception)
@@ -68,6 +68,9 @@ class Handler extends ExceptionHandler
         }/* else{
             return response()->view('errors.' . '500', [], 500);
         }*/
+        if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
+            return redirect()->route('login');
+        }
 
         return parent::render($request, $exception);
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Department;
 use App\MWorkUsers;
 use App\User;
 use App\UwJurBalanceChild;
@@ -18,6 +17,7 @@ use App\UwJurKatmClient;
 use App\UwJurKatmFile;
 use App\UwJurSaldo;
 use App\UwLoanTypes;
+use App\UwStatusName;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Exports\UwJuidicalClientsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UwJuridicalClientsController extends Controller
 {
@@ -74,7 +76,7 @@ class UwJuridicalClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -125,7 +127,7 @@ class UwJuridicalClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -138,50 +140,83 @@ class UwJuridicalClientsController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function getAllClients()
+    public function getAllClients(Request $request)
     {
         //
         $search = UwJuridicalClient::orderBy('id', 'DESC');
 
-        $u = Input::get ( 'u' );
-        $t = Input::get ( 't' );
-        $d = Input::get ( 'd' );
+        $mfo = Input::get ( 'mfo' );
+        $status = Input::get ( 'status' );
+        $date_s = Input::get ( 'date_s' );
+        $date_e = Input::get ( 'date_e' );
+        $text = Input::get ( 'text' );
+        $user = Input::get ( 'user' );
 
-        if($u) {
-            $search->where('work_user_id', $u);
+        if($mfo) {
+            $search->where('branch_code', '=', $mfo);
         }
 
-        if($t) {
-            $search->where(function ($query) use ($t) {
+        if($status == 'INC') {
+            $search->where('status', 2); // INCOME IN UNDERWRITER (NEW APP)
+        } elseif ($status == 'CON') {
+            $search->where('status', 3); // CONFIRM FROM UNDERWRITER
+        } elseif ($status == 'EDIT') {
+            $search->where('status', 0); // EDIT IN INSPECTOR
+        } elseif ($status == 'NEW') {
+            $search->where('status', 1); // NEW APP IN INSPECTOR
+        } elseif ($status == 'PAS') {
+            $search->where('status', -1); // PASSIVE APP
+        } elseif ($status == 'DEL') {
+            $search->where('status', -2); // DELETED APP
+        }
 
-                $query->orWhere('branch_code', 'LIKE', '%' . $t . '%');
-                $query->orWhere('client_code', 'LIKE', '%' . $t . '%');
-                $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
-                $query->orWhere('jur_name', 'LIKE', '%' . $t . '%');
-                $query->orWhere('inn', 'LIKE', '%' . $t . '%');
-                $query->orWhere('summa', 'LIKE', '%' . $t . '%');
+        if($user) {
+            $search->where('work_user_id', $user);
+        }
+
+        if($text) {
+            $search->where(function ($query) use ($text) {
+
+                $query->orWhere('client_code', 'LIKE', '%' . $text . '%');
+                $query->orWhere('claim_id', 'LIKE', '%' . $text . '%');
+                $query->orWhere('jur_name', 'LIKE', '%' . $text . '%');
+                $query->orWhere('inn', 'LIKE', '%' . $text . '%');
+                $query->orWhere('summa', 'LIKE', '%' . $text . '%');
             });
         }
 
-        if($d) {
-            $search->where('created_at', 'LIKE', '%'.$d.'%');
+        if($date_s) {
+            $search->whereBetween('created_at', [$date_s.' 00:00:00',$date_e.' 23:59:59']);
         }
 
         $models = $search->paginate(25);
 
         $models->appends ( array (
-            'u' => Input::get ( 'u' ),
-            't' => Input::get ( 't' ),
-            'd' => Input::get ( 'd' )
+            'mfo' => Input::get ( 'mfo' ),
+            'status' => Input::get ( 'status' ),
+            'date_s' => Input::get ( 'date_s' ),
+            'date_e' => Input::get ( 'date_e' ),
+            'text' => Input::get ( 'text' ),
+            'user' => Input::get ( 'user' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
-        $searchUser = MWorkUsers::find($u);
+        $status_names = UwStatusName::where('type', 'jur')->where('user_type', 'uw')->where('isActive', 'A')->get();
+
+        $status_name = UwStatusName::where('type', 'jur')->where('user_type', 'uw')->where('status_code', $status)->first();
+
+        $user = MWorkUsers::find($user);
 
         return view('jur.uw.all-clients',
-            compact('models','u','t','d','users','searchUser'));
+            compact('models','mfo','status_name','date_s','date_e','text','users','user','status_names'));
 
+    }
+
+    public function export(Request $request)
+    {
+
+        return Excel::download(new UwJuidicalClientsExport($request->all()), 'uw_jur_app_'.time().'.xlsx');
     }
 
     /**
@@ -427,7 +462,7 @@ class UwJuridicalClientsController extends Controller
 
         } else {
 
-            $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'loan_type_id');
+            $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'code_juridical_person', 'loan_type_id');
 
             $inputs['summa'] = $summa;
 

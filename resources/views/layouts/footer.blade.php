@@ -18,6 +18,13 @@
 
 <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
 
+<!-- date-range-picker -->
+<script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.min.js") }}"></script>
+
+<script src="{{ asset("/admin-lte/plugins/daterangepicker/daterangepicker.js") }}"></script>
+<!-- bootstrap datepicker -->
+<script src="{{ asset("/admin-lte/plugins/datepicker/bootstrap-datepicker.js") }}"></script>
+
 <!-- InputMask -->
 <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.js') }}"></script>
 <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.extensions.js') }}"></script>

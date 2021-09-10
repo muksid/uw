@@ -20,7 +20,9 @@
 
     <link href="{{ asset("/css/main.css") }}" rel="stylesheet" type="text/css">
 
-    <link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+    <link href="{{ asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+
+    <link href="{{ asset('/admin-lte/plugins/daterangepicker/daterangepicker.css')}}" rel="stylesheet">
 
     <!-- Theme style -->
     <link href="{{ asset("/admin-lte/dist/css/AdminLTE.css") }}" rel="stylesheet" type="text/css">

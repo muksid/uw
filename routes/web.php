@@ -208,6 +208,8 @@ Route::group(['middleware' => ['auth']], function() {
 
         Route::get('get-hr_emps','UwJuridicalClientsController@getHrEmps');
 
+        Route::post('export', 'UwJuridicalClientsController@export')->name('export');
+
     });
 
 

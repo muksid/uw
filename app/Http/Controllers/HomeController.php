@@ -34,79 +34,55 @@ class HomeController extends Controller
 
         $checkUserWork = MWorkUsers::where('user_id', Auth::id())->where('isActive', '=', 'A')->first();
 
-        if ($user->isActive == 'P'){
+        $user_personal = MPersonalUsers::where('user_id', $user->id)->where('doc_number', '=', null)->first();
 
-            $message = 'Xodim tizimda passiv holatda!!!';
+        if ($user_personal) {
 
-        } elseif ($user->isActive == 'D'){
+            $array = array('cb_id' => $user->cb_id, 'type' => 'emp_upd_personal');
 
-            $message = 'Xodim tizimdan o`chirilgan!!!';
+            $oraEmp = UwJuridicalClientsController::curlHttpPost($array);
 
-        } elseif (!$checkUserWork) {
+            if ($oraEmp) {
 
-            $message = 'Xodim faol ish joyi topilmadi!!!';
+                $oraEmpDecode = json_decode($oraEmp, true);
 
-        } elseif ($user->cb_id == 0) {
+                $oraValue = $oraEmpDecode[0];
 
-            $message = 'CB 0 Adminstratorga muroojat qiling!!!';
-
-        } else {
-
-            $user_personal = MPersonalUsers::where('user_id', $user->id)->where('doc_number', '=', null)->first();
-
-            if ($user_personal) {
-
-                $array = array('cb_id' => $user->cb_id, 'type' => 'emp_upd_personal');
-
-                $oraEmp =  UwJuridicalClientsController::curlHttpPost($array);
-
-                if ($oraEmp) {
-
-                    $oraEmpDecode = json_decode($oraEmp, true);
-
-                    $oraValue = $oraEmpDecode[0];
-
-                    $user_personal->update([
-                        'emp_id' => $oraValue['emp_id'],
-                        'f_name' => $oraValue['first_name'],
-                        'l_name' => $oraValue['last_name'],
-                        'm_name' => $oraValue['middle_name'],
-                        'birthday' => date('Y-m-d', strtotime($oraValue['birth_date'])),
-                        'email' => $oraValue['mail_address'],
-                        'pinfl' => $oraValue['inps'],
-                        'inn' => $oraValue['inn'],
-                        'doc_series' => $oraValue['passport_seria'],
-                        'doc_number' => $oraValue['passport_number'],
-                        'doc_begin_date' => date('Y-m-d', strtotime($oraValue['passport_date_begin'])),
-                        'doc_end_date' => date('Y-m-d', strtotime($oraValue['passport_date_end'])),
-                        'doc_address' => $oraValue['passport_issued'],
-                        'mobile_phone' => $oraValue['phone'],
-                        'address' => $oraValue['address'],
-                    ]);
-
-                }
+                $user_personal->update([
+                    'emp_id' => $oraValue['emp_id'],
+                    'f_name' => $oraValue['first_name'],
+                    'l_name' => $oraValue['last_name'],
+                    'm_name' => $oraValue['middle_name'],
+                    'birthday' => date('Y-m-d', strtotime($oraValue['birth_date'])),
+                    'email' => $oraValue['mail_address'],
+                    'pinfl' => $oraValue['inps'],
+                    'inn' => $oraValue['inn'],
+                    'doc_series' => $oraValue['passport_seria'],
+                    'doc_number' => $oraValue['passport_number'],
+                    'doc_begin_date' => date('Y-m-d', strtotime($oraValue['passport_date_begin'])),
+                    'doc_end_date' => date('Y-m-d', strtotime($oraValue['passport_date_end'])),
+                    'doc_address' => $oraValue['passport_issued'],
+                    'mobile_phone' => $oraValue['phone'],
+                    'address' => $oraValue['address'],
+                ]);
 
             }
 
-            $userInfo = MPersonalUsers::where('user_id', $user->id)->first();
-
-            $phyClients = UwClients::where('work_user_id', $checkUserWork->id)->get()->count();
-
-            $jurClients = UwJuridicalClient::where('work_user_id', $checkUserWork->id)->get()->count();
-
-            $roles = MUserRoles::where('user_id', $checkUserWork->id)->get();
-
-            $to_date = Carbon::now();
-            $from_date = Carbon::createFromFormat('Y-m-d', $userInfo->doc_end_date);
-            $pass_diff = $to_date->diff($from_date);
-
-            return view('home', compact('checkUserWork','userInfo', 'phyClients', 'jurClients', 'roles', 'pass_diff', 'user'));
-
         }
 
-        Auth::logout();
+        $userInfo = MPersonalUsers::where('user_id', $user->id)->first();
 
-        return Redirect::to('/login')->with('message', $message);
+        $phyClients = UwClients::where('work_user_id', $checkUserWork->id)->get()->count();
+
+        $jurClients = UwJuridicalClient::where('work_user_id', $checkUserWork->id)->get()->count();
+
+        $roles = MUserRoles::where('user_id', $checkUserWork->id)->get();
+
+        $to_date = Carbon::now();
+        $from_date = Carbon::createFromFormat('Y-m-d', $userInfo->doc_end_date);
+        $pass_diff = $to_date->diff($from_date);
+
+        return view('home', compact('checkUserWork', 'userInfo', 'phyClients', 'jurClients', 'roles', 'pass_diff', 'user'));
 
     }
 

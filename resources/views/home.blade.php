@@ -93,7 +93,7 @@
                                 <h5><b>PINFL: </b>{{ $userInfo->pinfl }}</h5>
                                 <h5><b>STIR: </b>{{ $userInfo->inn }}</h5>
 
-                                <h5><b>Passport: </b>{{ $userInfo->doc_series.' '.$userInfo->doc_number }}</h5>
+                                <h5><b>Passport: </b>{{ $userInfo->doc_series.$userInfo->doc_number }}</h5>
 
                                 <h5><b>Berilgan vaqti: </b>{{ date('d.m.Y', strtotime($userInfo->doc_begin_date))}} йил.</h5>
 

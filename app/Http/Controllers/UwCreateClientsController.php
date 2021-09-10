@@ -259,7 +259,7 @@ class UwCreateClientsController extends Controller
         $claim_number = $lastModelId->claim_number + 1;
         $claim_id = '1'.$branchCode.$claim_number;
         $model->work_user_id = $currentWorkUser->id;
-        $model->branch_code = $branchCode;;
+        $model->branch_code = $branchCode;
         $model->local_code = $currentWorkUser->local_code;
         $model->claim_id = $claim_id;
         $model->claim_date = today();

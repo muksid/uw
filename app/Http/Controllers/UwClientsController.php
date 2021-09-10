@@ -102,7 +102,7 @@ class UwClientsController extends Controller
                 $query->orWhere('iabs_num', 'LIKE', '%' . $t . '%');
                 $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
                 $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$t.'%']);
-                $query->orWhere('inn', 'LIKE', '%' . $t . '%');
+                $query->orWhere('pin', 'LIKE', '%' . $t . '%');
                 $query->orWhere('summa', 'LIKE', '%' . $t . '%');
 
             });
@@ -121,7 +121,7 @@ class UwClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -151,7 +151,7 @@ class UwClientsController extends Controller
                 $query->orWhere('iabs_num', 'LIKE', '%' . $t . '%');
                 $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
                 $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$t.'%']);
-                $query->orWhere('inn', 'LIKE', '%' . $t . '%');
+                $query->orWhere('pin', 'LIKE', '%' . $t . '%');
                 $query->orWhere('summa', 'LIKE', '%' . $t . '%');
 
             });
@@ -169,7 +169,7 @@ class UwClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 

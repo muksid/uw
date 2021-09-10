@@ -80,7 +80,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group has-success">
                                         <input type="text" class="form-control" name="t" value="{{ $t }}"
-                                               placeholder="% IABS, ARIZA, FIO, STIR, SUMMA, FILIAL">
+                                               placeholder="% IABS, ARIZA, FIO, PINFL, SUMMA, FILIAL">
                                     </div>
                                 </div>
 
@@ -141,7 +141,9 @@
                                 @foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}" class="text-sm">
                                         <td>{{ $i++ }}</td>
-                                        <td class="text-maroon">{{ $model->loanType->title??'' }}</td>
+                                        <td class="text-maroon">
+                                            {!! \Illuminate\Support\Str::words($model->loanType->title??'', '2') !!}
+                                        </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-info" id="editClient"
                                                     data-id="{{ $model->id }}">
@@ -191,7 +193,7 @@
                                         <td><span class="badge bg-light-blue-active">{{ $model->branch_code??'' }}</span>
                                             - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
                                         </td>
-                                        <td class="text-green">{{ $model->currentWork->personal->l_name??'-' }} {{ $model->currentWork->personal->f_name??'-' }}</td>
+                                        <td class="text-green">{{ $model->inspector->personal->l_name??'-' }} {{ $model->inspector->personal->f_name??'-' }}</td>
                                         <td>
                                             {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                         </td>

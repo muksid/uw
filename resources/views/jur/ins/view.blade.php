@@ -1,4 +1,4 @@
-@extends('uw_log.uw.dashboard')
+@extends('layouts.dashboard')
 
 @section('content')
 
@@ -68,7 +68,7 @@
                                         <td><strong>OKED:</strong></td>
                                         <td>{{ $model->oked }}</td>
                                         <td><strong>OKPO:</strong></td>
-                                        <td>{{ $model->okpo }}</td>
+                                        <td>{{ $model->okpo }} : {{ $model->code_juridical_person }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Filial:</strong></td>

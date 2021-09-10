@@ -54,6 +54,11 @@ class UwClients extends Model
         return $this->belongsTo(MWorkUsers::class,'work_user_id','id')->where('isActive', 'A');
     }
 
+    public function inspector()
+    {
+        return $this->belongsTo(MWorkUsers::class,'work_user_id','id');
+    }
+
     public function department()
     {
         return $this->belongsTo(SDepartments::class,'local_code','local_code');

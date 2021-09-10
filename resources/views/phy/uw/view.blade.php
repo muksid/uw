@@ -44,6 +44,8 @@
                                                     @if($myIdClient)
                                                     <img src="{{ url('/phy/client/image',$myIdClient->id) }}" alt=""
                                                          class="img-responsive img-rounded img-thumbnail" style="max-width: 240px;">
+                                                    @else
+                                                        <img src="{{ url('/admin-lte/dist/img/user.png') }}" class="user-image">
                                                     @endif
                                                 </th>
                                                 <th class="text-center"><i class="fa fa-user"></i> Mijoz pasport ma`lumotlari</th>
@@ -287,7 +289,7 @@
                                                 <td>3.</td>
                                                 <td>Kredit Inspektor FIO</td>
                                                 <td class="text-bold">
-                                                    {{ $model->currentWork->personal->l_name??'' }} {{ $model->currentWork->personal->f_name??'' }}
+                                                    {{ $model->inspector->personal->l_name??'' }} {{ $model->inspector->personal->f_name??'' }}
                                                 </td>
                                                 <td>
                                                     <i class="fa fa-check-circle text-info"></i>

@@ -1,12 +1,11 @@
-@extends('uw_log.uw.dashboard')
-<link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+@extends('layouts.dashboard')
 
 @section('content')
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Mijoz ma`lumotlari
+            Yuridik Mijoz ma`lumotlari
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
@@ -111,6 +110,16 @@
                                         <div class="form-group {{ $errors->has('okpo') ? 'has-error' : '' }}">
                                             <label>ОКПО</label>
                                             <input type="text" name="okpo" class="form-control" value="{{ $model->okpo }}" maxlength="10">
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="box-body">
+                                        <div class="form-group {{ $errors->has('code_juridical_person') ? 'has-error' : '' }}">
+                                            <label>ОКПО (OnlineReg)</label>
+                                            <input type="text" name="code_juridical_person" class="form-control" value="{{ $model->code_juridical_person }}" maxlength="10">
 
                                         </div>
                                     </div>
@@ -256,7 +265,7 @@
                         <input name="jur_clients_id" value="{{ $model->id }}" hidden>
 
                         <div class="box-header with-border">
-                            <h3 class="box-title text-aqua text-bold"><i class="fa fa-user"></i>Kafil</h3>
+                            <h3 class="box-title text-aqua text-bold"><i class="fa fa-user"></i>Ta`minot kiriting</h3>
                             <div class="row">
 
                                 <div class="col-md-3">
@@ -416,18 +425,6 @@
 
         </div>
 
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-        <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
-
-        <link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
-
-        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
-        <!-- InputMask -->
-        <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.js') }}"></script>
-        <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.extensions.js') }}"></script>
         <script>
             function formatDate(date) {
                 var d = new Date(date),

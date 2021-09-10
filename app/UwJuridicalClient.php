@@ -70,4 +70,11 @@ class UwJuridicalClient extends Model
         return $this->belongsTo(UnDistricts::class,'registration_district', 'code');
     }
 
+    public function uwStatus()
+    {
+        return $this->belongsTo(UwStatusName::class,'status', 'code')
+            ->where('type', 'jur')
+            ->where('user_type', 'uw');
+    }
+
 }
