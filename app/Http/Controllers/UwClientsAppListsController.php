@@ -218,4 +218,9 @@ class UwClientsAppListsController extends Controller
         
 
     }
+
+    public function sms()
+    {
+        return view('madmin.apps.sms');
+    }
 }

@@ -93,7 +93,10 @@ Route::group(['middleware' => ['auth']], function() {
         Route::resource('app-list','UwClientsAppListsController');
         Route::get('app-list-get-client','UwClientsAppListsController@getUwClient');
         Route::post('app-list-search','UwClientsAppListsController@index');
+        Route::any('app-list-sms','UwClientsAppListsController@sms');
 
+        // SMS
+        Route::get('sms', 'NotificationController@sendSmsNotificaition');
     });
 
     // PHYSICAL

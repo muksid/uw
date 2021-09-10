@@ -90,6 +90,7 @@
                                 <th>Type</th>
                                 <th>Template</th>
                                 <th>Status</th>
+                                <th>SMS</th>
                                 <th>Date</th>
                                 <th>Show</th>
                                 <th class="text-bold text-center text-red"><i class="fa fa-trash"></i></th>
@@ -120,6 +121,8 @@
                                                 <span class="text-sm text-bold">Unknown</span>
                                             @endif
                                         </td>
+                                        <td class="text-center">
+                                            <button class="sendSMS" data-id="{{$model->id}}"></button></td>
                                         <td class="text-sm">
                                             {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                             <span class="text-maroon text-sm"> ({{$model->created_at->diffForHumans()}})</span>
