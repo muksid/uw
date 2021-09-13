@@ -1137,7 +1137,7 @@
 
                         },
                         success: function(response){
-                            console.log(response);
+                            // console.log(response);
                             $(".inquiry-individual").prop('disabled', false);
                             $("#loading-gif").hide();
                             $('#ResultMessageModal').addClass('modal-'+response.status);
@@ -1665,7 +1665,7 @@
                         { data: 'action', name: 'action', orderable: false},
                     ],
                     footerCallback: function (row, data, start, end, display) {
-                        console.log(data)
+                        // console.log(data)
                         var totalAmount = 0;
                         for (var i = 0; i < data.length; i++) {
                             totalAmount += parseFloat(data[i]['total_sum']);
@@ -1718,7 +1718,7 @@
                     })
                 });
 
-                $('body').on('click', '#delete-debtor', function (e) {
+                $('body').on('click', '.delete-debtor', function (e) {
 
                     e.preventDefault();
                     let id = $(this).data("id");
@@ -1751,6 +1751,12 @@
                     $('#ConfirmDebtorModal').modal('hide');
                 });
 
+                $('body').on('click', '.reg-deptor', function () {
+                    var debtor_id = $(this).data('id');
+                    console.log(debtor_id)
+                    
+                });
+                
 
                 // request Guards
                 $('#guar_datatable').DataTable({
@@ -1979,6 +1985,10 @@
                     $('#ConfirmFileModal').modal('hide');
                 });
 
+                $('#reg-debtor_4171').on('click', function () {
+                    console.log('AS')
+                })
+
             });
 
             // Debtor form
@@ -2109,7 +2119,7 @@
                                 $("#loading-gif").show();
                             },
                             success: function (data) {
-                                console.log(data);
+                                // console.log(data);
                                 $("#loading-gif").hide();
                                 $('#sendForm').trigger("reset");
                                 $('#modalFormSend').modal('hide');
@@ -2172,6 +2182,8 @@
                     radioClass: 'iradio_flat-green'
                 });
             });
+
+
 
         </script>
     </section>

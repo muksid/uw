@@ -144,13 +144,13 @@ class UwClientDebtorsController extends Controller
         "pResident" => "1",
         "pSex" => "".$modelClient->gender."",
         "pSubjectType"=>"2" //document type
-    ),
-    );
+        ),
+        );
 
 
 
       $postdata = json_encode($data);
-    //   print($postdata);
+        //   print($postdata);
         //print_r($postdata); die;
 
         $ch1 = curl_init($url);
@@ -231,9 +231,9 @@ class UwClientDebtorsController extends Controller
                     $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-debtor '.$disabled.'">
 <span class="glyphicon glyphicon-pencil"></span></a>';
                     $button .= '&nbsp;&nbsp;';
-                    $button .= ' | <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
+                    $button .= ' | <a href="javascript:void(0);" id="delete-debtor_'.$data->id.'" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete-debtor text-maroon  '.$disabled.'">
  <span class="glyphicon glyphicon-trash"></span></a>';
-                    $button .= ' | <a href="javascript:void(0);" id="reg-debtor" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="text-green  '.$disabled.'">
+                    $button .= ' | <a href="javascript:void(0);" id="reg-debtor_'.$data->id.'" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="reg-deptor text-green  '.$disabled.'">
  <span class="glyphicon glyphicon-globe"></span></a>';
                     return $button;
                 })
