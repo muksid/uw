@@ -271,10 +271,11 @@
                                 <div class="col-md-3">
                                     <div class="box-body">
                                         <div class="form-group">
-                                            <label>Kredit turi <span class="text-red">*</span></label>
+                                            <label>Ta`minot turi <span class="text-red">*</span></label>
                                             <select class="form-control select2" name="guar_type">
-                                                <option value="K">Kafillik</option>
-                                                <option value="S">Sug`urta</option>
+                                                @foreach($guar_types as $value)
+                                                    <option value="{{ $value->code }}">{{ $value->title }}</option>
+                                                @endforeach
                                             </select>
 
                                         </div>
@@ -317,7 +318,7 @@
                                 <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Kafil Turi</th>
+                                    <th>Ta`minot Turi</th>
                                     <th>Nomi</th>
                                     <th>Summa</th>
                                     <th>Sana</th>
@@ -328,7 +329,7 @@
                                 @foreach ($guars as $key => $guar)
                                     <tr>
                                         <td>{{ $key++ }}</td>
-                                        <td class="text-sm">{{ $guar->guar_type }}</td>
+                                        <td class="text-sm">{{ $guar->guar->title??'-' }}</td>
                                         <td>{{ $guar->title }}</td>
                                         <td><b>{{ number_format($guar->guar_sum, 2) }}</b></td>
                                         <td class="text-sm">

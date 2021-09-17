@@ -4,14 +4,26 @@
 
     <section class="content-header">
         <h1>
-            Barcha Yuridik mijozlar
+            Jismoniy shaxslar
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
-            <li><a href="#">juridical</a></li>
-            <li class="active">index</li>
+            <li><a href="#">barcha arizalar</a></li>
+            <li class="active">clients</li>
         </ol>
+
+        @if (count($errors) > 0)
+            <div class="alert alert-danger">
+                <strong>Xatolik!</strong> xatolik bor.<br><br>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @if(session('success'))
             <div class="box box-default">
                 <div class="box-body">
@@ -25,9 +37,9 @@
                 </div>
             </div>
         @endif
+
     </section>
 
-    <!-- Main content -->
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
@@ -35,13 +47,19 @@
                 <div class="box box-primary">
 
                     <div class="box-body">
-                        <h4 class="box-title">FILTER
+
+                        <h4 class="box-title">
+                            <a href="{{ url('/phy/client/create/new') }}" class="btn btn-info btn-flat" style="margin-right: 5px;">
+                                <i class="fa fa-camera"></i> ARIZA YARATISH
+                            </a>
+                            FILTER
                             @if($date_s)
                                 <span class="text-sm text-green">{{ \Carbon\Carbon::parse($date_s)->format('d.m.Y')  }} dan {{ \Carbon\Carbon::parse($date_e)->format('d.m.Y') }} gacha</span>
                             @endif
+
                         </h4>
 
-                        <form action="{{url('/jur/uw/all-clients/')}}" method="POST" role="search">
+                        <form action="{{url('/myid/adm/phy/index')}}" method="POST" role="search">
                             {{ csrf_field() }}
 
                             <div class="row">
@@ -54,19 +72,19 @@
                                 <div class="col-md-2">
                                     <div class="form-group has-success">
                                         <select name="status" class="form-control select2" style="width: 100%;">
-                                            @if($status_name)
-                                                <option value="{{ $status_name->status_code }}" selected>{{ $status_name->name }}</option>
+                                            @if($status == 'A')
+                                                <option value="{{ $status }}" selected>FAOL</option>
+                                                <option value="P">FAOL EMAS</option>
+                                                <option value="">Holati barchasi</option>
+                                            @elseif($status == 'P')
+                                                <option value="{{ $status }}" selected>FAOL EMAS</option>
+                                                <option value="A">FAOL</option>
+                                                <option value="">Holati barchasi</option>
                                             @else
                                                 <option value="" selected>Holati barchasi</option>
+                                                <option value="A">FAOL</option>
+                                                <option value="P">FAOL EMAS</option>
                                             @endif
-
-                                            @foreach($status_names as $key => $value)
-
-                                                <option value="{{$value->status_code}}">
-                                                    {{ $value->name }}
-                                                </option>
-
-                                            @endforeach
 
                                         </select>
                                     </div>
@@ -84,8 +102,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <input name="date_s" id="s_start" value="" hidden>
-                                <input name="date_e" id="s_end" value="" hidden>
+                                <input name="date_s" id="s_start" value="{{ $date_s }}" hidden>
+                                <input name="date_e" id="s_end" value="{{ $date_e }}" hidden>
 
                                 <div class="col-md-2">
                                     <div class="form-group has-success">
@@ -94,34 +112,9 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <select name="user" class="form-control select2" style="width: 100%;">
-                                            @if(!empty($user))
-                                                <option value="{{$user->id}}" selected>
-                                                    {{$user->branch_code??''}} - {{ $user->personal->l_name??'' }} {{$user->personal->f_name??'-'}}
-                                                </option>
-                                            @else
-                                                <option value="" selected>
-                                                    Inspektor Barchasi
-                                                </option>
-                                            @endif
-
-                                            @if(!empty($users))
-                                                @foreach($users as $key => $value)
-                                                    <option value="{{$value->currentWork->id??0}}">
-                                                        {{$value->currentWork->branch_code??''}} - {{$value->personal->l_name??''}} {{$value->personal->f_name??''}}
-                                                    </option>
-                                                @endforeach
-                                            @endif
-
-                                        </select>
-                                    </div>
-                                </div>
-
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <a href="{{url('/jur/uw/all-clients')}}" class="btn btn-flat border-success">
+                                        <a href="{{url('/myid/adm/phy/index')}}" class="btn btn-flat border-success">
                                             <i class="fa fa-refresh"></i> @lang('blade.reset')
                                         </a>
                                         <button type="submit" class="btn btn-success btn-flat">
@@ -133,75 +126,73 @@
                             </div>
                             <!-- /.row -->
                         </form>
-                        <form action="{{ route('export') }}" method="POST" role="search">
-                        {{ csrf_field() }}
+
+                        <form action="{{ route('phy-export') }}" method="POST" role="search">
+                            {{ csrf_field() }}
                             <input name="mfo" value="{{ $mfo }}" hidden>
-                            <input name="status" value="{{ $status_name->status_code??null }}" hidden>
+                            <input name="status" value="{{ $status }}" hidden>
                             <input name="text" value="{{ $text }}" hidden>
-                            <input name="user" value="{{ $user->id??'' }}" hidden>
                             <input name="date_s" id="s_start" value="{{ $date_s }}" hidden>
                             <input name="date_e" id="s_end" value="{{ $date_e }}" hidden>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success hide">
                                 <i class="fa fa-file-excel-o"></i> Excel Export
                             </button>
                         </form>
                     </div>
 
                     <div class="box-body">
-                        <b>@lang('blade.overall'){{': '. $models->total()}} @lang('blade.group_edit_count').</b>
+                        <b>@lang('blade.overall'){{': '. number_format($models->total()) }} @lang('blade.group_edit_count').</b>
+
                         <table class="table table-striped table-bordered">
                             <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Kredit Turi</th>
-                                <th>IABS #</th>
-                                <th>Ariza #</th>
-                                <th>Mijoz nomi</th>
-                                <th>Summa</th>
-                                <th class="text-center">@lang('blade.status')</th>
-                                <th class="text-center"><i class="fa fa-pencil"></i></th>
-                                <th class="text-center">MFO</th>
-                                <th>Filial (BXO)</th>
-                                <th class="text-center">Inspektor</th>
-                                <th>Sana</th>
+                            <tr class="text-aqua">
+                                <th><i class="fa fa-list-ol"></i></th>
+                                <th><i class="fa fa-user"></i> MIJOZ F.I.O.</th>
+                                <th><i class="fa fa-credit-card"></i> PASSPORT</th>
+                                <th><i class="fa fa-map-marker"></i> MANZIL</th>
+                                <th><i class="fa fa-check-circle-o"></i> HOLATI</th>
+                                <th><i class="fa fa-link"></i> HARAKAT</th>
+                                <th><i class="fa fa-bank"></i> FILIAL</th>
+                                <th><i class="fa fa-calendar"></i> YARATILDI</th>
                             </tr>
                             </thead>
                             <tbody id="roleTable">
-                            <?php $i = 1 ?>
+                            <?php $i = 1; ?>
                             @if($models->count())
                                 @foreach ($models as $key => $model)
-                                    <tr id="rowId_{{ $model->id }}">
+                                    <tr>
                                         <td>{{ $i++ }}</td>
-                                        <td class="text-sm">{{ $model->loanType->title??'' }}</td>
-                                        <td>{{ $model->client_code }}</td>
-                                        <td>{{ $model->claim_id }}</td>
-                                        <td class="text-uppercase">
-                                            <a href="{{ url('/jur/uw/view-client', ['id' => $model->id]) }}">
-                                                {{ $model->jur_name }}
-                                            </a>
-                                        </td>
-                                        <td><b>{{ number_format($model->summa, 2) }}</b></td>
-
+                                        <td>{{ $model->full_name}}</td>
+                                        <td>{{ $model->pass_data }}</td>
+                                        <td>{{ $model->permanent_address }}</td>
                                         <td>
-                                            <span class="badge {{ $model->uwStatus->bg_style??'-' }}">
-                                                {{ $model->uwStatus->name??'-' }}
+                                            @if($model->isActive === 'A')
+                                            <span class="badge bg-aqua-active">
+                                                FAOL
                                             </span>
+                                            @else
+                                                <span class="badge bg-danger">
+                                                FAOL EMAS
+                                            </span>
+                                            @endif
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ url('/jur/uw/edit-client', $model->id) }}" class="btn btn-xs btn-info">
-                                                <i class="fa fa-pencil"></i>
+                                            <a href="{{ url('/myid/adm/phy/view',
+                                                    ['id' => $model->id,
+                                                    'claim_id' => $model->pinfl]) }}" class="btn btn-info btn-sm">
+                                                <i class="fa fa-link"></i> BATAFSIL..
                                             </a>
                                         </td>
-                                        <td><span class="badge bg-secondary">{{ $model->branch_code??'-' }}</span></td>
-                                        <td class="text-sm">{{ $model->filial->title??'' }}</td>
-                                        <td class="text-sm text-center text-bold text-blue">
-                                            {{ $model->inspector->personal->l_name??'-' }}
-                                            {{ mb_substr($model->inspector->personal->f_name??'-', 0, 1) }}.</td>
-                                        <td class="text-sm">
-                                            {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.y H:i')  }}
+                                        <td><span class="badge bg-light-blue-active">{{ $model->branch_code??'' }}</span>
+                                            - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
+                                        </td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                         </td>
                                     </tr>
-                                @endforeach @else
+                                @endforeach
+
+                            @else
                                 <td class="text-red text-center" colspan="12"><i class="fa fa-search"></i>
                                     <b>@lang('blade.not_found')</b></td>
                             @endif
@@ -219,6 +210,8 @@
         <script>
 
             $(function () {
+                $("#example1").DataTable();
+                //Initialize Select2 Elements
                 $(".select2").select2();
 
                 //Date picker
@@ -261,7 +254,7 @@
                         $('#s_start').val(s_start);
                         $('#s_end').val(s_end);
 
-                        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                        $('#daterange-btn span').html(start.format('MM.DD.YYYY') + ' - ' + end.format('MM.DD.YYYY'));
                     }
                 );
 

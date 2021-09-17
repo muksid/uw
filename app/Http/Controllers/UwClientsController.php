@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Department;
+use App\Exports\UwPhysicalClientsExport;
 use App\MWorkUsers;
 use App\PhyMyidClient;
 use App\UnDistricts;
@@ -15,12 +15,14 @@ use App\UwInpsClients;
 use App\UwKatmClients;
 use App\UwLoanTypes;
 use App\UwPhyKatmFile;
+use App\UwStatusName;
 use App\UwUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use Response;
 
 class UwClientsController extends Controller
@@ -133,48 +135,194 @@ class UwClientsController extends Controller
         //
         $search = UwClients::orderBy('id', 'DESC');
 
-        $u = Input::get ( 'u' );
-        $t = Input::get ( 't' );
-        $d = Input::get ( 'd' );
+        $mfo = Input::get ( 'mfo' );
+        $status = Input::get ( 'status' );
+        $date_s = Input::get ( 'date_s' );
+        $date_e = Input::get ( 'date_e' );
+        $text = Input::get ( 'text' );
+        $user = Input::get ( 'user' );
 
-        if($u) {
-            //print_r($u); die;
-            $user = MWorkUsers::where('user_id', $u)->get()->pluck('id');
-            $workUserIds = $user->toArray();
+        if($status == 'SEND') {
+            $search->where('status', 2); // SEND TO UNDERWRITER
+        } elseif ($status == 'CON') {
+            $search->where('status', 3); // CONFIRM FROM UNDERWRITER
+        } elseif ($status == 'EDIT') {
+            $search->where('status', 0); // EDIT IN INSPECTOR
+        } elseif ($status == 'NEW') {
+            $search->where('status', 1); // NEW APP IN INSPECTOR
+        } elseif ($status == 'PAS') {
+            $search->where('status', -1); // PASSIVE APP
+        } elseif ($status == 'DEL') {
+            $search->where('status', -2); // DELETED APP
+        }
+
+        if($mfo) {
+            $search->where('branch_code', '=', $mfo);
+        }
+
+        if($user) {
+            $work_user = MWorkUsers::where('user_id', $user)->get()->pluck('id');
+            $workUserIds = $work_user->toArray();
 
             $search->whereIn('work_user_id', $workUserIds);
         }
 
-        if($t) {
-            $search->where(function ($query) use ($t) {
-                $query->orWhere('branch_code', 'LIKE', '%' . $t . '%');
-                $query->orWhere('iabs_num', 'LIKE', '%' . $t . '%');
-                $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
-                $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$t.'%']);
-                $query->orWhere('pin', 'LIKE', '%' . $t . '%');
-                $query->orWhere('summa', 'LIKE', '%' . $t . '%');
+        if($text) {
+            $search->where(function ($query) use ($text) {
+                $query->orWhere('iabs_num', 'LIKE', '%' . $text . '%');
+                $query->orWhere('claim_id', 'LIKE', '%' . $text . '%');
+                $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$text.'%']);
+                $query->orWhere('pin', 'LIKE', '%' . $text . '%');
+                $query->orWhere('summa', 'LIKE', '%' . $text . '%');
 
             });
         }
 
-        if($d) {
-            $search->where('created_at', 'LIKE', '%'.$d.'%');
+        if($date_s) {
+            $search->whereBetween('created_at', [$date_s.' 00:00:00',$date_e.' 23:59:59']);
         }
 
         $models = $search->paginate(25);
 
         $models->appends ( array (
-            'u' => Input::get ( 'u' ),
-            't' => Input::get ( 't' ),
-            'd' => Input::get ( 'd' )
+            'mfo' => Input::get ( 'mfo' ),
+            'status' => Input::get ( 'status' ),
+            'date_s' => Input::get ( 'date_s' ),
+            'date_e' => Input::get ( 'date_e' ),
+            'text' => Input::get ( 'text' ),
+            'user' => Input::get ( 'user' )
         ) );
 
         $users = User::select('id')->where('isActive', 'A')->get();
 
-        $searchUser = MWorkUsers::find($u);
+        $ins_search = DB::table('roles as a')
+            ->join('m_user_roles as b', 'a.id', '=', 'b.role_id')
+            ->join('m_work_users as c', 'b.user_id', '=', 'c.id')
+            ->join('m_personal_users as d', 'c.user_id', '=', 'd.user_id')
+            ->select('c.user_id as user_id','c.branch_code','c.local_code',
+                DB::raw('CONCAT(d.l_name," ", d.f_name) AS full_name'))
+            ->where('a.role_code','=', 'phy_ins')
+            ->where('c.isActive', '=','A');
+        if ($mfo) {
+            $ins_search->where('c.branch_code', '=', $mfo);
+        }
+        $inspectors = $ins_search->get();
 
-        return view('phy.uw.all-clients',compact('models','u','t','d','users','searchUser'));
+        $status_names = UwStatusName::where('type', 'phy')->where('user_type', 'uw')->where('isActive', 'A')->get();
 
+        $status_name = UwStatusName::where('type', 'phy')->where('user_type', 'uw')->where('status_code', $status)->first();
+
+        return view('phy.uw.all-clients',compact('models','mfo','status_name','date_s','date_e','text','users',
+            'user','status_names', 'inspectors'));
+
+    }
+
+    public function krdAllClients()
+    {
+        //
+        $user_branch = Auth::user()->currentWork->branch_code??'0';
+
+        $search = UwClients::where('branch_code', '=', $user_branch);
+
+        $status = Input::get ( 'status' );
+        $date_s = Input::get ( 'date_s' );
+        $date_e = Input::get ( 'date_e' );
+        $text = Input::get ( 'text' );
+        $user = Input::get ( 'user' );
+
+        if($status == 'SEND') {
+            $search->where('status', 2); // SEND TO UNDERWRITER
+        } elseif ($status == 'CON') {
+            $search->where('status', 3); // CONFIRM FROM UNDERWRITER
+        } elseif ($status == 'EDIT') {
+            $search->where('status', 0); // EDIT IN INSPECTOR
+        } elseif ($status == 'NEW') {
+            $search->where('status', 1); // NEW APP IN INSPECTOR
+        } elseif ($status == 'PAS') {
+            $search->where('status', -1); // PASSIVE APP
+        } elseif ($status == 'DEL') {
+            $search->where('status', -2); // DELETED APP
+        }
+
+        if($user) {
+            $work_user = MWorkUsers::where('user_id', $user)->get()->pluck('id');
+            $workUserIds = $work_user->toArray();
+
+            $search->whereIn('work_user_id', $workUserIds);
+        }
+
+        if($text) {
+            $search->where(function ($query) use ($text) {
+                $query->orWhere('iabs_num', 'LIKE', '%' . $text . '%');
+                $query->orWhere('claim_id', 'LIKE', '%' . $text . '%');
+                $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$text.'%']);
+                $query->orWhere('pin', 'LIKE', '%' . $text . '%');
+                $query->orWhere('summa', 'LIKE', '%' . $text . '%');
+
+            });
+        }
+
+        if($date_s) {
+            $search->whereBetween('created_at', [$date_s.' 00:00:00',$date_e.' 23:59:59']);
+        }
+
+        $models = $search->orderBy('id', 'DESC')->paginate(25);
+
+        $models->appends ( array (
+            'status' => Input::get ( 'status' ),
+            'date_s' => Input::get ( 'date_s' ),
+            'date_e' => Input::get ( 'date_e' ),
+            'text' => Input::get ( 'text' ),
+            'user' => Input::get ( 'user' )
+        ) );
+
+        $users = User::select('id')->where('isActive', 'A')->get();
+
+        $inspectors = DB::table('roles as a')
+            ->join('m_user_roles as b', 'a.id', '=', 'b.role_id')
+            ->join('m_work_users as c', 'b.user_id', '=', 'c.id')
+            ->join('m_personal_users as d', 'c.user_id', '=', 'd.user_id')
+            ->select('c.user_id as user_id','c.branch_code','c.local_code',
+                DB::raw('CONCAT(d.l_name," ", d.f_name) AS full_name'))
+            ->where('a.role_code','=', 'phy_ins')
+            ->where('c.branch_code','=', $user_branch)
+            ->where('c.isActive', '=','A')
+            ->get();
+
+        $status_names = UwStatusName::where('type', 'phy')->where('user_type', 'ins')->where('isActive', 'A')->get();
+
+        $status_name = UwStatusName::where('type', 'phy')->where('user_type', 'ins')->where('status_code', $status)->first();
+
+        return view('phy.krd.index',compact('models','status_name','date_s','date_e','text','users',
+            'user','status_names', 'inspectors'));
+
+    }
+
+    public function krdView($id,$claim_id)
+    {
+        //
+        $model = UwClients::findOrFail($id);
+
+        $myIdClient = PhyMyidClient::where('pinfl', '=',$model->pin)->first();
+
+        $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
+
+        $duplicateClients = UwClients::where('id', '!=', $model->id)
+            ->where('pin', '=',$model->pin)
+            ->where(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->document_serial.$model->document_serial)
+            ->get();
+
+        $sch_type_d = 'checked';
+        $sch_type_a = '';
+        if ($model->sch_type == 2){
+            $sch_type_d = '';
+            $sch_type_a = 'checked';
+        }
+
+        $kias_history = UwPhyKatmFile::where('uw_clients_id', $id)->where('uw_katm_id', 0)->where('file_type', '=', 'B64_K_HIS')->first();
+
+        return view('phy.krd.view',
+            compact('model', 'modelComments', 'duplicateClients', 'sch_type_d', 'sch_type_a', 'kias_history', 'myIdClient'));
     }
 
     public function uwView($id,$claim_id)
@@ -1326,6 +1474,11 @@ class UwClientsController extends Controller
                 'message' => 'File Successfully deleted'
             )
         );
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new UwPhysicalClientsExport($request->all()), 'uw_phy_app_'.time().'.xlsx');
     }
 
 }

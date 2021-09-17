@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UwJuridicalClientsExport;
 use App\MWorkUsers;
 use App\User;
+use App\UwGuarType;
 use App\UwJurBalanceChild;
 use App\UwJurBalanceForm;
 use App\UwJurClientComment;
@@ -21,11 +23,11 @@ use App\UwStatusName;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\Exports\UwJuidicalClientsExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UwJuridicalClientsController extends Controller
@@ -84,12 +86,7 @@ class UwJuridicalClientsController extends Controller
             compact('models','u','t','d','users','searchUser','status'));
 
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $status
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
+
     public function getUwClients($status)
     {
         //
@@ -135,11 +132,7 @@ class UwJuridicalClientsController extends Controller
             compact('models','u','t','d','users','searchUser','status'));
 
     }
-    /**
-     * Display the specified resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
+
     public function getAllClients(Request $request)
     {
         //
@@ -213,10 +206,83 @@ class UwJuridicalClientsController extends Controller
 
     }
 
+    public function getAdminAllClients(Request $request)
+    {
+        //
+        $search = UwJuridicalClient::orderBy('id', 'DESC');
+
+        $mfo = Input::get ( 'mfo' );
+        $status = Input::get ( 'status' );
+        $date_s = Input::get ( 'date_s' );
+        $date_e = Input::get ( 'date_e' );
+        $text = Input::get ( 'text' );
+        $user = Input::get ( 'user' );
+
+        if($mfo) {
+            $search->where('branch_code', '=', $mfo);
+        }
+
+        if($status == 'INC') {
+            $search->where('status', 2); // INCOME IN UNDERWRITER (NEW APP)
+        } elseif ($status == 'CON') {
+            $search->where('status', 3); // CONFIRM FROM UNDERWRITER
+        } elseif ($status == 'EDIT') {
+            $search->where('status', 0); // EDIT IN INSPECTOR
+        } elseif ($status == 'NEW') {
+            $search->where('status', 1); // NEW APP IN INSPECTOR
+        } elseif ($status == 'PAS') {
+            $search->where('status', -1); // PASSIVE APP
+        } elseif ($status == 'DEL') {
+            $search->where('status', -2); // DELETED APP
+        }
+
+        if($user) {
+            $search->where('work_user_id', $user);
+        }
+
+        if($text) {
+            $search->where(function ($query) use ($text) {
+
+                $query->orWhere('client_code', 'LIKE', '%' . $text . '%');
+                $query->orWhere('claim_id', 'LIKE', '%' . $text . '%');
+                $query->orWhere('jur_name', 'LIKE', '%' . $text . '%');
+                $query->orWhere('inn', 'LIKE', '%' . $text . '%');
+                $query->orWhere('summa', 'LIKE', '%' . $text . '%');
+            });
+        }
+
+        if($date_s) {
+            $search->whereBetween('created_at', [$date_s.' 00:00:00',$date_e.' 23:59:59']);
+        }
+
+        $models = $search->paginate(25);
+
+        $models->appends ( array (
+            'mfo' => Input::get ( 'mfo' ),
+            'status' => Input::get ( 'status' ),
+            'date_s' => Input::get ( 'date_s' ),
+            'date_e' => Input::get ( 'date_e' ),
+            'text' => Input::get ( 'text' ),
+            'user' => Input::get ( 'user' )
+        ) );
+
+        $users = User::select('id')->where('isActive', 'A')->get();
+
+        $status_names = UwStatusName::where('type', 'jur')->where('user_type', 'uw')->where('isActive', 'A')->get();
+
+        $status_name = UwStatusName::where('type', 'jur')->where('user_type', 'uw')->where('status_code', $status)->first();
+
+        $user = MWorkUsers::find($user);
+
+        return view('jur.admin.all-clients',
+            compact('models','mfo','status_name','date_s','date_e','text','users','user','status_names'));
+
+    }
+
     public function export(Request $request)
     {
 
-        return Excel::download(new UwJuidicalClientsExport($request->all()), 'uw_jur_app_'.time().'.xlsx');
+        return Excel::download(new UwJuridicalClientsExport($request->all()), 'uw_jur_app_'.time().'.xlsx');
     }
 
     /**
@@ -238,15 +304,6 @@ class UwJuridicalClientsController extends Controller
     public function store(Request $request)
     {
         //
-        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->first();
-        if (!$currentWorkUser){
-            return back()->with(
-                [
-                    'status' => 'warning',
-                    'message' => 'Inspektor passive holatda!!! (ip:247)'
-                ]);
-        }
-
         $rules = array(
             'hbranch' => 'required|max:10',
             'summa' => 'required',
@@ -266,9 +323,13 @@ class UwJuridicalClientsController extends Controller
 
         } else{
 
-            $branchCode = $currentWorkUser->branch_code;
+            $checkClient = UwJuridicalClient::where('client_code', $request->client_code)->whereNotIn('status', [-2,-1,3])->first();
 
-            //$localCode = Department::find($currentWorkUser->depart_id);
+            if ($checkClient) {
+                return back()->with(['success' => 'Ushbu Mijoz tizimda mavjud']);
+            }
+
+            $branchCode = Auth::user()->currentWork->branch_code??'09011';
 
             $lastModelId = UwJuridicalClient::where('branch_code', '=', $branchCode)->latest()->first();
             $claim_id = 1000;
@@ -306,9 +367,9 @@ class UwJuridicalClientsController extends Controller
             $model->summa = $summa;
             $model->client_code = $request->client_code;
             $model->loan_type_id = $request->loan_type_id;
-            $model->work_user_id = $currentWorkUser->id;
+            $model->work_user_id = Auth::user()->currentWork->id??0;
             $model->branch_code = $branchCode;
-            $model->local_code = $currentWorkUser->local_code;
+            $model->local_code = Auth::user()->currentWork->local_code??'09011';
             $model->save();
 
             return Redirect::to('/jur/clients/1')
@@ -408,6 +469,61 @@ class UwJuridicalClientsController extends Controller
         );
     }
 
+    public function uwEditClient($id)
+    {
+        $model = UwJuridicalClient::findOrFail($id);
+
+        $loans = UwLoanTypes::where('isActive', 1)->where('short_code', 'J')->get();
+
+        $status_names = UwStatusName::where('isActive', 'A')->where('type', 'jur')->where('user_type', 'uw')->get();
+
+        $inspectors = DB::table('roles as a')
+            ->join('m_user_roles as b', 'a.id', '=', 'b.role_id')
+            ->join('m_work_users as c', 'b.user_id', '=', 'c.id')
+            ->join('m_personal_users as d', 'c.user_id', '=', 'd.user_id')
+            ->select('c.id as work_user_id','c.branch_code','c.local_code',
+                DB::raw('CONCAT(d.l_name," ", d.f_name) AS full_name'))
+            ->where('a.role_code','=', 'jur_ins')
+            ->where('c.branch_code','=', $model->branch_code)
+            ->where('c.isActive', '=','A')
+            ->get();
+
+        return view('jur.uw.edit-client',
+            compact('model', 'loans', 'status_names', 'inspectors')
+        );
+    }
+
+    public function uwEditClientPost(Request $request)
+    {
+        $model_id = $request->id;
+        $loan_type_id = $request->loan_type_id;
+        $work_user_id = $request->work_user_id;
+        $status = $request->status;
+        $text = $request->text;
+
+        $model = UwJuridicalClient::findOrFail($model_id);
+
+        $work_user = MWorkUsers::findOrFail($work_user_id);
+
+        $model->update([
+            'loan_type_id' => $loan_type_id,
+            'work_user_id' => $work_user_id,
+            'branch_code' => $work_user->branch_code,
+            'local_code' => $work_user->local_code,
+            'status' => $status,
+        ]);
+
+        $clientComment = new UwJurClientComment();
+        $clientComment->jur_clients_id = $model_id;
+        $clientComment->work_user_id = Auth::user()->currentWork->id??0;
+        $clientComment->title = 'Mijoz o`zgartirildi - '.$text;
+        $clientComment->process_type = 'EDIT';
+        $clientComment->save();
+
+        return back()->with('success', 'Mijoz ma`lumotlari muvaffaqiyatli o`zgartirildi');
+
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -423,9 +539,11 @@ class UwJuridicalClientsController extends Controller
 
         $guars = UwJurClientGuars::where('jur_clients_id', $id)->get();
 
+        $guar_types = UwGuarType::where('isActive', 1)->get();
+
         $files = UwJurClientFiles::where('jur_clients_id', $id)->get();
 
-        return view('jur.ins.edit', compact('model', 'loans', 'guars', 'files'));
+        return view('jur.ins.edit', compact('model', 'loans', 'guars', 'files', 'guar_types'));
     }
 
     /**
@@ -1146,7 +1264,7 @@ class UwJuridicalClientsController extends Controller
         $modelComment->jur_clients_id = $id;
         $modelComment->work_user_id = Auth::user()->currentWork->id??0;
         $modelComment->title = 'Ariza tahrirlashda - '.$descr;
-        $modelComment->process_type = 'CACN';
+        $modelComment->process_type = 'CANC';
         $modelComment->save();
 
         return response()->json(array('success' => true));

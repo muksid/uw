@@ -75,7 +75,6 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Men haqimda</h3>
                     </div>
-
                     <div class="box-body">
 
                         <strong><i class="fa fa-bank margin-r-5"></i> Ish joyi va Lavozimingiz</strong>

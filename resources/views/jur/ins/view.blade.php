@@ -644,16 +644,16 @@
                                 <div class="col-md-12">
                                     <div class="box box-success direct-chat">
                                         <div class="box-header with-border">
-                                            <h3 class="box-title">Kafil ma`lumotlari</h3>
+                                            <h3 class="box-title">Ta`minot ma`lumotlari</h3>
                                         </div>
-                                        <!-- /.box-header -->
+
                                         @if($guars)
                                             <div class="box-body">
                                                 <table class="table table-striped table-bordered">
                                                     <thead>
                                                     <tr>
                                                         <th>#</th>
-                                                        <th>Kafil Turi</th>
+                                                        <th>Ta`minot Turi</th>
                                                         <th>Nomi</th>
                                                         <th>Summa</th>
                                                         <th>Sana</th>
@@ -663,7 +663,7 @@
                                                     @foreach ($guars as $key => $guar)
                                                         <tr>
                                                             <td>{{ $key++ }}</td>
-                                                            <td class="text-sm">{{ $guar->guar_type }}</td>
+                                                            <td class="text-sm">{{ $guar->guar->title??'-' }}</td>
                                                             <td>{{ $guar->title }}</td>
                                                             <td><b>{{ number_format($guar->guar_sum) }}</b></td>
                                                             <td class="text-sm">

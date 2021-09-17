@@ -37,8 +37,19 @@ class PhyMyidClient extends Model
         'temporary_registration', // vaqtinchalik yashash manzili JSON
         // FILIAL
         'branch_code',
+        'local_code',
         'work_user_id',
         'img_path',
         'isActive'
     ];
+
+    public function inspector()
+    {
+        return $this->belongsTo(MWorkUsers::class,'work_user_id','id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(SDepartments::class,'local_code','local_code');
+    }
 }

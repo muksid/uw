@@ -1228,6 +1228,11 @@ class UwKatmController extends Controller
                                 $inps->isVersion = 2;
                                 $inps->status = 1;
                                 $inps->save();
+                            } else {
+                                return response()->json(
+                                    [
+                                        'message' => 'Oxirgi 12 oy davomida oylik daromadi topilmadi!!!'
+                                    ]);
                             }
                         }
 

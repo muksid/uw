@@ -13,4 +13,9 @@ class UwJurClientGuars extends Model
         'title',
         'guar_sum'
     ];
+
+    public function guar()
+    {
+        return $this->belongsTo(UwGuarType::class,'guar_type', 'code');
+    }
 }

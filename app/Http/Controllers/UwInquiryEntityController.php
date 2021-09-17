@@ -21,17 +21,23 @@ use Illuminate\Support\Facades\Storage;
 class UwInquiryEntityController extends Controller
 {
     //
-    public $URL_INQ_IND  = 'http://10.22.50.3:8000/inquiry/individual';
-    public $URL_INQ_ENT  = 'http://10.22.50.3:8000/inquiry/entity';
-    public $URL_CREDIT_REPORT  = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
-    public $URL_CREDIT_REPORT_STATUS  = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
+    public $BASE_URL = '10.22.50.3';
+    public $PORT_8000 = ':8000';
+    public $PORT_8001 = ':8001';
+    public $URL_INQ_IND  = '/inquiry/individual';
+    public $URL_INQ_ENT  = '/inquiry/entity';
+    public $URL_CREDIT_REPORT  = '/katm-api/v1/credit/report';
+    public $URL_CREDIT_REPORT_STATUS  = '/katm-api/v1/credit/report/status';
 
     public function curlHttpPost($array)
     {
         $url = $array['url'];
+        $port = $array['port'];
         $post = $array['data'];
 
-        $ch = curl_init($url);
+        $POST_URL = 'http://'.$this->BASE_URL.$port.$url;
+
+        $ch = curl_init($POST_URL);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -39,7 +45,7 @@ class UwInquiryEntityController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
-        curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8001');
+        curl_setopt($ch, CURLOPT_PROXY, $this->BASE_URL.$port);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
         curl_close($ch);
@@ -177,11 +183,11 @@ class UwInquiryEntityController extends Controller
         $result = curl_exec($ch);
         curl_close($ch);*/
         $arr_curl = array(
+            'port' => $this->PORT_8000,
             'url' => $url,
             'data' => $postData
         );
         $result = $this->curlHttpPost($arr_curl);
-
         $data_decode = json_decode($result, true);
         $code = $data_decode['result']['code'];
         $message = $data_decode['result']['message'];
@@ -247,7 +253,7 @@ class UwInquiryEntityController extends Controller
 
         $model = UwJuridicalClient::find($id);
 
-        $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
+        //$url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
 
         $data = array(
             "security" => array(
@@ -280,7 +286,8 @@ class UwInquiryEntityController extends Controller
         curl_close($ch);*/
 
         $arr_curl = array(
-            'url' => $url,
+            'port' => $this->PORT_8001,
+            'url' => $this->URL_CREDIT_REPORT,
             'data' => $postData
         );
         $result = $this->curlHttpPost($arr_curl);
@@ -370,6 +377,7 @@ class UwInquiryEntityController extends Controller
         curl_close($ch1);*/
 
         $arr_curl = array(
+            'port' => $this->PORT_8001,
             'url' => $this->URL_CREDIT_REPORT_STATUS,
             'data' => $postData
         );
@@ -608,6 +616,7 @@ class UwInquiryEntityController extends Controller
         $json_data = curl_exec($ch1);
         curl_close($ch1);*/
         $arr_curl = array(
+            'port' => $this->PORT_8001,
             'url' => $this->URL_CREDIT_REPORT,
             'data' => $postParamEncode
         );

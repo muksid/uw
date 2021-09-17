@@ -39,6 +39,49 @@
 
                 <div class="box box-primary" style="clear: both;">
 
+                    <form method="POST" action="https://test.paycom.uz">
+
+                        <!-- Идентификатор WEB Кассы -->
+                        <input type="text" name="merchant" value="6140a65028b8a10c3657c24d"/>
+
+                        <!-- Сумма платежа в тийинах -->
+                        <input type="text" name="amount" value="1"/>
+
+                        <!-- Поля Объекта Account -->
+                        <input type="text" name="account[{field_name}]" value="613cc33206f619dfa07afc5c"/>
+                        <button type="submit" class="btn btn-primary btn-xs" id="btn-save"
+                                value="create">@lang('blade.send')
+                        </button>
+
+                    </form>
+
+                    <form method="POST" action="https://test.paycom.uz">
+                        <input type="hidden" name="merchant" value="6140a65028b8a10c3657c24d"/>
+                        <input type="hidden" name="amount" value="1.00"/>
+                        <input type="hidden" name="account[{field_name}]" value="613cc33206f619dfa07afc5c"/>
+                        <input type="hidden" name="lang" value="ru"/>
+                        <input type="hidden" name="currency" value="860"/>
+                        <input type="hidden" name="callback" value="https://online-banking.uz/"/>
+                        <input type="hidden" name="callback_timeout" value="15"/>
+                        <input type="hidden" name="payment" value="123456"/>
+                        <input type="hidden" name="description" value="test online-bank"/>
+                        <input type="hidden" name="detail" value="{JSON объект детализации в BASE64}"/>
+                        <button type="submit">Оплатить с помощью <b>Payme</b></button>
+                    </form>
+
+                    <body onload="Paycom.Button('#form-payme', '#button-container')">
+                    <form id="form-payme" method="POST" action="https://checkout.paycom.uz/">
+                        <input type="hidden" name="merchant" value="6140a65028b8a10c3657c24d">
+                        <input type="hidden" name="account[order_id]" value="613cc33206f619dfa07afc5c">
+                        <input type="hidden" name="amount" value="500">
+                        <input type="hidden" name="lang" value="ru">
+                        <input type="hidden" name="button" data-type="svg" value="colored">
+                        <div id="button-container"></div>
+                    </form>
+                    <!-- ... -->
+                    <script src="https://cdn.paycom.uz/integration/js/checkout.min.js"></script>
+                    </body>
+
                     <div class="box-header with-border">
                         <div class="col-md-1">
 
@@ -47,6 +90,7 @@
                             </button>
 
                         </div>
+
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
@@ -63,7 +107,7 @@
                             </thead>
                             <tbody id="roleTable">
                             <?php $i = 1 ?>
-                                @foreach ($models as $key => $model)
+                                {{--@foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}">
                                         <td>{{ $i++ }}</td>
                                         <td>{{ $model->title }}</td>
@@ -82,7 +126,7 @@
                                             </button>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @endforeach--}}
                             </tbody>
                         </table>
                     </div>

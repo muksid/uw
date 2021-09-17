@@ -138,4 +138,19 @@ class UwClients extends Model
     {
         return $this->hasMany(UwClientFiles::class, 'uw_client_id');
     }
+
+    public function statusUw()
+    {
+        return $this->belongsTo(UwStatusName::class,'status', 'code')
+            ->where('type', 'phy')
+            ->where('user_type', 'uw');
+    }
+
+    public function statusIns()
+    {
+        return $this->belongsTo(UwStatusName::class,'status', 'code')
+            ->where('type', 'phy')
+            ->where('user_type', 'ins');
+    }
+
 }

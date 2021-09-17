@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ url('admin-lte/bootstrap/css/bootstrap.min.css') }}">
+<!-- Font Awesome -->
+<link href="{{ asset("/admin-lte/bootstrap/css/font-awesome.min.css") }}" rel="stylesheet" type="text/css">
 
 <link rel="stylesheet" href="{{ url('admin-lte/dist/css/AdminLTE.min.css') }}">
 
@@ -22,8 +24,8 @@
                     <div class="box-body">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="alert alert-warning">
-                                    <h4 class="modal-title"> {{ session('message') }}</h4>
+                                <div class="alert alert-danger">
+                                    <h5 class="modal-title"><i class="fa fa-warning"></i> {{ session('message') }}</h5>
                                 </div>
                             </div>
                         </div>

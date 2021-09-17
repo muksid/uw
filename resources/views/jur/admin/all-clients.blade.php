@@ -176,16 +176,14 @@
                                         <td>{{ $model->client_code }}</td>
                                         <td>{{ $model->claim_id }}</td>
                                         <td class="text-uppercase">
-                                            <a href="{{ url('/jur/uw/view-client', ['id' => $model->id]) }}">
-                                                {{ $model->jur_name }}
+                                            <a href="{{ route('client.show', ['id' => $model->id]) }}">
+                                                {{ $model->jur_name}}
                                             </a>
                                         </td>
                                         <td><b>{{ number_format($model->summa, 2) }}</b></td>
 
                                         <td>
-                                            <span class="badge {{ $model->uwStatus->bg_style??'-' }}">
-                                                {{ $model->uwStatus->name??'-' }}
-                                            </span>
+                                            <span class="badge {{ $model->uwStatus->bg_style??'-' }}">{{ $model->uwStatus->name??'-' }}</span>
                                         </td>
                                         <td class="text-center">
                                             <a href="{{ url('/jur/uw/edit-client', $model->id) }}" class="btn btn-xs btn-info">

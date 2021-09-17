@@ -6,7 +6,6 @@
         <h1>
             Jismoniy shaxlar
             <small>ariza yaratish</small>
-            <a href="{{ url('/phy/client/create/new') }}" class="btn bg-purple">Create New</a>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
@@ -59,6 +58,14 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body table-responsive no-padding">
+                        <div class="col-md-4">
+                            <div class="form-group">
+
+                                <a href="{{ url('/phy/client/create/new') }}" class="btn bg-aqua-gradient btn-flat">
+                                    <i class="fa fa-camera"></i> MIJOZNI PHOTO RASMI BILAN KIRITNG
+                                </a>
+                            </div>
+                        </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <select name="credit_type" id="credit_type" class="form-control select2" style="width: 100%;">

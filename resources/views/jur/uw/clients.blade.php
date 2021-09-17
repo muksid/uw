@@ -1,5 +1,4 @@
 @extends('layouts.dashboard')
-<link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
 
 @section('content')
 

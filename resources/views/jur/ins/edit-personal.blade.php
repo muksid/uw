@@ -1,4 +1,4 @@
-@extends('uw_log.uw.dashboard')
+@extends('layouts.dashboard')
 <link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
 
 @section('content')
@@ -299,16 +299,6 @@
             <!-- /.col -->
 
         </div>
-
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-        <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
-
-        <link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
-
-        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
         <!-- InputMask -->
         <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.js') }}"></script>
         <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.extensions.js') }}"></script>

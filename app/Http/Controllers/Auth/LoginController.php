@@ -86,7 +86,7 @@ class LoginController extends Controller
         }
         else{
             return redirect()->route('login')
-                ->with('message','Username And Password Are Wrong.');
+                ->with('message','Login yoki kalit so`z mos kelmadi');
         }
 
     }

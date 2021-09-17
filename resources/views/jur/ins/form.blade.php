@@ -13,6 +13,20 @@
             <li><a href="#">underwriter</a></li>
             <li class="active">underwriter</li>
         </ol>
+        @if(session('success'))
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-danger">
+                                <h4 class="modal-title"> {{ session('success') }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>

@@ -116,9 +116,19 @@ Route::group(['middleware' => ['auth']], function() {
 
     });
 
+    // MY ID CLIENTS
+    Route::group(['prefix'=>'myid'], function(){
+        //UW
+        Route::any('adm/phy/index','PhysicalClientCreateController@physicalClients');
+        Route::get('adm/phy/view/{id}/{pinfl}','PhysicalClientCreateController@physicalClientView');
+        Route::post('adm/phy/edit','PhysicalClientCreateController@physicalClientEdit');
+    });
+
     // PHYSICAL
     Route::group(['prefix'=>'phy'], function(){
         //UW
+        Route::any('krd/index','UwClientsController@krdAllClients');
+        Route::get('krd/view/{id}/{claim_id}','UwClientsController@krdView');
         Route::any('uw/clients/{q}','UwClientsController@uwIndex');
         Route::any('uw/all-clients','UwClientsController@uwAllClients');
         Route::get('uw/view-client/{id}/{claim_id}', 'UwClientsController@uwView');
@@ -170,14 +180,19 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('client/create-file', 'UwCreateClientsController@createClientFile');
         Route::get('client/download-file/{id}','UwClientsController@downloadFile');
         Route::get('client/delete-file/{id}', 'UwCreateClientsController@deleteClientFile');
+
+        Route::post('phy-export', 'UwClientsController@export')->name('phy-export');
     });
 
     // JURIDICAL
     Route::group(['prefix'=>'jur'], function(){
         Route::resource('client','UwJuridicalClientsController');
         Route::any('clients/{q}','UwJuridicalClientsController@getClients');
+        Route::any('adm/all-clients','UwJuridicalClientsController@getAdminAllClients');
         Route::any('uw/clients/{q}','UwJuridicalClientsController@getUwClients');
         Route::any('uw/all-clients','UwJuridicalClientsController@getAllClients');
+        Route::get('uw/edit-client/{q}','UwJuridicalClientsController@uwEditClient');
+        Route::post('uw/edit-client-post','UwJuridicalClientsController@uwEditClientPost');
         Route::get('uw/view-client/{q}','UwJuridicalClientsController@uwShow');
 
         Route::get('ora-search','UwJuridicalClientsController@getOraSearch');
@@ -211,7 +226,6 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('export', 'UwJuridicalClientsController@export')->name('export');
 
     });
-
 
     // End New User Position
     // User Role

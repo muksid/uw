@@ -47,7 +47,7 @@
                         <h3 class="box-title text-maroon"><i class="fa fa-camera-retro"></i> Mijoz fotosuratini olish bo`yicha talablar</h3>
                     </div>
                 <div class="box-body">
-                    <img class="img-responsive pad pull-left" src="../../../images/myid_photo2.png" alt="Photo">
+                    <img class="img-responsive pad pull-left" src="../../../images/myid_photo4.jpg" alt="Photo">
                 </div>
                 </div>
             </div>

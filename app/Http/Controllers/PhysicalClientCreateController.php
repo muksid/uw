@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\MUserRoles;
 use App\MWorkUsers;
 use App\MyidDistricts;
 use App\MyidIibDistricts;
@@ -10,10 +11,12 @@ use App\PhyMyidClient;
 use App\PhyMyidToken;
 use App\UwClients;
 use App\UwLoanTypes;
+use App\UwStatusName;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 
@@ -70,12 +73,12 @@ class PhysicalClientCreateController extends Controller
             })
             ->where(DB::raw("(STR_TO_DATE(birth_date,'%Y-%m-%d'))"), "=", $request->birth_date)
             ->where(function ($status){
-                $status->where('status', '!=', -1);
+                $status->whereNotIn('status', [-2,-1]);
             })->first();
 
         if ($checkModel) {
 
-            return response()->json(['code' => 'model', 'message' => $checkModel->branch_code.' INSPEKTOR: '.$checkModel->currentWork->personal->l_name??'-']);
+            return response()->json(['code' => 'model', 'message' => $checkModel->branch_code]);
         }
 
         $checkClient = PhyMyidClient::where('pass_data', '=', $passport)
@@ -340,6 +343,7 @@ class PhysicalClientCreateController extends Controller
                 }
 
                 $phyMyidClient->branch_code = Auth::user()->currentWork->branch_code??'09011';
+                $phyMyidClient->local_code = Auth::user()->currentWork->local_code??'09011';
                 $phyMyidClient->work_user_id = Auth::user()->currentWork->id??0;
                 $phyMyidClient->img_path = $path_img;
                 $phyMyidClient->isActive = 'A';
@@ -493,6 +497,125 @@ class PhysicalClientCreateController extends Controller
         $response->header("Content-Type", 'image/jpeg');
 
         return $response;
+
+    }
+
+    public function physicalClients()
+    {
+        //
+        $user = Auth::user()->currentWork->id??0;
+        $roles = MUserRoles::leftJoin('roles', function($join) {
+            $join->on('roles.id', '=', 'm_user_roles.role_id');
+            })
+            ->where('roles.role_code', '=', 'phy_krd')
+            ->where('user_id', $user)
+            ->first();
+
+        $search = PhyMyidClient::select('id', DB::raw('CONCAT(last_name," ",first_name," ",middle_name) AS full_name'),
+            'pass_data', 'pinfl', 'permanent_address', 'branch_code', 'isActive', 'created_at');
+
+        $mfo = Input::get ( 'mfo' );
+        $status = Input::get ( 'status' );
+        $date_s = Input::get ( 'date_s' );
+        $date_e = Input::get ( 'date_e' );
+        $text = Input::get ( 'text' );
+
+        if($status) {
+            $search->where('isActive', '=', $status);
+        }
+
+        if ($roles) {
+            $search->where('branch_code', '=', Auth::user()->currentWork->branch_code??0);
+        }
+
+        if($mfo) {
+            $search->where('branch_code', '=', $mfo);
+        }
+
+        if($text) {
+            $search->where(function ($query) use ($text) {
+                $query->orWhereRaw("CONCAT(`last_name`, ' ', `first_name`,' ', `middle_name`) LIKE ?", ['%'.$text.'%']);
+                $query->orWhere('pass_data', 'LIKE', '%' . $text . '%');
+            });
+        }
+
+        if($date_s) {
+            $search->whereBetween('created_at', [$date_s.' 00:00:00',$date_e.' 23:59:59']);
+        }
+
+        $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+
+        $models->appends ( array (
+            'mfo' => Input::get ( 'mfo' ),
+            'status' => Input::get ( 'status' ),
+            'date_s' => Input::get ( 'date_s' ),
+            'date_e' => Input::get ( 'date_e' ),
+            'text' => Input::get ( 'text' )
+        ) );
+
+        return view('myid-clients.phy.index',compact('models','mfo','date_s','date_e','text',
+            'status'));
+
+    }
+
+    public function physicalClientView($id, $pinfl)
+    {
+        $user = Auth::user()->currentWork->id??0;
+        $roles = MUserRoles::leftJoin('roles', function($join) {
+            $join->on('roles.id', '=', 'm_user_roles.role_id');
+        })
+            ->where('roles.role_code', '=', 'phy_krd')
+            ->where('user_id', $user)
+            ->first();
+
+        $model = PhyMyidClient::where('id', $id)->where('pinfl', $pinfl)->firstOrFail();
+
+        $phy_search = UwClients::where(DB::raw("CONCAT(`document_serial`,`document_number`)"), '=',$model->pass_data);
+            if ($roles) {
+                $phy_search->where('branch_code', '=', Auth::user()->currentWork->branch_code ?? 0);
+            }
+        $phy_search->where(DB::raw("(STR_TO_DATE(birth_date,'%Y-%m-%d'))"), "=", $model->birth_date);
+        $phy_clients = $phy_search->get();
+
+        $ins_search = DB::table('roles as a')
+            ->join('m_user_roles as b', 'a.id', '=', 'b.role_id')
+            ->join('m_work_users as c', 'b.user_id', '=', 'c.id')
+            ->join('m_personal_users as d', 'c.user_id', '=', 'd.user_id')
+            ->select(
+                DB::raw('MAX(c.isActive) as isActive'),
+                DB::raw('MAX(c.id) as work_user_id'),
+                DB::raw('MAX(c.branch_code) as branch_code'),
+                DB::raw('MAX(c.local_code) as local_code'),
+                DB::raw('CONCAT(d.l_name," ", d.f_name) AS full_name'))
+            ->whereIn('a.role_code', ['phy_ins', 'uw_admin', 'madmin', 'phy_uw', 'phy_krd']);
+                if ($roles) {
+                    $ins_search->where('c.branch_code', '=', Auth::user()->currentWork->branch_code ?? 0);
+                }
+            $ins_search->where('c.isActive', '=', 'A')
+            ->groupBy('c.user_id');
+           $inspectors = $ins_search->get();
+
+        return view('myid-clients.phy.view', compact('model', 'phy_clients', 'inspectors'));
+
+    }
+
+    public function physicalClientEdit(Request $request)
+    {
+        $model_id = $request->id;
+        $work_user_id = $request->work_user_id;
+        $isActive = $request->isActive;
+        $work_data = MWorkUsers::findOrFail($work_user_id);
+
+        $model = PhyMyidClient::findOrFail($model_id);
+
+        $model->update([
+            'work_user_id' => $work_user_id,
+            'branch_code' => $work_data->branch_code,
+            'local_code' => $work_data->local_code,
+            'isActive' => $isActive
+        ]);
+
+        return back()->with('success', 'Ma`lumot muvaffaqiyatli yangilandi');
 
     }
 
