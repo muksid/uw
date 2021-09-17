@@ -1,7 +1,6 @@
 @extends('layouts.dashboard')
 <link href="{{asset('/admin-lte/css/main.css')}}" rel="stylesheet">
 @section('content')
-
     <section class="content-header">
         <h1>
             Kredit natijasi
@@ -374,6 +373,21 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <div id="katm_inps_buttons"></div>
+                                        <div id="katm_inps_debtors_buttons">
+                                            @foreach ($modelDebtors as $value)
+                                                @if ($value->katm_sir != null)
+                                                    <button class='btn btn-flat btn-bitbucket margin getScoringDeb' id='getScoringDeb_{{$value->id}}' data-id='{{$value->id}}'><i class='fa fa-history'></i> Scroring KIAS</button>
+                                                    <button class='btn btn-flat btn-bitbucket margin getSalaryDeb' id='getSalaryDeb_{{$value->id}}' data-id='{{$value->id}}'><i class='fa fa-credit-card'></i> Oylik daromadi</button> 
+                                                    <span class='text-bold debtorFullName' id='debtorFullName_{{$value->id}}'>{{$value->family_name." ".$value->name}}</span> 
+                                                    <br>
+                                                @else
+                                                    <div class="col-sm-6">
+                                                        <span id="unRegSpan_{{$value->id}}"></span> Ro`yxatdan o'tkazilmagan - <span class='text-bold debtorFullName' id='debtorFullName_{{$value->id}}'>{{$value->family_name." ".$value->name}}</span> 
+                                                    </div>
+                                                    <br>
+                                                @endif
+                                            @endforeach
+                                        </div>
                                     </div>
                                     <div class="box box-widget widget-user-2">
                                         <div class="widget-user-header bg-blue-active">
@@ -665,6 +679,28 @@
                                     <div class="form-group">
                                         <label>Jami (Oy) da</label>
                                         <input type="number" class="form-control" id="total_month" name="total_month" maxlength="2" value="" required="">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Ish haqi <span class="text-red">*</span></label>
+                                        <select class="form-control" name="salary" id="salary">
+                                            <option value="Y" SELECTED>XA</option>
+                                            <option value="N">YO`Q</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Kafillik turi <span class="text-red">*</span></label>
+                                        <select class="form-control" name="type" id="deb_type" required>
+                                            <option value="" SELECTED>Tanlang ...</option>
+                                            <option value="K">Kafil</option>
+                                            <option value="Q">Qo'shimcha qarzdor</option>
+                                            <option value="B">Birgalikdagi qarzdor</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -1051,9 +1087,9 @@
             var sendToAdminButton = $("#send_to_admin_buttons");
             var id = "{{ $model->id }}";
             var is_inps = "{{ $model->is_inps }}";
-            var button_res_k = "<button class='btn btn-flat btn-bitbucket margin' id='getScoring' data-id='"+id+"'><i class='fa fa-history'></i> Scroring KIAS</button>";
-            var button_res_i = "<button class='btn btn-flat btn-bitbucket margin' id='getSalary' data-id='"+id+"'><i class='fa fa-credit-card'></i> Oylik daromadi</button>";
-            var button_send_a = "<button class='btn btn-flat btn-bitbucket margin' id='sendToAdmin' data-id='"+id+"'><i class='fa fa-send-o'></i> Adminstratorga yuborish</button>";
+            var button_res_k = "<button class='btn btn-flat btn-bitbucket margin getScoring' id='getScoring' data-id='"+id+"'><i class='fa fa-history'></i> Scroring KIAS</button>";
+            var button_res_i = "<button class='btn btn-flat btn-bitbucket margin getSalary' id='getSalary' data-id='"+id+"'><i class='fa fa-credit-card'></i> Oylik daromadi</button>";
+            var button_send_a = "<button class='btn btn-flat btn-bitbucket margin sendToAdmin' id='sendToAdmin' data-id='"+id+"'><i class='fa fa-send-o'></i> Adminstratorga yuborish</button>";
             function ResultButtons(res){
                 //console.log(res);
                 $('#credit_debt').empty().append(formatCurrency(res.credit_results.credit_debt));
@@ -1127,7 +1163,7 @@
 
                     $.ajax({
                         url: "{{ url('/phy/client/online-reg') }}",
-                        data: {id: id},
+                        data: {id: id, type: 'client'},
                         dataType: 'JSON',
                         type: 'POST',
                         beforeSend: function(){
@@ -1156,9 +1192,9 @@
 
                 });
 
-                $('body').on('click', '#getScoring', function () {
+                $('body').on('click', '.getScoring', function () {
 
-                    let id = $('#getScoring').data('id');
+                    let id = $('.getScoring').data('id');
 
                     $.ajax({
                         url: '/phy/client/get-scoring',
@@ -1169,7 +1205,8 @@
                             $("#overlayKias").show();
                         },
                         success: function(result){
-                            //console.log(result);
+                            console.log(result)
+
                             if (result.scoring_k.isVersion === 2){
 
                                 let res = result.scoring_file;
@@ -1433,9 +1470,9 @@
                 });
 
                 // BUTTON GET INPS RESULT
-                $('body').on('click', '#getSalary', function () {
+                $('body').on('click', '.getSalary', function () {
 
-                    let id = $('#getSalary').data('id');
+                    let id = $('.getSalary').data('id');
 
                     $.ajax({
                         url: '/phy/client/get-salary',
@@ -1573,9 +1610,9 @@
                 });
 
                 // BUTTON GET STATUS SEND TO ADMIN
-                $('body').on('click', '#sendToAdmin', function () {
+                $('body').on('click', '.sendToAdmin', function () {
                     //console.log('ds');
-                    var id = $('#sendToAdmin').data('id');
+                    var id = $('.sendToAdmin').data('id');
 
                     var getSChType = $("input:radio[name=sch_type]:checked").val();
 
@@ -1715,10 +1752,13 @@
                         $('#job_address').val(data.job_address);
                         $('#total_sum').val(data.total_sum);
                         $('#total_month').val(data.total_month);
+                        $('#deb_type').val(data.type);
+                        $('#salary').val(data.salary);
+                        
                     })
                 });
 
-                $('body').on('click', '#delete-debtor', function (e) {
+                $('body').on('click', '.delete-debtor', function (e) {
 
                     e.preventDefault();
                     let id = $(this).data("id");
@@ -1751,6 +1791,495 @@
                     $('#ConfirmDebtorModal').modal('hide');
                 });
 
+                // Register debtor to inquiry/individual
+                $('body').on('click', '.register-debtor', function (e) {
+
+                    e.preventDefault();
+                    let id = $(this).data("id");
+                    let fullname = $(this).data("fullname");
+                                        
+                    let scoringButton = "<button class='btn btn-flat btn-bitbucket margin getScoringDeb' id='getScoringDeb_"+id+"' data-id='"+id+"'><i class='fa fa-history'></i> Scroring KIAS</button>"; 
+                    let salaryButton  = "<button class='btn btn-flat btn-bitbucket margin getSalaryDeb' id='getSalaryDeb_"+id+"' data-id='"+id+"'><i class='fa fa-credit-card'></i> Oylik daromadi</button>"; 
+                    let debtorName    = "<span class='text-bold debtorFullName' id='debtorFullName_"+id+"'>"+fullname+"</span>"; 
+
+                    $.ajax({
+                        url: "{{ url('/phy/client/reg-debtor') }}",
+                        data: {model_id: id, post_type: 'reg'},
+                        dataType: 'JSON',
+                        type: 'POST',
+                        beforeSend: function(){
+
+                            $(".inquiry-individual").prop('disabled', true);
+                            $("#loading-gif").show();
+
+                        },
+                        success: function(response){
+                            console.log(response);
+                            $(".register-debtor").prop('disabled', false);
+                            $("#loading-gif").hide();
+                            $('#ResultMessageModal').addClass('modal-'+response.status);
+                            $('#result_header').empty().append(response.status);
+                            $('#result_title').empty().append(response.message);
+                            $('#result_text').empty().append(response.data);
+                            $('#ResultMessageModal').modal('show');
+                            
+                            if( ! $("#debtorFullName_"+id).length )         // use this if you are using id to check
+                            {
+                                if( ! $("#unRegSpan_"+id).length){
+                                    $("#unRegSpan_"+id).empty()
+                                    $("#debtorFullName_"+id).empty()
+                                }
+                                $('#katm_inps_debtors_buttons').append(scoringButton + salaryButton + debtorName + "<br>")                                
+                            }
+
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            console.log('Error '+xhr.status+' | '+thrownError);
+
+                        },
+                    });
+                });
+
+                // Get Debtor scoring
+                $('body').on('click', '.getScoringDeb', function (e) {
+                    console.log("Get Scoring clicked!!!")
+                    let id = $('.getScoringDeb').data('id');
+
+                    $.ajax({
+                        url: '/phy/client/reg-debtor',
+                        type: 'POST',
+                        data: {model_id: id, post_type: 'scoring'},
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#overlayKias").show();
+                        },
+                        success: function(result){
+                            console.log(result)
+
+                            if (result.scoring_k.isVersion === 2){
+
+                                let res = result.scoring_file;
+                                let data = '';
+                                data+= '<table style="width: 1000px;"><tbody>';
+                                for (let i = 0; i < res.length; i++) {
+
+                                    if (!Array.isArray(res[i]['td'])){
+                                        if (res[i]['td']['content'] !== undefined){
+                                            let cols;
+                                            if (res[i]['td']['colspan'] === undefined){
+                                                cols = 7;
+                                            } else {
+                                                cols = res[i]['td']['colspan'];
+                                            }
+                                            data+= '<tr>' +
+                                                '<td class="text-muted" style="'+res[i]['td']['style']+'" colspan="'+cols+'">'
+                                                +res[i]['td']['content'];
+
+                                            if (res[i]['td']['span']){
+
+                                                data+=    '<span>'+res[i]['td']['span']['span']+'</span>';
+                                            }
+                                            data+=  '</td>' +
+                                                '</tr>';
+                                        }
+                                    }else if (res[i]['td'].length === 2){
+                                        data+=
+                                            '<tr>' +
+                                            '<td style="'+res[i]['td'][0]['style']+'" colspan="'+res[i]['td'][0]['colspan']+'">' +
+                                            res[i]['td'][0]['content'] +
+                                            '</td>' +
+                                            '<td style="'+res[i]['td'][1]['style']+'" id="'+res[i]['td'][1]['id']+'" colspan="'+res[i]['td'][1]['colspan']+'">' +
+                                            '<span>'+res[i]['td'][1]['span']+'</span>' +
+                                            '</td>' +
+                                            '</tr>';
+                                    } else if (i === 10 && res[i]['td'].length === 3){
+                                        data+= '<tr>';
+                                        for (let j = 0; j < res[i]['td'].length; j++) {
+                                            let sc = res[i]['td'][j];
+                                            data+=
+                                                '<td colspan="'+sc['colspan']+'" rowspan="'+sc['rowspan']+'" style="'+sc['style']+'">';
+                                            if (j === 1){
+                                                data+='<img id="'+sc['img']['id']+'" style="'+sc['img']['style']+'" src="'+sc['img']['src']+'" height="149">';
+
+                                                data+='<div id="'+sc['div']['id']+'" style="'+sc['div']['style']+'">' +
+                                                    '<span>'+sc['div']['span']+'</span>'+
+                                                    '</div>';
+
+                                            } else if (j === 2){
+                                                data+='<div style="'+sc['div']['style']+'">';
+
+                                                if (sc['div']['div'].length === 2){
+                                                    for (let k = 0; k < sc['div']['div'].length; k++) {
+                                                        let scb = sc['div']['div'][k];
+                                                        //console.log(scb);
+                                                        data+='<div style="'+scb['style']+'" id="'+scb['id']+'">' +
+                                                            '<span>'+scb['span']+'</span>'+
+                                                            '</div>';
+                                                    }
+
+                                                }
+                                                data+='</div>'
+
+                                            }
+                                            data+='</td>';
+                                        }
+                                        data+= '</tr>';
+
+
+                                    }else if (res[i]['td'].length === 4){
+                                        data+= '<tr style="font-weight: bold;">';
+                                        for (let j = 0; j < res[i]['td'].length; j++) {
+                                            let row_h = res[i]['td'][j];
+                                            data+='<td style="'+row_h['style']+'" rowspan="'+row_h['rowspan']+'" colspan="'+row_h['colspan']+'">'+row_h['content']+'</td>';
+
+                                        }
+                                        data+= '</tr>';
+
+                                    } else if (res[i]['td'].length === 6){
+                                        data+= '<tr>';
+                                        for (let k = 0; k < res[i]['td'].length; k++) {
+                                            let row = res[i]['td'][k];
+                                            if (k === 0 || k === 1){
+                                                data+='<td style="'+row['style']+'" colspan="'+row['colspan']+'">'+row['content']+'</td>';
+
+                                            } else {
+                                                data+='<td style="'+row['style']+'" id="'+row['id']+'">'+row['span']+'</td>';
+
+                                            }
+
+                                        }
+                                        data+= '</tr>';
+
+                                    } else if (i === 31 && res[i]['td'].length === 3){
+                                        data+= '<tr>';
+                                        for (let l = 0; l < res[i]['td'].length; l++) {
+                                            let row_l = res[i]['td'][l];
+                                            if (l === 0 || l === 1){
+                                                data+='<td style="'+row_l['style']+'" colspan="'+row_l['colspan']+'">'+row_l['content']+'</td>';
+
+                                            } else {
+                                                data+='<td style="'+row_l['style']+'" colspan="'+row_l['colspan']+'">';
+                                                for (let j = 0; j < row_l['span'].length; j++) {
+                                                    let row_ll = row_l['span'][j];
+                                                    if (row_ll['span'] !== undefined){
+                                                        data+='<span id="'+row_ll['id']+'">'+row_ll['span']+'</span><br>';
+                                                    }
+                                                }
+                                                data+='</td>';
+
+                                            }
+
+                                        }
+                                        data+= '</tr>';
+
+                                    }
+
+                                }
+                                data+= '</tbody></table>';
+                                $("#data_table").html(data);
+
+                                $('#tableModal').modal('show');
+                            } else {
+                                let data = result;
+                                let katm_score = JSON.parse(result.scoring_k.katm_score);
+                                let katm_tb = JSON.parse(result.scoring_k.katm_tb);
+                                $('#scoringPage').empty();
+                                $("#scoringPage").prepend(result.scoring_page);
+                                $(".client_name").html(katm_score.client_info_1);
+                                $(".client_birth_date").html(katm_score.client_info_2_text);
+                                let gender = 'М';
+                                if (result.client_model.gender === '2') {
+                                    gender = 'Ж';
+                                }
+                                $(".client_gender").html(gender);
+                                $(".client_live_address").html(katm_score.client_info_4);
+                                $(".client_pin").html(katm_score.client_info_5);
+                                $(".client_inn").html(katm_score.client_info_6);
+                                $(".client_phone").html(katm_score.client_info_8);
+                                if (katm_score.client_info_7){
+                                    $(".client_info_7").html(katm_score.client_info_7);
+                                }
+
+                                var doc_formattedDate = new Date(result.client_model.document_date);
+                                var doc_d = doc_formattedDate.getDate();
+                                var doc_m = doc_formattedDate.getMonth();
+                                doc_m += 1;  // JavaScript months are 0-11
+                                if (doc_d < 10) {
+                                    doc_d = "0" + doc_d;
+                                }
+                                if (doc_m < 10) {
+                                    doc_m = "0" + doc_m;
+                                }
+                                var doc_y = doc_formattedDate.getFullYear();
+                                $(".client_document").html(result.client_model.document_serial + ' ' + result.client_model.document_number + ' '
+                                    + doc_d + "." + doc_m + "." + doc_y);
+
+                                $('.sc_ball').html(katm_score.sc_ball);
+                                $('.sc_level_info').html(katm_score.sc_level_info);
+                                $('.sc_version').html(katm_score.sc_version);
+                                $('.score_date').html(katm_score.score_date);
+
+                                $('.client_info_1').html(katm_score.client_info_1); // fio
+                                $('.client_info_2_text').html(katm_score.client_info_2_text); // den roj
+                                $('.client_info_4').html(katm_score.client_info_4); // adress
+                                $('.client_info_5').html(katm_score.client_info_5); // pinfl
+                                $('.client_info_6').html(katm_score.client_info_6); // inn
+                                $('.client_info_8').html(katm_score.client_info_8); // passport
+
+                                $('.score_img').html('' +
+                                    '<img id="score_chart" style="padding-left: 9px; margin-bottom: 15px; width: 311px;"' +
+                                    ' src="' + data.scoring_img + '" height="149">\n');
+
+                                $('#tb_row_1_ot').html(katm_tb.row_1.open_total);
+                                $('#tb_row_1_os').html(katm_tb.row_1.open_summ);
+                                $('#tb_row_1_ct').html(katm_tb.row_1.close_total);
+                                $('#tb_row_1_cs').html(katm_tb.row_1.close_summ);
+
+                                $('#tb_row_2_ot').html(katm_tb.row_2.open_total);
+                                $('#tb_row_2_os').html(katm_tb.row_2.open_summ);
+                                $('#tb_row_2_ct').html(katm_tb.row_2.close_total);
+                                $('#tb_row_2_cs').html(katm_tb.row_2.close_summ);
+
+                                $('#tb_row_3_ot').html(katm_tb.row_3.open_total);
+                                $('#tb_row_3_os').html(katm_tb.row_3.open_summ);
+                                $('#tb_row_3_ct').html(katm_tb.row_3.close_total);
+                                $('#tb_row_3_cs').html(katm_tb.row_3.close_summ);
+
+                                $('#tb_row_4_ot').html(katm_tb.row_4.open_total);
+                                $('#tb_row_4_os').html(katm_tb.row_4.open_summ);
+                                $('#tb_row_4_ct').html(katm_tb.row_4.close_total);
+                                $('#tb_row_4_cs').html(katm_tb.row_4.close_summ);
+
+                                $('#tb_row_5_ot').html(katm_tb.row_5.open_total);
+                                $('#tb_row_5_os').html(katm_tb.row_5.open_summ);
+                                $('#tb_row_5_ct').html(katm_tb.row_5.close_total);
+                                $('#tb_row_5_cs').html(katm_tb.row_5.close_summ);
+
+                                $('#tb_row_6_ot').html(katm_tb.row_6.open_total);
+                                $('#tb_row_6_os').html(katm_tb.row_6.open_summ);
+                                $('#tb_row_6_ct').html(katm_tb.row_6.close_total);
+                                $('#tb_row_6_cs').html(katm_tb.row_6.close_summ);
+
+                                if (katm_tb.row_7){
+                                    $('#tb_row_7_ot').html(katm_tb.row_7.open_total);
+                                    $('#tb_row_7_os').html(katm_tb.row_7.open_summ);
+                                    $('#tb_row_7_ct').html(katm_tb.row_7.close_total);
+                                    $('#tb_row_7_cs').html(katm_tb.row_7.close_summ);
+                                } else {
+                                    $('#tb_row_7_ot').html(0);
+                                    $('#tb_row_7_os').html(0);
+                                    $('#tb_row_7_ct').html(0);
+                                    $('#tb_row_7_cs').html(0);
+                                }
+
+                                if (katm_tb.row_8){
+                                    $('#tb_row_8_ot').html(katm_tb.row_8.open_total);
+                                    $('#tb_row_8_os').html(katm_tb.row_8.open_summ);
+                                    $('#tb_row_8_ct').html(katm_tb.row_8.close_total);
+                                    $('#tb_row_8_cs').html(katm_tb.row_8.close_summ);
+                                } else {
+                                    $('#tb_row_8_ot').html(0);
+                                    $('#tb_row_8_os').html(0);
+                                    $('#tb_row_8_ct').html(0);
+                                    $('#tb_row_8_cs').html(0);
+                                }
+
+                                if (katm_tb.row_9){
+                                    $('#tb_row_9_ot').html(katm_tb.row_9.open_total);
+                                    $('#tb_row_9_os').html(katm_tb.row_9.open_summ);
+                                    $('#tb_row_9_ct').html(katm_tb.row_9.close_total);
+                                    $('#tb_row_9_cs').html(katm_tb.row_9.close_summ);
+                                } else {
+                                    $('#tb_row_9_ot').html(0);
+                                    $('#tb_row_9_os').html(0);
+                                    $('#tb_row_9_ct').html(0);
+                                    $('#tb_row_9_cs').html(0);
+                                }
+
+                                $('#tb_row_12_agr_summ').html(katm_tb.row_12.agr_summ);
+                                $('#tb_row_12_agr_comm2').html(katm_tb.row_12.agr_comm2.content);
+                                $('#tb_row_12_agr_comm3').html(katm_tb.row_12.agr_comm3);
+                                $('#tb_row_12_agr_comm4').html(katm_tb.row_12.agr_comm4);
+
+                                $('#tb_ft_claim_id').html(result.client_model.claim_id);
+                                $('#tb_ft_claim_date').html(result.client_model.claim_date);
+
+                                $('#btn-save').val("KatmResult");
+                                $('#katmClaimId').val(id);
+                                $('#resultKATMModal').modal('show');
+                            }
+
+                        },
+                        complete:function(res){
+                            $("#overlayKias").hide();
+                        }
+
+                    });
+                })
+
+                // Get Debtor salary
+                $('body').on('click', '.getSalaryDeb', function (e) {
+                    console.log("Get Salary clicked!!!")
+
+                    let id = $('.getSalaryDeb').data('id');
+
+                    $.ajax({
+                        url: '/phy/client/reg-debtor',
+                        type: 'POST',
+                        data: {model_id: id, post_type: 'salary_tin'},
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#overlayKias").show();
+                        },
+                        success: function(data){
+                            console.log(data)
+                            $('#getSalaryDeb'+id).prop('disabled', true);
+                            setTimeout(function() {
+                                $('#getSalaryDeb'+id).prop('disabled', false);
+                            }, 60000);
+
+                        },
+                        complete: function(){
+                            $("#overlayKias").hide();
+                        }
+
+                    });
+
+                    $.ajax({
+                        url: '/phy/client/get-deb-salary',
+                        type: 'GET',
+                        data: {id: id},
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#overlayKias").show();
+                        },
+                        success: function(data){
+                            let table = '';
+                            let salary = 0;
+                            let other_salary = 0;
+                            let sum = 0;
+                            let other_sum = 0;
+                            let salaryVersion = '';
+                            if (data[0]['isVersion'] === 2){
+
+                                salaryVersion = 'Oylik daromadi natijasi (SOLIQ)';
+
+                                table+= '<div class="box-body no-padding">' +
+                                    '<table class="table table-striped">' +
+                                        '<tr>' +
+                                            '<th style="width: 10px">#</th>' +
+                                            '<th>Mijoz F.I.O.</th>' +
+                                            '<th>M.STIR</th>' +
+                                            '<th>PINFL</th>' +
+                                            '<th>Davr</th>' +
+                                            '<th>Summa</th>' +
+                                            '<th>Other</th>' +
+                                            '<th>Tashkilot</th>' +
+                                            '<th>T.STIR</th>' +
+                                        '</tr>';
+
+                                let key = 1;
+                                for (let i = 0; i < data.length; i++){
+                                    let val = data[i];
+
+                                    salary+= val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum;
+
+                                    other_salary+= val.other_income;
+
+                                    sum = (val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    other_sum= val.other_income.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    table+=
+                                        '<tr>' +
+                                            '<td>'+ key++ +'.</td>' +
+                                            '<td class="text-sm">'+val.client_name+'</td>' +
+                                            '<td>'+val.client_tin+'</td>' +
+                                            '<td>'+val.pinfl+'</td>' +
+                                            '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
+                                            '<td class="text-bold">'+sum+'</td>' +
+                                            '<td><span class="badge bg-info">'+other_sum+'</span></td>' +
+                                            '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                            '<td>'+val.ORG_INN+'</td>' +
+                                        '</tr>';
+                                }
+
+                                let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                let otherSalaryTotal = (other_salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                table+= '<tr>' +
+                                            '<td colspan="4"><b>Jami:</b><td>' +
+                                            '<td colspan="2"><b>'+salaryTotal+' <span class="badge bg-info pull-right">'+otherSalaryTotal+'</span></b><td>' +
+                                            '<td colspan="1"><td>' +
+                                        '</tr>';
+
+                                table+= '</table>' +
+                                    '</div>';
+
+                            } else {
+
+                                salaryVersion = 'Oylik daromadi natijasi (XALQBANK)';
+
+                                table+=
+                                    '<div class="box-body no-padding">' +
+                                    '<table class="table table-striped">' +
+                                    '<tr>' +
+                                    '<th style="width: 10px">#</th>' +
+                                    '<th>F.I.O.</th>' +
+                                    '<th>PINFL</th>' +
+                                    '<th>Davr</th>' +
+                                    '<th>Summa</th>' +
+                                    '<th>Tashkilot</th>' +
+                                    '<th>T.STIR</th>' +
+                                    '</tr>';
+
+                                let key = 1;
+                                for (let i = 0; i < data.length; i++){
+                                    let val = data[i];
+
+                                    salary += val.INCOME_SUMMA;
+
+                                    sum = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    table+= '<tr>' +
+                                        '<td>'+ key++ +'.</td>' +
+                                        '<td>'+val.client_name+'</td>' +
+                                        '<td>'+val.pinfl+'</td>' +
+                                        '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
+                                        '<td>'+sum+'</td>' +
+                                        '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                        '<td>'+val.ORG_INN+'</td>' +
+                                        '</tr>';
+                                }
+
+                                let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                table+= '<tfoot>' +
+                                            '<tr>' +
+                                                '<td colspan="3"><b>Jami:</b><td>' +
+                                                '<td colspan="2"><b>'+salaryTotal+'</b><td>' +
+                                            '</tr>' +
+                                        '</tfoot>';
+
+                                table+= '</table>' +
+                                    '</div>';
+                            }
+
+                            $('#resultINPSModal').modal('show');
+
+                            $("#salaryVersion").html(salaryVersion);
+
+                            $("#resultDataINPS").html(table);
+
+                        },
+                        complete: function(){
+                            $("#overlayKias").hide();
+                        }
+
+                    });
+                })
+
 
                 // request Guards
                 $('#guar_datatable').DataTable({
@@ -1764,27 +2293,27 @@
                         type: 'GET',
                     },
                     columns: [
-                        { data: 'id', name: 'id', 'visible': false, "searchable": false},
-                        { data: 'guar_type', name: 'guar_type' },
-                        { data: 'title', name: 'title' },
-                        { data: 'guar_owner', name: 'guar_owner', 'visible': false },
-                        { data: null,
-                            render: function ( data, type, row ) {
-                                return formatCurrency(data.guar_sum);
-                            }
-                        },
-                        { data: 'address', name: 'address', 'visible': false },
-                        { data: 'action', name: 'action', orderable: false},
-                    ],
-                    footerCallback: function (row, data, start, end, display) {
-                    //console.log(data)
-                    var totalPayment = 0;
-                    for (var j = 0; j < data.length; j++) {
-                        totalPayment += parseFloat(data[j]['guar_sum']);
-                    }
-                    var api = this.api();
-                    $(api.column(5).footer()).html(formatCurrency(totalPayment));
-                },
+                            { data: 'id', name: 'id', 'visible': false, "searchable": false},
+                            { data: 'guar_type', name: 'guar_type' },
+                            { data: 'title', name: 'title' },
+                            { data: 'guar_owner', name: 'guar_owner', 'visible': false },
+                            { data: null,
+                                render: function ( data, type, row ) {
+                                    return formatCurrency(data.guar_sum);
+                                }
+                            },
+                            { data: 'address', name: 'address', 'visible': false },
+                            { data: 'action', name: 'action', orderable: false},
+                        ],
+                        footerCallback: function (row, data, start, end, display) {
+
+                        var totalPayment = 0;
+                        for (var j = 0; j < data.length; j++) {
+                            totalPayment += parseFloat(data[j]['guar_sum']);
+                        }
+                        var api = this.api();
+                        $(api.column(5).footer()).html(formatCurrency(totalPayment));
+                    },
                     order: [[0, 'desc']]
                 });
 
@@ -2130,9 +2659,44 @@
             let CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
             $("#document_region").change(function () {
+                
                 var region_code = $(this).val();
                 $.ajax({
                     type: "POST",
+                    url: "/madmin/get-districts",
+                    data: {_token: CSRF_TOKEN, region_code: region_code},
+                    dataType: 'JSON',
+                    success: function (res) {
+                        let districtData = '';
+
+                        if (res) {
+                            $("#document_district").empty();
+
+                            if (res !== 0) {
+
+                                $('#document_district').show();
+
+                                $("#document_district").append('<option value="" disabled selected>Tumanni tanlang</option>');
+
+                                $.each(res, function (key, val) {
+                                    districtData += '<option value="' + val.code + '">' + val.name + '</option>';
+                                });
+
+                            } else {
+                                $('#document_district').hide();
+                            }
+
+                            $("#document_district").append(districtData); //// For Append
+                        }
+                    },
+
+                    error: function () {
+                        console.log('error');
+                    }
+                });
+                
+                $.ajax({
+                    type: "GET",
                     url: "/madmin/get-districts",
                     data: {_token: CSRF_TOKEN, region_code: region_code},
                     dataType: 'JSON',

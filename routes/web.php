@@ -147,6 +147,7 @@ Route::group(['middleware' => ['auth']], function() {
         Route::post('calc-form','UwClientsController@calcForm');
         Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
         Route::post('client-send-to-uw', 'UwClientsController@csAppSend');
+
         //INS CREATE NEW
         Route::get('client/create/new', 'PhysicalClientCreateController@index');
         Route::post('client/create/personal', 'PhysicalClientCreateController@createPersonal');
@@ -158,6 +159,8 @@ Route::group(['middleware' => ['auth']], function() {
         // DEBTORS
         Route::resource('client-debtors', 'UwClientDebtorsController');
         Route::get('get-uw-debtor/{id}', 'UwClientDebtorsController@onlineDebtorsRegistration');
+        Route::post('client/reg-debtor', 'UwDebtorController@postKatm');
+        Route::get('client/get-deb-salary','UwDebtorController@getSalary');
 
         // GUAR
         Route::get('client/get-guars/{id}', 'UwCreateClientsController@getClientGuars');

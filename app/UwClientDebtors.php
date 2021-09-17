@@ -12,6 +12,7 @@ class UwClientDebtors extends Model
         'branch_code',
         'claim_id',
         'claim_number',
+        'katm_sir',
         'inn',
         'resident',
         'document_type',
@@ -31,6 +32,8 @@ class UwClientDebtors extends Model
         'total_sum',
         'total_month',
         'isReg',
+        'salary',
+        'type',
         'isActive'
     ];
 
@@ -113,6 +116,11 @@ class UwClientDebtors extends Model
 
     public function files()
     {
-        return $this->hasMany(UwClientFiles::class, 'uw_client_id');
+        return $this->hasMany(UwClientFiles::class, 'uw_clients_id');
+    }
+
+    public function uwClient()
+    {
+        return $this->hasMany(UwClientFiles::class, 'uw_clients_id');
     }
 }

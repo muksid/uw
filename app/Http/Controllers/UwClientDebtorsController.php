@@ -41,6 +41,7 @@ class UwClientDebtorsController extends Controller
     public function store(Request $request)
     {
         //
+        // dd($request->all());
         $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
         if (!$currentWorkUser){
@@ -84,6 +85,8 @@ class UwClientDebtorsController extends Controller
                 'claim_id'=>$claim_id,
                 'claim_number'=>$claim_number,
                 'branch_code'=>$lastModelId->branch_code,
+                'salary'  =>$request->salary,
+                'type'  =>$request->type,
                 'isActive' => 1,
             ]);
         return response()->json([
@@ -227,13 +230,13 @@ class UwClientDebtorsController extends Controller
             }
 
             return datatables()->of(UwClientDebtors::where('uw_clients_id', $id)->get())
-                ->addColumn('action', function($data) use ($disabled) {
+                ->addColumn('action', function($data) use ($disabled,$model) {
                     $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-debtor '.$disabled.'">
 <span class="glyphicon glyphicon-pencil"></span></a>';
                     $button .= '&nbsp;&nbsp;';
-                    $button .= ' | <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
+                    $button .= ' | <a href="javascript:void(0);" id="delete-debtor'.$data->id.'" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete-debtor text-maroon  '.$disabled.'">
  <span class="glyphicon glyphicon-trash"></span></a>';
-                    $button .= ' | <a href="javascript:void(0);" id="reg-debtor" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="text-green  '.$disabled.'">
+                    $button .= ' | <a href="javascript:void(0);" id="reg-debtor'.$data->id.'" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" data-fullname="'.$data->family_name.' '.$data->name.' '.$data->patronymic.'" class="register-debtor text-green  '.$disabled.'">
  <span class="glyphicon glyphicon-globe"></span></a>';
                     return $button;
                 })

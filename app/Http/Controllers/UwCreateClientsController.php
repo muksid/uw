@@ -12,6 +12,7 @@ use App\UwClientGuars;
 use App\UwClients;
 use App\UwGuarType;
 use App\UwLoanTypes;
+use App\UwClientDebtors;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -315,6 +316,8 @@ class UwCreateClientsController extends Controller
 
         $districts = UnDistricts::where('status', 1)->get();
 
+        $modelDebtors = UwClientDebtors::where('uw_clients_id',$model->id)->get();
+
         $sch_type_d = 'checked';
         $sch_type_a = '';
         if ($model->sch_type == 2){
@@ -323,7 +326,7 @@ class UwCreateClientsController extends Controller
         }
 
         return view('phy.ins.create-i-step-result',
-            compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
+            compact('model', 'modelComments', 'regions', 'districts', 'modelDebtors', 'sch_type_d', 'sch_type_a'));
     }
 
     /**
