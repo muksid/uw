@@ -40,6 +40,11 @@
 
                     <div class="box-header">
                         <div class="col-md-1">
+                            <a href="{{ url('/madmin/filials') }}" class="btn btn-primary btn-flat">
+                                <i class="fa fa-bank"></i> <b> Filiallar</b>
+                            </a>
+                        </div>
+                        <div class="col-md-1">
                             <a href="{{ route('departments.create') }}" class="btn btn-success btn-flat">
                                 <i class="fa fa-plus-circle"></i> <b> @lang('blade.add')</b>
                             </a>

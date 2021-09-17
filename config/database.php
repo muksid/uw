@@ -43,27 +43,15 @@ return [
             'driver' => 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'muw'),
+            'database' => env('DB_DATABASE', 'edo.turonbank.uz'),
             'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', 'edo!@#$'),
+            'password' => env('DB_PASSWORD', 'mukSid2020!'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'strict' => false,
             'engine' => null,
-        ],
-
-        'mysql_uw' => [
-            'driver'    => 'mysql',
-            'host'      => env('DB_EXT_HOST', '127.0.0.1'),
-            'database'  => env('DB_EXT_DATABASE', 'uw_turonbank_13'),
-            'username'  => env('DB_EXT_USERNAME', 'root'),
-            'password'  => env('DB_EXT_PASSWORD', ''),
-            'charset'   => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix'    => '',
-            'strict'    => false,
         ],
 
         'pgsql' => [
@@ -90,31 +78,16 @@ return [
             'prefix' => '',
         ],
 
-        'oracle' => [
-            'driver'         => 'oracle',
-            'host'           => env('ORACLE_HOST', '192.168.1.6'),
-            'port'           => env('ORACLE_PORT', '1521'),
-            'database'       => env('ORACLE_DATABASE', 'IABS'),
-            'username'       => env('ORACLE_USERNAME', 'ibs'),
-            'password'       => env('ORACLE_PASSWORD', 'testdb'),
-            'charset'        => env('ORACLE_CHARSET', 'AL32UTF8'),
-            'prefix'         => env('ORACLE_PREFIX', ''),
-            'prefix_schema'  => env('ORACLE_SCHEMA_PREFIX', ''),
-            'server_version' => env('ORACLE_SERVER_VERSION', '11g'),
-        ],
-
-        'oracle_db' => [
-            'driver'         => 'oracle',
-            'host'           => env('ORACLE_HOST', '192.168.1.6'),
-            'port'           => env('ORACLE_PORT', '1521'),
-            'database'       => env('ORACLE_DATABASE', 'IABS'),
-            'username'       => env('ORACLE_USERNAME', 'ibs'),
-            'password'       => env('ORACLE_PASSWORD', 'testdb'),
-            'charset'        => env('ORACLE_CHARSET', 'AL32UTF8'),
-            'prefix'         => env('ORACLE_PREFIX', ''),
-            'prefix_schema'  => env('ORACLE_SCHEMA_PREFIX', ''),
-            'server_version' => env('ORACLE_SERVER_VERSION', '11g'),
-        ],
+        'oracle' => array(
+            'driver' => 'oracle',
+            'host' => 'localhost',
+            'port' => '1521',
+            'database' => 'xe',
+            'username' => 'user',
+            'password' => 'pass',
+            'charset' => 'AL32UTF8',
+            'prefix' => '',
+        )
 
     ],
 

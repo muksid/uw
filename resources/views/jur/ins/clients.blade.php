@@ -172,7 +172,7 @@
                                                 </a>
                                             @endif
                                         </td>
-                                        <td class="text-sm">{{ $model->department->title_ru??'' }}</td>
+                                        <td class="text-sm">{{ $model->filial->title??'' }}</td>
                                         <td class="text-sm text-center text-bold text-blue">
                                             {{ $model->user->personal->l_name??'-' }}
                                             {{ mb_substr($model->user->personal->f_name??'-', 0, 1) }}.</td>

@@ -21,6 +21,10 @@ class Department extends Model
         'branch_code',
         'local_code',
         'parent_id',
+        'ora_parent_code',
+        'ora_code',
+        'ora_condition',
+        'order_by',
         'status',
     ];
 
@@ -32,7 +36,7 @@ class Department extends Model
 
     public function childs() {
 
-        return $this->hasMany(Department::class,'parent_id','id')->where('status', 1);
+        return $this->hasMany(Department::class,'parent_id','id');
 
     }
 

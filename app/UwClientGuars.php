@@ -16,4 +16,10 @@ class UwClientGuars extends Model
         'guar_owner',
         'guar_sum'
     ];
+
+    public function getGuarName()
+    {
+        return $this->belongsTo(UwGuarType::class,'guar_type','code');
+    }
+
 }

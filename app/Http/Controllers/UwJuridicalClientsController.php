@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Department;
 use App\MWorkUsers;
 use App\User;
 use App\UwJurBalanceChild;
@@ -18,6 +17,7 @@ use App\UwJurKatmClient;
 use App\UwJurKatmFile;
 use App\UwJurSaldo;
 use App\UwLoanTypes;
+use App\UwStatusName;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Exports\UwJuidicalClientsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UwJuridicalClientsController extends Controller
 {
@@ -74,7 +76,7 @@ class UwJuridicalClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -125,7 +127,7 @@ class UwJuridicalClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -138,50 +140,83 @@ class UwJuridicalClientsController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function getAllClients()
+    public function getAllClients(Request $request)
     {
         //
         $search = UwJuridicalClient::orderBy('id', 'DESC');
 
-        $u = Input::get ( 'u' );
-        $t = Input::get ( 't' );
-        $d = Input::get ( 'd' );
+        $mfo = Input::get ( 'mfo' );
+        $status = Input::get ( 'status' );
+        $date_s = Input::get ( 'date_s' );
+        $date_e = Input::get ( 'date_e' );
+        $text = Input::get ( 'text' );
+        $user = Input::get ( 'user' );
 
-        if($u) {
-            $search->where('work_user_id', $u);
+        if($mfo) {
+            $search->where('branch_code', '=', $mfo);
         }
 
-        if($t) {
-            $search->where(function ($query) use ($t) {
+        if($status == 'INC') {
+            $search->where('status', 2); // INCOME IN UNDERWRITER (NEW APP)
+        } elseif ($status == 'CON') {
+            $search->where('status', 3); // CONFIRM FROM UNDERWRITER
+        } elseif ($status == 'EDIT') {
+            $search->where('status', 0); // EDIT IN INSPECTOR
+        } elseif ($status == 'NEW') {
+            $search->where('status', 1); // NEW APP IN INSPECTOR
+        } elseif ($status == 'PAS') {
+            $search->where('status', -1); // PASSIVE APP
+        } elseif ($status == 'DEL') {
+            $search->where('status', -2); // DELETED APP
+        }
 
-                $query->orWhere('branch_code', 'LIKE', '%' . $t . '%');
-                $query->orWhere('client_code', 'LIKE', '%' . $t . '%');
-                $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
-                $query->orWhere('jur_name', 'LIKE', '%' . $t . '%');
-                $query->orWhere('inn', 'LIKE', '%' . $t . '%');
-                $query->orWhere('summa', 'LIKE', '%' . $t . '%');
+        if($user) {
+            $search->where('work_user_id', $user);
+        }
+
+        if($text) {
+            $search->where(function ($query) use ($text) {
+
+                $query->orWhere('client_code', 'LIKE', '%' . $text . '%');
+                $query->orWhere('claim_id', 'LIKE', '%' . $text . '%');
+                $query->orWhere('jur_name', 'LIKE', '%' . $text . '%');
+                $query->orWhere('inn', 'LIKE', '%' . $text . '%');
+                $query->orWhere('summa', 'LIKE', '%' . $text . '%');
             });
         }
 
-        if($d) {
-            $search->where('created_at', 'LIKE', '%'.$d.'%');
+        if($date_s) {
+            $search->whereBetween('created_at', [$date_s.' 00:00:00',$date_e.' 23:59:59']);
         }
 
         $models = $search->paginate(25);
 
         $models->appends ( array (
-            'u' => Input::get ( 'u' ),
-            't' => Input::get ( 't' ),
-            'd' => Input::get ( 'd' )
+            'mfo' => Input::get ( 'mfo' ),
+            'status' => Input::get ( 'status' ),
+            'date_s' => Input::get ( 'date_s' ),
+            'date_e' => Input::get ( 'date_e' ),
+            'text' => Input::get ( 'text' ),
+            'user' => Input::get ( 'user' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
-        $searchUser = MWorkUsers::find($u);
+        $status_names = UwStatusName::where('type', 'jur')->where('user_type', 'uw')->where('isActive', 'A')->get();
+
+        $status_name = UwStatusName::where('type', 'jur')->where('user_type', 'uw')->where('status_code', $status)->first();
+
+        $user = MWorkUsers::find($user);
 
         return view('jur.uw.all-clients',
-            compact('models','u','t','d','users','searchUser'));
+            compact('models','mfo','status_name','date_s','date_e','text','users','user','status_names'));
 
+    }
+
+    public function export(Request $request)
+    {
+
+        return Excel::download(new UwJuidicalClientsExport($request->all()), 'uw_jur_app_'.time().'.xlsx');
     }
 
     /**
@@ -233,7 +268,7 @@ class UwJuridicalClientsController extends Controller
 
             $branchCode = $currentWorkUser->branch_code;
 
-            $localCode = Department::find($currentWorkUser->depart_id);
+            //$localCode = Department::find($currentWorkUser->depart_id);
 
             $lastModelId = UwJuridicalClient::where('branch_code', '=', $branchCode)->latest()->first();
             $claim_id = 1000;
@@ -273,7 +308,7 @@ class UwJuridicalClientsController extends Controller
             $model->loan_type_id = $request->loan_type_id;
             $model->work_user_id = $currentWorkUser->id;
             $model->branch_code = $branchCode;
-            $model->local_code = $localCode->local_code;
+            $model->local_code = $currentWorkUser->local_code;
             $model->save();
 
             return Redirect::to('/jur/clients/1')
@@ -320,6 +355,8 @@ class UwJuridicalClientsController extends Controller
         $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
 
         $balance_class = $this->balanceClass($id);
+
+        //print_r($kias_table); die;
 
         return view('jur.ins.view',
             compact('model', 'kias', 'kias_table', 'balance', 'financial', 'saldos', 'k2','credit_result',
@@ -425,7 +462,7 @@ class UwJuridicalClientsController extends Controller
 
         } else {
 
-            $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'loan_type_id');
+            $inputs = $request->only('hbranch', 'summa', 'owner_form', 'phone', 'oked', 'okpo', 'code_juridical_person', 'loan_type_id');
 
             $inputs['summa'] = $summa;
 
@@ -450,7 +487,7 @@ class UwJuridicalClientsController extends Controller
         //
     }
 
-    public function curlHttpPost($array)
+    public static function curlHttpPost($array)
     {
         $user = 'muksid_iabs';
         $pass = 'zz0102031!@#$';
@@ -536,6 +573,95 @@ class UwJuridicalClientsController extends Controller
 
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'emp'){
+            $emp_code = $array['emp_code'];
+            $query = "
+            select a.*,b.department_code,c.department_name,d.begin_date as begin_work_date,d.work_dep,d.work_post 
+            from hr_emps a, hr_staffing b, hr_s_departments c, hr_emp_works d
+            where 1=1 and A.CONDITION != 'P' and a.staffing_id = b.staffing_id and b.department_code = c.code 
+            and a.emp_id = d.emp_id 
+            and d.work_now = 'Y' 
+            and (a.tab_num like '".$emp_code."' or upper(a.last_name|| ' ' || a.first_name|| ' ' || a.middle_name) like '%".$emp_code."%')            
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'emp_upd_personal'){
+            $cb_id = $array['cb_id'];
+            $query = "
+            select a.* from hr_emps a
+            where 1=1 and a.cb_id = '".$cb_id."' and  A.CONDITION != 'P'          
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'get_emp_insert'){
+            $cb_id = $array['cb_id'];
+            $query = "
+            select a.*,b.department_code,c.department_name,d.begin_date as begin_work_date,d.work_dep,d.work_post 
+            from hr_emps a
+            left join hr_staffing b on a.staffing_id = b.staffing_id
+            left join hr_s_departments c on b.department_code = c.code
+            left join hr_emp_works d on a.emp_id = d.emp_id and d.work_now = 'Y'
+            where 1=1 and a.cb_id = '".$cb_id."' and  A.CONDITION != 'P'          
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'filial_upd'){
+            $query = "
+            select a.* from vl_filials a
+            where 1=1 and a.condition = 'A' and a.code_level in (1,2,3)
+            order by a.code_level, a.code
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'sdep_upd'){
+            $query = "
+            select a.* from hr_s_departments a
+            where 1=1
+            order by a.code
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'role_dep_upd'){
+            $branch_code = $array['branch_code'];
+            $query = "
+            select a.* from hr_departments a
+            where a.filial = '".$branch_code."'
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'emp_get_last_work'){
+            $cb_id = $array['cb_id'];
+            $query = "
+            select a.filial,a.emp_id,a.tab_num,a.last_name,c.parent_code,c.code,c.condition,d.work_now,d.begin_date,d.end_date,
+            d.work_post,d.bank_branch_code from hr_emps a
+            left join hr_staffing b on a.staffing_id = b.staffing_id
+            left join hr_departments c on c.code = b.department_code and b.filial = c.filial
+            left join hr_emp_works d on a.emp_id = d.emp_id
+            where 1=1 and a.cb_id = '".$cb_id."' and d.work_now = 'Y'
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        }
+
+        /*elseif ($type == 'emp_get_cb_ids'){
+            $filial = $array['filial'];
+            //$emp_code = $array['emp_code'];
+            $query = "
+            select a.cb_id, max(a.emp_id) as emp_id, max(a.tab_num) as tab_num, max(a.filial) as filial from hr_emps a
+            where a.condition != 'P' and a.filial = '".$filial."'
+            group  by a.cb_id
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
+        } elseif ($type == 'dep_upd'){
+            $branch_code = $array['branch_code'];
+            $query = "
+            select a.filial,a.code,a.parent_code,a.condition,a.order_by,b.code,b.department_name from hr_departments a
+            left join hr_s_departments b on a.code = b.code
+            where 1=1 and a.condition = 'A' and a.filial = '".$branch_code."' and b.code != '000000'
+            ";
+            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
+            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
         } elseif ($type == 'q'){
             $query = "
             select * from saldo a
@@ -545,19 +671,8 @@ class UwJuridicalClientsController extends Controller
 
             $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
             $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        } elseif ($type == 'emp'){
-            $emp_code = $array['emp_code'];
-            $query = "
-            select a.*,b.department_code,c.department_name,d.begin_date as begin_work_date,d.work_dep,d.work_post 
-            from hr_emps a, hr_staffing b, hr_s_departments c, hr_emp_works d
-            where 1=1 and A.CONDITION != 'P' and a.staffing_id = b.staffing_id and b.department_code = c.code 
-            and a.emp_id = d.emp_id 
-            and d.work_now = 'Y' 
-            and (a.emp_id like '".$emp_code."' or upper(a.last_name|| ' ' || a.first_name|| ' ' || a.middle_name) like '%".$emp_code."%')            
-            ";
-            $data = array('user' => $user, 'pass' => $pass, 'query' => $query);
-            $url = 'https://kpi.turonbank.uz:4343/api/ora/get-client-select';
-        }
+        }*/
+
 
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_URL, $url);
@@ -975,12 +1090,15 @@ class UwJuridicalClientsController extends Controller
         if ($credit_sum >= $credit_canBe){
             $code = 0;
             $message = 'Kredit summasi yetarli emas!!!';
+        } elseif ($model->summa > 500000000){
+            $code = 0;
+            $message = 'Kredit maksimal summasi 500 mln so`m!!!';
         } elseif (!$model->katm_sir){
             $code = 0;
             $message = 'Mijoz KATM dasturidan ro`yhatdan o`tmagan!!!';
         } elseif (!$kias){
             $code = 0;
-            $message = 'KATM KIAS Scoring natijasi tpilmadi!!!';
+            $message = 'KATM KIAS Scoring natijasi topilmadi!!!';
         } else {
             $model = UwJuridicalClient::find($id);
             $model->update(['status' => 2]);

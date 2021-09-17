@@ -57,13 +57,13 @@ class UwLoanTypesController extends Controller
 
         $checkedBanks = UwLoanBank::where('loan_types_id', $id)->get();
 
-        $enableBanks = $checkedBanks->implode('depart_id', ',');
+        $enableBanks = $checkedBanks->implode('branch_code', ',');
 
         $enableBanks = explode(',', $enableBanks);
 
-        $checkedModel = Department::whereIn('id', $enableBanks)->get();
+        $checkedModel = Filials::whereIn('filial_code', $enableBanks)->get();
 
-        $model = Department::whereNotIn('id', $enableBanks)->where('parent_id', 0)->get();
+        $model = Filials::whereNotIn('filial_code', $enableBanks)->get();
 
 
         return response()->json(['model' => $model, 'checkedModel' => $checkedModel, 'enableBanks' => $enableBanks, 'loanName' => $loanName]);
@@ -88,8 +88,9 @@ class UwLoanTypesController extends Controller
             {
                 $model = new UwLoanBank();
                 $model->loan_types_id = $loan_id;
-                $model->filials_id = $filial;
-                $model->depart_id = $filial;
+                $model->filials_id = 0;
+                $model->depart_id = 0;
+                $model->branch_code = $filial;
                 $model->isActive = 1;
                 $model->save();
             }
@@ -221,4 +222,12 @@ class UwLoanTypesController extends Controller
             'code'=>201
         ]);
     }
+
+    public function getLoans($code){
+
+        $models = UwLoanTypes::where('credit_type', '=', $code)->where('isActive', 1)->get();
+
+        return response()->json($models);
+    }
+
 }

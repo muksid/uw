@@ -260,14 +260,14 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-3">
+                                                    {{--<div class="col-md-3">
                                                         <div class="form-group">
                                                             <label for="inn" class="control-label">STIR</label>
                                                             <input type="number" class="form-control"
                                                                    style="width: 100%" id="inn"
                                                                    name="inn" value="">
                                                         </div>
-                                                    </div>
+                                                    </div>--}}
 
                                                     <div class="col-md-3">
                                                         <div class="form-group">

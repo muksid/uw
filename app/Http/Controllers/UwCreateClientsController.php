@@ -12,6 +12,7 @@ use App\UwClientGuars;
 use App\UwClients;
 use App\UwGuarType;
 use App\UwLoanTypes;
+use App\UwClientDebtors;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,7 +46,7 @@ class UwCreateClientsController extends Controller
             } else {
                 $models = UwLoanTypes::whereHas('banks',
                     function ($query) use ($depart) {
-                        $query->where('depart_id', $depart->gen_dep_id);
+                        $query->where('branch_code', $depart->branch_code);
                         $query->where('isActive', 1);
                     })
                     ->where('credit_type', $request->credit_type)
@@ -250,7 +251,7 @@ class UwCreateClientsController extends Controller
         $summa = str_replace(' ', '', $str_summa);
 
         $branchCode = $currentWorkUser->branch_code;
-        $localCode = Department::find($currentWorkUser->depart_id);
+        //$localCode = Department::find($currentWorkUser->depart_id);
 
         $lastModelId = UwClients::where('branch_code', '=', $branchCode)->latest()->first();
 
@@ -260,7 +261,7 @@ class UwCreateClientsController extends Controller
         $claim_id = '1'.$branchCode.$claim_number;
         $model->work_user_id = $currentWorkUser->id;
         $model->branch_code = $branchCode;
-        $model->local_code = $localCode->local_code;
+        $model->local_code = $currentWorkUser->local_code;
         $model->claim_id = $claim_id;
         $model->claim_date = today();
         $model->claim_number = $claim_number;
@@ -274,6 +275,7 @@ class UwCreateClientsController extends Controller
         $model->phone = $phone;
         $model->katm_sir = "";
         $model->loan_type_id = $loanType->id;
+        $model->credit_type = $loanType->credit_type;
         $model->summa = $summa;
         $model->status = 1;
 
@@ -314,6 +316,8 @@ class UwCreateClientsController extends Controller
 
         $districts = UnDistricts::where('status', 1)->get();
 
+        $modelDebtors = UwClientDebtors::where('uw_clients_id',$model->id)->get();
+
         $sch_type_d = 'checked';
         $sch_type_a = '';
         if ($model->sch_type == 2){
@@ -322,7 +326,7 @@ class UwCreateClientsController extends Controller
         }
 
         return view('phy.ins.create-i-step-result',
-            compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
+            compact('model', 'modelComments', 'regions', 'districts', 'modelDebtors', 'sch_type_d', 'sch_type_a'));
     }
 
     /**
@@ -344,16 +348,22 @@ class UwCreateClientsController extends Controller
 
             return datatables()->of(UwClientGuars::where('uw_clients_id', $id)->get())
                 ->addColumn('action', function($data) use ($disabled) {
-                    $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-guar '.$disabled.'">
-<span class="glyphicon glyphicon-pencil"></span></a>';
+
+                    $button ='<a href="javascript:void(0)" data-id="'.$data->id.'" class="edit edit-guar '.$disabled.'">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                              </a>';
                     $button .= '&nbsp;&nbsp;';
-                    $button .= ' | <a href="javascript:void(0);" id="delete-guar" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
- <span class="glyphicon glyphicon-trash"></span></a>';
+
+                    $button .= ' | <a href="javascript:void(0);" id="delete-guar" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                 </a>';
+
                     return $button;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
+
     }
 
     /**

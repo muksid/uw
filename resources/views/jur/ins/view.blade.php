@@ -1,4 +1,4 @@
-@extends('uw_log.uw.dashboard')
+@extends('layouts.dashboard')
 
 @section('content')
 
@@ -68,7 +68,7 @@
                                         <td><strong>OKED:</strong></td>
                                         <td>{{ $model->oked }}</td>
                                         <td><strong>OKPO:</strong></td>
-                                        <td>{{ $model->okpo }}</td>
+                                        <td>{{ $model->okpo }} : {{ $model->code_juridical_person }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Filial:</strong></td>
@@ -390,13 +390,17 @@
                                                                                         </td>
                                                                                     @endforeach
                                                                                 </tr>
-                                                                            @elseif($key = 28)
+                                                                            @elseif($key == 28)
                                                                                 <tr>
                                                                                     @foreach($value['td'] as $key1 => $value1)
                                                                                         <td colspan="{{ $value1['colspan']??1 }}" style="{{ $value1['style']??'' }}">
                                                                                             @if($key1 == 2)
                                                                                                 @foreach($value1['span'] as $key2 => $value2)
+                                                                                                    @if($key2 == 2)
+                                                                                                        ---
+                                                                                                    @else
                                                                                                     <span id="{{ $value2['id']??''}}">{{ $value2['span']??'' }}</span><br>
+                                                                                                    @endif
                                                                                                 @endforeach
                                                                                             @else
                                                                                                 {{ $value1['content']??'-' }}
@@ -1247,7 +1251,18 @@
                                         for (let j = 0; j < row_l['span'].length; j++) {
                                             let row_ll = row_l['span'][j];
                                             if (row_ll['span'] !== undefined){
-                                                data+='<span id="'+row_ll['id']+'">'+row_ll['span']+'</span><br>';
+                                                if (j === 2) {
+                                                    if (Array.isArray(row_ll['span']['content'])) {
+                                                        for (let k = 0; k < row_ll['span']['content'].length; k++) {
+                                                            let row_k = row_ll['span']['content'][k];
+                                                            data+= row_k+'<br>';
+                                                        }
+                                                    } else {
+                                                        data+='<span id="'+row_ll['id']+'">'+row_ll['span']+'</span><br>';
+                                                    }
+                                                } else {
+                                                    data+='<span id="'+row_ll['id']+'">'+row_ll['span']+'</span><br>';
+                                                }
                                             }
                                         }
                                         data+='</td>';

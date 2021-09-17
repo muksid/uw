@@ -34,7 +34,7 @@
                         <!-- Menu Footer-->
                         <li class="user-footer">
                             <div class="pull-left">
-                                <a href="{{ route('users.edit', Auth::id()) }}" class="btn btn-default btn-flat">@lang('blade.profile')</a>
+                                <a href="{{ url('/madmin/user/profile', \Illuminate\Support\Facades\Auth::id()) }}" class="btn btn-default btn-flat">@lang('blade.profile')</a>
                             </div>
                             <div class="pull-right">
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

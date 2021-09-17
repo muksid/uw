@@ -11,6 +11,7 @@ class UwLoanBank extends Model
         'loan_types_id',
         'filials_id',
         'depart_id',
+        'branch_code',
         'startDate',
         'endDate',
         'isActive'

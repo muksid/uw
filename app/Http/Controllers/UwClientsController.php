@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Department;
 use App\MWorkUsers;
+use App\PhyMyidClient;
 use App\UnDistricts;
 use App\UnRegions;
 use App\User;
@@ -60,19 +61,18 @@ class UwClientsController extends Controller
     public function CsIndex($status)
     {
         //
-        $currentWorkUser = MWorkUsers::with('department')->where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
+        $currentWorkUser = MWorkUsers::where('user_id', Auth::id())->where('isActive', 'A')->firstOrFail();
 
         $models = UwClients::where('id', 0)->get();
+
         if ($currentWorkUser){
+
             $user = MWorkUsers::where('user_id', Auth::id())->get()->pluck('id');
+
             $workUserIds = $user->toArray();
 
-            $local_code_id = $currentWorkUser->department->id??0;
-
-            $local_code = Department::find($local_code_id);
-
-            $models = UwClients::where('branch_code', '=',$local_code->branch_code)
-                ->where('local_code', '=',$local_code->local_code)
+            $models = UwClients::where('branch_code', '=',$currentWorkUser->branch_code)
+                //->where('local_code', '=',$currentWorkUser->local_code)
                 ->whereIn('work_user_id', $workUserIds)
                 ->where('status', $status)
                 ->orderBy('id', 'DESC')
@@ -102,7 +102,7 @@ class UwClientsController extends Controller
                 $query->orWhere('iabs_num', 'LIKE', '%' . $t . '%');
                 $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
                 $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$t.'%']);
-                $query->orWhere('inn', 'LIKE', '%' . $t . '%');
+                $query->orWhere('pin', 'LIKE', '%' . $t . '%');
                 $query->orWhere('summa', 'LIKE', '%' . $t . '%');
 
             });
@@ -121,7 +121,7 @@ class UwClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -138,7 +138,11 @@ class UwClientsController extends Controller
         $d = Input::get ( 'd' );
 
         if($u) {
-            $search->where('work_user_id', $u);
+            //print_r($u); die;
+            $user = MWorkUsers::where('user_id', $u)->get()->pluck('id');
+            $workUserIds = $user->toArray();
+
+            $search->whereIn('work_user_id', $workUserIds);
         }
 
         if($t) {
@@ -147,7 +151,7 @@ class UwClientsController extends Controller
                 $query->orWhere('iabs_num', 'LIKE', '%' . $t . '%');
                 $query->orWhere('claim_id', 'LIKE', '%' . $t . '%');
                 $query->orWhereRaw("CONCAT(`family_name`, ' ', `name`,' ', `patronymic`) LIKE ?", ['%'.$t.'%']);
-                $query->orWhere('inn', 'LIKE', '%' . $t . '%');
+                $query->orWhere('pin', 'LIKE', '%' . $t . '%');
                 $query->orWhere('summa', 'LIKE', '%' . $t . '%');
 
             });
@@ -165,7 +169,7 @@ class UwClientsController extends Controller
             'd' => Input::get ( 'd' )
         ) );
 
-        $users = User::select('id')->where('status', 1)->where('isUw', 1)->get();
+        $users = User::select('id')->where('isActive', 'A')->get();
 
         $searchUser = MWorkUsers::find($u);
 
@@ -177,6 +181,8 @@ class UwClientsController extends Controller
     {
         //
         $model = UwClients::findOrFail($id);
+
+        $myIdClient = PhyMyidClient::where('pinfl', '=',$model->pin)->first();
 
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
@@ -195,7 +201,7 @@ class UwClientsController extends Controller
         $kias_history = UwPhyKatmFile::where('uw_clients_id', $id)->where('uw_katm_id', 0)->where('file_type', '=', 'B64_K_HIS')->first();
 
         return view('phy.uw.view',
-            compact('model', 'modelComments', 'duplicateClients', 'sch_type_d', 'sch_type_a', 'kias_history'));
+            compact('model', 'modelComments', 'duplicateClients', 'sch_type_d', 'sch_type_a', 'kias_history', 'myIdClient'));
     }
 
     public function superAdminView($id,$claim_id)
@@ -418,23 +424,23 @@ class UwClientsController extends Controller
         $user = DB::table('users')
             ->join('m_personal_users', 'users.id', '=', 'm_personal_users.user_id')
             ->join('m_work_users', 'users.id', '=', 'm_work_users.user_id')
-            ->join('departments', 'm_work_users.depart_id', '=', 'departments.id')
+            //->join('departments', 'm_work_users.depart_id', '=', 'departments.id')
             ->select('m_work_users.id as work_user_id',
                 DB::raw('CONCAT(m_personal_users.l_name," ", m_personal_users.f_name) AS full_name'),
-                'm_work_users.branch_code as filial_code', 'departments.title as filial_name')
+                'm_work_users.branch_code as filial_code')
             ->where('m_work_users.isActive', '=','A')
             ->where('m_work_users.id',$model->work_user_id)
             ->first();
 
         $csUsers = DB::table('users')
             ->join('m_personal_users', 'users.id', '=', 'm_personal_users.user_id')
+            //->join('departments', 'm_work_users.depart_id', '=', 'departments.id')
             ->join('m_work_users', 'users.id', '=', 'm_work_users.user_id')
-            ->join('departments', 'm_work_users.depart_id', '=', 'departments.id')
             ->select('m_work_users.id as work_user_id',
                 DB::raw('CONCAT(m_personal_users.l_name," ", m_personal_users.f_name) AS full_name'),
-                'm_work_users.branch_code as filial_code', 'departments.title as filial_name')
-            ->where('users.status', '=',1)
-            ->where('users.isUw','=', 1)
+                'm_work_users.branch_code as filial_code')
+            ->where('users.isActive', '=','A')
+            //->where('users.isUw','=', 1)
             ->where('m_work_users.isActive', '=','A')
             ->get();
 

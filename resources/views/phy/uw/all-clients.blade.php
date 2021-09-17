@@ -67,8 +67,8 @@
 
                                             @if(!empty($users))
                                                 @foreach($users as $key => $value)
-                                                    <option value="{{$value->currentWork->id}}">
-                                                        {{$value->currentWork->branch_code??''}} - {{$value->personal->l_name??''}} {{$value->personal->f_name??''}}
+                                                    <option value="{{ $value->id }}">
+                                                        {{ $value->currentWork->branch_code??'-' }} - {{ $value->personal->l_name??'-' }} {{ $value->personal->f_name??'-' }}
                                                     </option>
                                                 @endforeach
                                             @endif
@@ -80,7 +80,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group has-success">
                                         <input type="text" class="form-control" name="t" value="{{ $t }}"
-                                               placeholder="% IABS, ARIZA, FIO, STIR, SUMMA, FILIAL">
+                                               placeholder="% IABS, ARIZA, FIO, PINFL, SUMMA, FILIAL">
                                     </div>
                                 </div>
 
@@ -127,7 +127,6 @@
                                 <th>IABS</th>
                                 <th>Ariza #</th>
                                 <th>Mijoz FIO</th>
-                                <th>STIR</th>
                                 <th>Summa</th>
                                 <th>Status</th>
                                 <th>OnReg</th>
@@ -142,7 +141,9 @@
                                 @foreach ($models as $key => $model)
                                     <tr id="rowId_{{ $model->id }}" class="text-sm">
                                         <td>{{ $i++ }}</td>
-                                        <td class="text-maroon">{{ $model->loanType->title??'' }}</td>
+                                        <td class="text-maroon">
+                                            {!! \Illuminate\Support\Str::words($model->loanType->title??'', '2') !!}
+                                        </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-info" id="editClient"
                                                     data-id="{{ $model->id }}">
@@ -158,7 +159,6 @@
                                                {{ $model->family_name. ' '.$model->name. ' '.$model->patronymic}}
                                             </a>
                                         </td>
-                                        <td>{{ $model->inn }}</td>
                                         <td>{{ number_format($model->summa) }}</td>
                                         <td>
                                             @if($model->status == 0)
@@ -190,10 +190,10 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td><span class="badge bg-light-blue-active">{{ $model->filial->filial_code??'' }}</span>
+                                        <td><span class="badge bg-light-blue-active">{{ $model->branch_code??'' }}</span>
                                             - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
                                         </td>
-                                        <td class="text-green">{{ $model->currentWork->personal->l_name??'-' }} {{ $model->currentWork->personal->f_name??'-' }}</td>
+                                        <td class="text-green">{{ $model->inspector->personal->l_name??'-' }} {{ $model->inspector->personal->f_name??'-' }}</td>
                                         <td>
                                             {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                         </td>
@@ -441,10 +441,14 @@
 
                         $('#cs_user_id').empty();
 
-                        $('#cs_user_id').append('<option value="'+data.user.work_user_id+'" selected>'+data.user.filial_code+' - '+data.user.full_name+' - '+data.user.filial_name+ '</option>');
+                        if (data.user) {
+
+                            $('#cs_user_id').append('<option value="'+data.user.work_user_id+'" selected>'+data.user.filial_code+' - '+data.user.full_name+ '</option>');
+
+                        }
 
                         $.each( data.csUsers, function(k, v) {
-                            $('#cs_user_id').append($('<option>', {value:v.work_user_id, text:v.filial_code+' - '+v.full_name+' - '+v.filial_name}));
+                            $('#cs_user_id').append($('<option>', {value:v.work_user_id, text:v.filial_code+' - '+v.full_name}));
                         });
 
                     })

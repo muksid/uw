@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Session;
 Route::get('/', function () {
     return view('auth.login');
 });
-
 Route::get('locale/{locale}', function ($locale){
     Session::put('locale', $locale);
     return redirect()->back();
@@ -20,6 +19,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/', 'HomeController@index')->name('home');
     Route::get('/home', 'HomeController@index')->name('home');
 
+    Route::get('cbids','HomeController@updateUserCBIds');
     // ADMIN
     Route::group(['prefix'=>'madmin'], function(){
         // LOG CACHE
@@ -27,10 +27,23 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('get-log-file', 'HomeController@getLogFile');
         Route::get('cache/{type}', 'HomeController@cacheClear');
 
-        // DEPARTMENT
+        // FILIAL
+        Route::resource('filial','FilialController');
+        Route::any('filial','FilialController@index');
+        Route::get('filial-get-update-ora','FilialController@getUpdateOra');
+        Route::get('update-role-department/{code}','FilialController@updateRoleDepartment');
+
+        // OLD DEPARTMENT
         Route::resource('departments','DepartmentController');
         Route::any('departments','DepartmentController@index');
         Route::post('get-department','DepartmentController@getDepartment');
+        //Route::get('update-department/{id}','DepartmentController@updateDepartment');
+
+        // DEPARTMENT
+        Route::any('s-departments','DepartmentController@sDepartments');
+        Route::get('update-s-departments','DepartmentController@updateSDepartments');
+        Route::get('get-s-department/{id}','DepartmentController@getSDepartment');
+        Route::post('edit-s-department','DepartmentController@editSDepartment');
         Route::post('get-sub-department','DepartmentController@subDepartment');
         Route::post('get-districts','DepartmentController@getDistricts');
         Route::post('get-reg-districts','DepartmentController@getRegDistricts');
@@ -53,17 +66,28 @@ Route::group(['middleware' => ['auth']], function() {
 
         // USERS
         Route::resource('users','UserController');
-        Route::any('users-search','UserController@index');
+        Route::any('users','UserController@index');
         Route::get('users-username-check/{username}','UserController@usernameCheck');
         Route::get('users-get-branch/{id}','UserController@getBranch');
         Route::post('users-update','UserController@updateUser');
+        Route::post('user/username-update/{user_id}','UserController@usernameUpdate');
         Route::get('ora-emp-search','UwJuridicalClientsController@getOraEmpSearch');
+        Route::get('user/profile/{id}','UserController@profile');
+        Route::post('user/profile-update/{id}','UserController@profileUpdate');
+
+        // ORA USERS
+        Route::get('ora-index','UserController@oraIndex');
+        Route::get('update-user-info/{id}','UserController@updateUserInfo');
+        Route::get('update-user-work/{user_id}','UserController@updateUserWork');
+        Route::post('user/role-update/{user_id}','UserController@updateUserRoles');
+        Route::get('get-user-info/{id}','UserController@getUserInfo');
+        Route::get('users/delete/{id}','UserController@destroy');
+        Route::post('users/store-new','UserController@storeNew');
 
         // WORK USERS
         Route::resource('work-users','MWorkUsersController');
         Route::get('work-users-tab_num-check/{tab_num}','MWorkUsersController@tab_numCheck');
         Route::get('work-users/get-roles/{id}','MWorkUsersController@getRoles');
-        Route::get('work-users/get-history/{id}','MWorkUsersController@getHistory');
         Route::get('work-users/get-history-roles/{id}','MWorkUsersController@getHistoryRoles');
         Route::get('work-users/activate-user/{id}','MWorkUsersController@activateUser');
 
@@ -77,6 +101,7 @@ Route::group(['middleware' => ['auth']], function() {
         Route::delete('loan-types/{id}', 'UwLoanTypesController@destroy');
         Route::get('get-loan-banks/{id}', 'UwLoanTypesController@getBanks');
         Route::post('store-loan-banks', 'UwLoanTypesController@storeBanks');
+        Route::get('get-loans/{code}', 'UwLoanTypesController@getLoans');
 
         // GUAR TYPES
         Route::resource('guar-type', 'UwGuarTypesController');
@@ -123,9 +148,19 @@ Route::group(['middleware' => ['auth']], function() {
         Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
         Route::post('client-send-to-uw', 'UwClientsController@csAppSend');
 
+        //INS CREATE NEW
+        Route::get('client/create/new', 'PhysicalClientCreateController@index');
+        Route::post('client/create/personal', 'PhysicalClientCreateController@createPersonal');
+        Route::get('client/form/{id}', 'PhysicalClientCreateController@clientForm');
+        Route::post('client/create/app', 'PhysicalClientCreateController@createApp');
+        Route::get('client/image/{id}', 'PhysicalClientCreateController@displayImage');
+
+
         // DEBTORS
         Route::resource('client-debtors', 'UwClientDebtorsController');
         Route::get('get-uw-debtor/{id}', 'UwClientDebtorsController@onlineDebtorsRegistration');
+        Route::post('client/reg-debtor', 'UwDebtorController@postKatm');
+        Route::get('client/get-deb-salary','UwDebtorController@getSalary');
 
         // GUAR
         Route::get('client/get-guars/{id}', 'UwCreateClientsController@getClientGuars');
@@ -176,6 +211,8 @@ Route::group(['middleware' => ['auth']], function() {
 
         Route::get('get-hr_emps','UwJuridicalClientsController@getHrEmps');
 
+        Route::post('export', 'UwJuridicalClientsController@export')->name('export');
+
     });
 
 
@@ -213,4 +250,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/uw/get-app-blank/{claim_id}','UwClientsController@getAppBlank');*/
 
 });
+
+
 

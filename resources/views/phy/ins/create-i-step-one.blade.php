@@ -300,7 +300,7 @@
                                             <label>Ish joy manzili<span class="text-red">*</span></label>
                                             <input type="text" name="job_address"
                                                    class="form-control" value="{{ $model->job_address ?? '' }}"
-                                                   placeholder="Ij joy manzili" required>
+                                                   placeholder="Ish joy manzili" required>
 
                                         </div>
                                     </div>

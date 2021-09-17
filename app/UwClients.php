@@ -54,20 +54,19 @@ class UwClients extends Model
         return $this->belongsTo(MWorkUsers::class,'work_user_id','id')->where('isActive', 'A');
     }
 
-    public function department()
+    public function inspector()
     {
-        return $this->belongsTo(Department::class,'local_code','local_code')->where('status', 1);
+        return $this->belongsTo(MWorkUsers::class,'work_user_id','id');
     }
 
+    public function department()
+    {
+        return $this->belongsTo(SDepartments::class,'local_code','local_code');
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
-    }
-
-    public function uwUser()
-    {
-        return $this->belongsTo(UwUsers::class,'user_id', 'user_id')->where('status', 1);
     }
 
     public function filial()

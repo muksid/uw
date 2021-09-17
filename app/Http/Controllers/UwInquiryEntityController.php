@@ -21,6 +21,35 @@ use Illuminate\Support\Facades\Storage;
 class UwInquiryEntityController extends Controller
 {
     //
+    public $URL_INQ_IND  = 'http://10.22.50.3:8000/inquiry/individual';
+    public $URL_INQ_ENT  = 'http://10.22.50.3:8000/inquiry/entity';
+    public $URL_CREDIT_REPORT  = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
+    public $URL_CREDIT_REPORT_STATUS  = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
+
+    public function curlHttpPost($array)
+    {
+        $url = $array['url'];
+        $post = $array['data'];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
+        curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8001');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        //print_r($result); die;
+
+        return $result;
+
+    }
+
     public function onlineRegistration(Request $request)
     {
         //
@@ -41,7 +70,7 @@ class UwInquiryEntityController extends Controller
         }
 
         if ($modelClient->client_type == '11'){
-            $url = 'http://10.22.50.3:8000/inquiry/individual';
+            $url = $this->URL_INQ_IND;
 
             $personal = UwJurClientPersonal::where('jur_clients_id', $id)->first();
 
@@ -91,7 +120,7 @@ class UwInquiryEntityController extends Controller
 
         } else {
 
-            $url = 'http://10.22.50.3:8000/inquiry/entity';
+            $url = $this->URL_INQ_ENT;
 
             $data = array(
                 "header" => array(
@@ -133,9 +162,9 @@ class UwInquiryEntityController extends Controller
 
         }
 
-        $postdata = json_encode($data);
+        $postData = json_encode($data);
 
-        $ch = curl_init($url);
+        /*$ch = curl_init($url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -146,7 +175,12 @@ class UwInquiryEntityController extends Controller
         curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8000');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
-        curl_close($ch);
+        curl_close($ch);*/
+        $arr_curl = array(
+            'url' => $url,
+            'data' => $postData
+        );
+        $result = $this->curlHttpPost($arr_curl);
 
         $data_decode = json_decode($result, true);
         $code = $data_decode['result']['code'];
@@ -202,12 +236,15 @@ class UwInquiryEntityController extends Controller
 
         if ($isKATM){
 
-            return response()->json([
+            $isKATM->update(['status' => 0]);
+
+            /*return response()->json([
                     'success' => 'Mijoz KATM Scoring ma`lumotlari yangilandi!',
                     'code' => '05000',
                     'data' => $isKATM
-                ]);
+                ]);*/
         }
+
         $model = UwJuridicalClient::find($id);
 
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
@@ -229,7 +266,7 @@ class UwInquiryEntityController extends Controller
 
         $postData = json_encode($data);
 
-        $ch = curl_init($url);
+        /*$ch = curl_init($url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -240,7 +277,13 @@ class UwInquiryEntityController extends Controller
         curl_setopt($ch, CURLOPT_PROXY, '10.22.50.3:8001');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $result = curl_exec($ch);
-        curl_close($ch);
+        curl_close($ch);*/
+
+        $arr_curl = array(
+            'url' => $url,
+            'data' => $postData
+        );
+        $result = $this->curlHttpPost($arr_curl);
 
         $data_decode = json_decode($result, true);
 
@@ -293,7 +336,7 @@ class UwInquiryEntityController extends Controller
     public function creditReportStatusK($id, $branch_code, $token, $claim_id, $client_type)
     {
         //
-        $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
+        //$url = 'http://10.22.50.3:8001/katm-api/v1/credit/report/status';
 
         $data = array(
             "security" => array(
@@ -313,7 +356,7 @@ class UwInquiryEntityController extends Controller
 
         $postData = json_encode($data);
 
-        $ch1 = curl_init($url);
+        /*$ch1 = curl_init($url);
         curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch1, CURLOPT_POST, 1);
@@ -324,7 +367,13 @@ class UwInquiryEntityController extends Controller
         curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
         curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $json_data = curl_exec($ch1);
-        curl_close($ch1);
+        curl_close($ch1);*/
+
+        $arr_curl = array(
+            'url' => $this->URL_CREDIT_REPORT_STATUS,
+            'data' => $postData
+        );
+        $json_data = $this->curlHttpPost($arr_curl);
 
         $json_data_decode = json_decode($json_data, true);
 
@@ -525,7 +574,7 @@ class UwInquiryEntityController extends Controller
 
         $client = UwJuridicalClient::find($id);
 
-        $base_url = 'http://10.22.50.3:8001/katm-api/v1/credit/report/';
+        //$base_url = 'http://10.22.50.3:8001/katm-api/v1/credit/report/';
 
         $postParam = array(
             "security" => array(
@@ -546,7 +595,7 @@ class UwInquiryEntityController extends Controller
 
         $postParamEncode = json_encode($postParam);
 
-        $ch1 = curl_init($base_url);
+        /*$ch1 = curl_init($base_url);
         curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch1, CURLOPT_POST, 1);
@@ -557,7 +606,12 @@ class UwInquiryEntityController extends Controller
         curl_setopt($ch1, CURLOPT_PROXY, '10.22.50.3:8001');
         curl_setopt($ch1, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         $json_data = curl_exec($ch1);
-        curl_close($ch1);
+        curl_close($ch1);*/
+        $arr_curl = array(
+            'url' => $this->URL_CREDIT_REPORT,
+            'data' => $postParamEncode
+        );
+        $json_data = $this->curlHttpPost($arr_curl);
 
         $json_data_decode = json_decode($json_data, true);
 
@@ -569,6 +623,15 @@ class UwInquiryEntityController extends Controller
                 $base64_decode = base64_decode($json_data_decode['data']['reportBase64']);
                 $json_decode_arr = json_decode($base64_decode, true);
                 $base_data = $json_decode_arr['report']['data'];
+
+                $clientComment = new UwJurClientComment();
+                $clientComment->jur_clients_id = $id;
+                $clientComment->work_user_id = Auth::user()->currentWork->id??'0';
+                $clientComment->code = $result_code;
+                $clientComment->title = '(code:'.$code.') Moliyaviy hisobot muvaffaqiyatli saqlandi ('.$type.')';
+                $clientComment->json_data = '';
+                $clientComment->process_type = 'BAL';
+                $clientComment->save();
 
                 if ($pReportId == '060'){
 

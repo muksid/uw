@@ -1,12 +1,11 @@
-@extends('uw_log.uw.dashboard')
-<link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+@extends('layouts.dashboard')
 
 @section('content')
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Mijoz ma`lumotlari
+            Yuridik Mijoz ma`lumotlari
             <small>jadval</small>
         </h1>
         <ol class="breadcrumb">
@@ -265,18 +264,6 @@
             <!-- /.col -->
         </div>
 
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-        <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
-
-        <link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
-
-        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
-        <!-- InputMask -->
-        <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.js') }}"></script>
-        <script src="{{ asset('/admin-lte/plugins/input-mask/jquery.inputmask.extensions.js') }}"></script>
         <script>
             $("#loading").hide();
 

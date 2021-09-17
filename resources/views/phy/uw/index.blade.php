@@ -5,8 +5,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Jismoniy shaxslar
-            <small>arizalar</small>
+            Arizalar
+            <small>jismoniy shaxslar</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
@@ -68,7 +68,7 @@
 
                                             @if(!empty($users))
                                                 @foreach($users as $key => $value)
-                                                    <option value="{{$value->currentWork->id}}">
+                                                    <option value="{{$value->currentWork->id??0}}">
                                                         {{$value->currentWork->branch_code??''}} - {{$value->personal->l_name??''}} {{$value->personal->f_name??''}}
                                                     </option>
                                                 @endforeach
@@ -81,7 +81,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group has-success">
                                         <input type="text" class="form-control" name="t" value="{{ $t }}"
-                                               placeholder="(iabs, ariza#, fio, inn, summa, mfo)">
+                                               placeholder="% IABS, ARIZA, FIO, PINFL, SUMMA, FILIAL">
                                     </div>
                                 </div>
 
@@ -125,7 +125,7 @@
                                 <th>IABS #</th>
                                 <th>Ariza #</th>
                                 <th>Mijoz Nomi</th>
-                                <th>STIR</th>
+                                <th>PINFL</th>
                                 <th>Summa</th>
                                 <th class="text-center">@lang('blade.status')</th>
                                 <th><i class="fa fa-bank"></i> Filial Nomi</th>
@@ -151,24 +151,23 @@
                                             {{ $model->family_name. ' '.$model->name. ' '.$model->patronymic}}
                                         </a>
                                     </td>
-                                    <td>{{ $model->inn }}</td>
+                                    <td>{{ $model->pin }}</td>
                                     <td><b>{{ number_format($model->summa, 2) }}</b></td>
-
                                     <td>
                                         @if($model->status == 0)
                                             <span class="badge bg-red-active">Taxrirlashda</span>
-                                            @elseif($model->status == 2)
+                                        @elseif($model->status == 2)
                                             <span class="badge bg-yellow-active">Yangi</span>
-                                            @elseif($model->status == 3)
+                                        @elseif($model->status == 3)
                                             <span class="badge bg-aqua-active">Tasdiqlandi</span>
-                                            @elseif($model->status == 4)
+                                        @elseif($model->status == 4)
                                             <span class="badge bg-aqua-active">Yopilgan</span>
                                         @endif
                                     </td>
-                                    <td><span class="badge bg-light-blue-active">{{ $model->filial->filial_code??'' }}</span>
-                                       - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
+                                    <td class="text-sm"><span class="badge bg-light-blue-active">{{ $model->branch_code??'' }}</span>
+                                        - {!! \Illuminate\Support\Str::words($model->department->title??'Филиал', '3') !!}
                                     </td>
-                                    <td class="text-green">{{ $model->currentWork->personal->l_name??'' }} {{ $model->currentWork->personal->f_name??'' }}</td>
+                                    <td class="text-green">{{ $model->inspector->personal->l_name??'-' }} {{ $model->inspector->personal->f_name??'-' }}</td>
                                     <td>
                                         {{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i')  }}<br>
                                         <span class="text-maroon"> ({{$model->created_at->diffForHumans()}})</span>
@@ -300,15 +299,6 @@
             <!-- /.col -->
         </div>
 
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-        <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
-
-        <link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
-
-        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
         <script>
 
             $(function () {

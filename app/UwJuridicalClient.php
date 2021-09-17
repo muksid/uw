@@ -45,6 +45,11 @@ class UwJuridicalClient extends Model
         return $this->belongsTo(MWorkUsers::class,'work_user_id')->where('isActive', 'A');
     }
 
+    public function filial()
+    {
+        return $this->belongsTo(Filials::class,'branch_code', 'filial_code');
+    }
+
     public function department()
     {
         return $this->belongsTo(Department::class,'local_code', 'local_code');
@@ -63,6 +68,13 @@ class UwJuridicalClient extends Model
     public function district()
     {
         return $this->belongsTo(UnDistricts::class,'registration_district', 'code');
+    }
+
+    public function uwStatus()
+    {
+        return $this->belongsTo(UwStatusName::class,'status', 'code')
+            ->where('type', 'jur')
+            ->where('user_type', 'uw');
     }
 
 }

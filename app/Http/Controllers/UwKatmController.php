@@ -8,6 +8,7 @@ use App\UwInpsClients;
 use App\UwKatmClients;
 use App\UwLoanTypes;
 use App\UwPhyInpsBaseFile;
+use App\UwPhyKatmBaseFile;
 use App\UwPhyKatmFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -804,6 +805,13 @@ class UwKatmController extends Controller
                     $clientComment->json_data = '';
                     $clientComment->process_type = 'KS';
                     $clientComment->save();
+
+                    // save katm base file
+                    $katmBaseFile = new UwPhyKatmBaseFile();
+                    $katmBaseFile->uw_clients_id = $model_id;
+                    $katmBaseFile->uw_katm_id = $katm->id;
+                    $katmBaseFile->base_file = $txt_base64;
+                    $katmBaseFile->save();
 
                     // save katm file (base64 txt)
                     $katmFile = new UwPhyKatmFile();
