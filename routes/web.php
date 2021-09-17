@@ -167,7 +167,7 @@ Route::group(['middleware' => ['auth']], function() {
 
         // DEBTORS
         Route::resource('client-debtors', 'UwClientDebtorsController');
-        Route::get('get-uw-debtor/{id}', 'UwClientDebtorsController@onlineDebtorsRegistration');
+        Route::post('debtor-client/online-reg', 'UwClientDebtorsController@postKatm');
 
         // GUAR
         Route::get('client/get-guars/{id}', 'UwCreateClientsController@getClientGuars');

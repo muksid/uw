@@ -514,6 +514,7 @@ class UwInquiryIndividualController extends Controller
     public function getClientSalary($id, $claim_id, $branch_code, $is_inps)
     {
         //
+        return $this->getClientSalaryInps($id, $claim_id, $branch_code, $is_inps);
         $inps_client = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
         if ($inps_client) {

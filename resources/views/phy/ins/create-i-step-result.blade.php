@@ -1629,6 +1629,43 @@
 
                 });
 
+
+                // ONLINE REG DEBTOR CLIENT
+                $('body').on('click', '.reg-debtor',function(e){
+                    e.preventDefault();
+                    let debtor_id = $(this).data('id');
+
+                    let post_type = 'reg';
+
+                    $.ajax({
+                        url: "{{ url('/phy/debtor-client/online-reg') }}",
+                        data: {debtor_id: debtor_id, post_type: post_type},
+                        dataType: 'JSON',
+                        type: 'POST',
+                        beforeSend: function(){
+
+                            $("#loading-gif").show();
+
+                        },
+                        success: function(response){
+                            console.log(response);
+                            $("#loading-gif").hide();
+                            $('#ResultMessageModal').addClass('modal-'+response.status);
+                            $('#result_header').empty().append(response.status);
+                            $('#result_title').empty().append(response.message);
+                            $('#result_text').empty().append(response.data);
+                            $('#ResultMessageModal').modal('show');
+                            ResultButtons(response);
+
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            console.log('Error '+xhr.status+' | '+thrownError);
+
+                        },
+                    });
+
+                });
+
                 // request DEBTORS
                 $('#debtors_datatable').DataTable({
                     processing: true,
