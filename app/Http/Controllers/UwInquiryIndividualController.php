@@ -8,7 +8,9 @@ use App\UwClientDebtors;
 use App\UwClientFiles;
 use App\UwClients;
 use App\UwInpsClients;
+use App\UwInpsDebClients;
 use App\UwKatmClients;
+use App\UwKatmDebClients;
 use App\UwLoanTypes;
 use App\UwPhyInpsBaseFile;
 use App\UwPhyKatmBaseFile;
@@ -68,6 +70,7 @@ class UwInquiryIndividualController extends Controller
         $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
         $d_pay = 0;
         if ($debPayment){
+
             foreach ($debPayment as $key => $value){
                 $d_pay+=$value->total_sum/$value->total_month * 0.87 * $model->loanType->dept_procent/100;
             }
