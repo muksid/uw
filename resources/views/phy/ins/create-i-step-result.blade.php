@@ -525,7 +525,11 @@
                                                             
                                                             @if ($debtor->isReg == 1)
                                                                 <button class="btn getDebtorScoring" id="getDebtorScoring_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-history'></i> Scroring KIAS</button>
-                                                                <button class="btn getDebtorSalary" id="getDebtorSalary_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-credit-card'></i> Oylik daromadi</button>
+                                                                @if ($debtor->has_salary == 'Y')
+                                                                    <button class="btn getDebtorSalary" id="getDebtorSalary_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-credit-card'></i> Oylik daromadi</button>
+                                                                @else
+                                                                    <button class="btn bg-danger" id="" data-id=""><i class='fa fa-credit-card'></i> Daromadi yo`q</button>
+                                                                @endif
                                                             @endif
 
                                                         </td>
@@ -689,13 +693,36 @@
                                         <input type="number" class="form-control" id="pin" name="pin" minlength="14" maxlength="14" value="" required="">
                                     </div>
                                 </div>
+
                                 <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Kafillik turi </label>
+                                        <select class="form-control" name="deb_type" id="deb_type" required>
+                                            <option value="" SELECTED>Tanlang ...</option>
+                                            <option value="K">Kafil</option>
+                                            <option value="Q">Qo'shimcha qarzdor</option>
+                                            <option value="B">Birgalikdagi qarzdor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Ish haqi <span class="text-red">*</span></label>
+                                        <div class="radio">
+                                            <label><input type="radio" name="has_salary" id="debtor_has_salary_yes" value="Y" checked> Ha</label>
+                                            <label><input type="radio" name="has_salary" id="debtor_has_salary_no" value="N"> Yo`q</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3" id="debtor_total_sum_div">
                                     <div class="form-group">
                                         <label>Jami oylik daromadi</label>
                                         <input type="number" class="form-control" id="total_sum" name="total_sum" value="" required="">
                                     </div>
                                 </div>
-                                <div class="col-sm-2">
+                                <div class="col-sm-2" id="debtor_total_month_div">
                                     <div class="form-group">
                                         <label>Jami (Oy) da</label>
                                         <input type="number" class="form-control" id="total_month" name="total_month" maxlength="2" value="" required="">
@@ -2205,6 +2232,30 @@
                         $('#job_address').val(data.job_address);
                         $('#total_sum').val(data.total_sum);
                         $('#total_month').val(data.total_month);
+                        switch (data.deb_type) {
+                            case 'K':
+                                $('#deb_type option[value=K]').attr('selected','selected');
+                                break;
+                            case 'B':
+                                $('#deb_type option[value=B]').attr('selected','selected');
+                                break;
+                            case 'Q':
+                                $('#deb_type option[value=Q]').attr('selected','selected');
+
+                                break;
+                        
+                            default:
+                                break;
+                        }
+
+                        if(data.has_salary == 'Y'){
+                            $("#debtor_has_salary_yes").prop("checked", true);
+                            $("#debtor_has_salary_no").prop("checked", false);
+                        }else {
+                            $("#debtor_has_salary_yes").prop("checked", false);
+                            $("#debtor_has_salary_no").prop("checked", true);
+                        }
+
                     })
                 });
 
@@ -2493,8 +2544,7 @@
                                 $('#debtorForm').trigger("reset");
                                 $('#debtor-modal').modal('hide');
                                 $('#debtor-btn-save').html('Save Changes');
-                                var oTable = $('#debtors_datatable').dataTable();
-                                oTable.fnDraw(false);
+                                location.reload();
                             },
                             error: function (data) {
                                 console.log('Error:', data);

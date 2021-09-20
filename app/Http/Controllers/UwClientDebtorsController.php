@@ -94,6 +94,8 @@ class UwClientDebtorsController extends Controller
                 'claim_id'=>$claim_id,
                 'claim_number'=>$claim_number,
                 'branch_code'=>$lastModelId->branch_code,
+                'has_salary'    => $request->has_salary,
+                'deb_type'    => $request->deb_type,
                 'isActive' => 1,
             ]);
         return response()->json([
@@ -154,8 +156,8 @@ class UwClientDebtorsController extends Controller
         "pResident" => "1",
         "pSex" => "".$modelClient->gender."",
         "pSubjectType"=>"2" //document type
-    ),
-    );
+        ),
+      );
 
 
 
