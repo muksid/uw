@@ -1026,7 +1026,14 @@ class UwInquiryIndividualController extends Controller
         //
         $model = UwClients::find($id);
 
+        $modelDebtors = UwClientDebtors::where('uw_clients_id',$id)->get();
+
+        $selected = $modelDebtors->implode('id', ',');
+        $explode = explode(',', $selected);
+        
         $KATM = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
+        $KATM_DEB = UwKatmDebClients::whereIn('uw_deb_id', $explode)->where('status', 1)->get();
 
         $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
 
@@ -1043,9 +1050,39 @@ class UwInquiryIndividualController extends Controller
         // Client Debtors Payment Calculate
         $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
         $d_pay = 0;
-        if ($debPayment){
+
+        if (empty($debPayment)){
             foreach ($debPayment as $key => $value){
-                $d_pay+=$value->total_sum/$value->total_month * 0.87 * $model->loanType->dept_procent/100;
+
+                if ($value->has_salary == 'N') {
+                    $d_pay+=$value->total_sum/$value->total_month * 0.87 * $model->loanType->dept_procent/100;
+                }else {
+                    $clientTotalSumDeb = UwInpsDebClients::where('uw_deb_id', $value->id)->where('status', 1)
+                        ->groupBy('uw_deb_id')
+                        ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
+
+                    $clientTotalSumMonthlyDeb  = DB::select(
+                        DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_deb_clients a 
+                        where a.status = 1 and a.uw_deb_id =  '.$value->id.' and a.INCOME_SUMMA > 0 group by sum'));
+
+                    $clientTotalSumMonthlyDeb = count($clientTotalSumMonthlyDeb);
+ 
+                    if($clientTotalSumMonthlyDeb > 0){
+
+                        $d_pay+=$clientTotalSumDeb/$clientTotalSumMonthlyDeb * 0.87 * $model->loanType->dept_procent/100;
+                    }else{
+                        $status = 0;
+                        $modal_style = 'warning';
+                        $message = 'Kafildor shaxning ish xaqi ro`yxatdan o`tkazilmagan!!!';
+
+                        return response()->json([
+                            'status'   => $status,
+                            'modal_style'   => $modal_style,
+                            'message' => $message
+                        ]);
+                    }
+                }
+
             }
         }
 
@@ -1071,7 +1108,42 @@ class UwInquiryIndividualController extends Controller
                 $arr_row_8 = $base_arr['26']['td']['4']['span'];
                 $arr_row_9 = $base_arr['27']['td']['4']['span'];
             }*/
+
+
         }
+        
+        if (empty($KATM_DEB)){
+            foreach ($KATM_DEB as $key => $value) {
+                $creditDebtDeb += $value->summa;
+                $scoringBallDeb = $value->scoring_ball;
+
+                $katm_base_fileDeb = UwPhyKatmBaseDebFile::where('uw_katm_id', $value->id)->where('base_file', '!=', null)->first();
+
+                if (!$value){
+                    $status = 0;
+                    $modal_style = 'warning';
+                    $message = 'KATMga so`rov yuboring (Kafil, qo`shimcha qarzdor, ...)!!!';
+
+                    return response()->json([
+                        'status'   => $status,
+                        'modal_style'   => $modal_style,
+                        'message' => $message
+                    ]);
+                }elseif ($scoringBallDeb < 200) {
+                    $status = 0;
+                    $modal_style = 'warning';
+                    $message = 'Skoring bali (200 ball) dan yuqori emas!!!';
+
+                    return response()->json([
+                        'status'   => $status,
+                        'modal_style'   => $modal_style,
+                        'message' => $message
+                    ]);
+                }
+            }
+
+        }
+        if(isset($creditDebtDeb)) $creditDebt += $creditDebtDeb;
 
         if ($clientTotalSum){
             $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
@@ -1113,22 +1185,26 @@ class UwInquiryIndividualController extends Controller
             $modal_style = 'warning';
             $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
         }
-        elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 2){
-            $status = 0;
-            $modal_style = 'warning';
-            $message = 'Mijozning Oylik daromadi davri yetarli emas (3 oydan kam)!!!';
-        }
         elseif ($model->is_inps > 1 && !$modelFile){
             $status = 0;
             $modal_style = 'warning';
             $message = 'Ilova hujjatlarini yuklang!!!';
         }
+        elseif ($model->is_inps == 2 && $clientTotalSumMonthly < 2 ){
+
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Mijozning Oylik daromadi davri yetarli emas (3 oydan kam)!!!';
+        }
+
         else {
             $status = 1;
             $modal_style = 'success';
             $message = 'Arizani yuborishni tasdiqlang';
         }
 
+        // "Ta`lim" credit type = 59   $model->loanType->credit_type != 59
+        
         return response()->json([
             'status'   => $status,
             'modal_style'   => $modal_style,

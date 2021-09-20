@@ -2108,7 +2108,7 @@
                 $('body').on('click', '#sendToAdmin', function () {
                     //console.log('ds');
                     var id = $('#sendToAdmin').data('id');
-
+                    
                     var getSChType = $("input:radio[name=sch_type]:checked").val();
 
                     $.get('/phy/get-status-send/' + id+'/'+getSChType, function (response) {

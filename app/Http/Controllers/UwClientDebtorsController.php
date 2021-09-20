@@ -1742,5 +1742,109 @@ class UwClientDebtorsController extends Controller
     }
 
 
+        public function getStatusSend($id, $sch_type)
+    {
+        //
+        $model = UwClients::find($id);
+
+        $KATM = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
+        $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
+
+        $clientTotalSumMonthly  = DB::select(
+            DB::raw('SELECT concat(a.PERIOD,"-",a.NUM) as SUM FROM uw_inps_clients a 
+            where a.status = 1 and a.uw_clients_id =  '.$id.' and a.INCOME_SUMMA > 0 group by sum'));
+
+        $clientTotalSumMonthly = count($clientTotalSumMonthly);
+
+        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)
+            ->groupBy('uw_clients_id')
+            ->sum(DB::raw('INCOME_SUMMA-salary_tax_sum'));
+
+        // Client Debtors Payment Calculate
+        $debPayment = UwClientDebtors::where('uw_clients_id', $id)->get();
+        $d_pay = 0;
+
+        if ($debPayment){
+            foreach ($debPayment as $key => $value){
+                $d_pay+=$value->total_sum/$value->total_month * 0.87 * $model->loanType->dept_procent/100;
+            }
+        }
+
+        $creditDebt = 0;
+        $creditCanBe = 0;
+        $arr_row_7 = 0;
+        $arr_row_8 = 0;
+        $arr_row_9 = 0;
+
+        if ($KATM){
+            $creditDebt = $KATM->summa;
+            $scoringBall = $KATM->scoring_ball;
+            $katm_base_file = UwPhyKatmBaseFile::where('uw_katm_id', $KATM->id)->where('base_file', '!=', null)->first();
+        }
+
+        if ($clientTotalSum){
+            $totalMonthPayment = ($clientTotalSum / $clientTotalSumMonthly * $model->loanType->dept_procent/100) - $creditDebt;
+            if ($sch_type == 1){
+                $creditCanBe = ($totalMonthPayment+$d_pay) * $model->loanType->credit_duration /(+$model->loanType->credit_duration*($model->loanType->procent/100)/365*30+1);
+            } else {
+                $creditCanBe = ($totalMonthPayment+$d_pay) * (pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)-1)/
+                    ($model->loanType->procent*0.01/12*(pow(1+($model->loanType->procent*0.01/12), $model->loanType->credit_duration)));
+            }
+        }
+
+        if (!$KATM){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'KATMga so`rov yuboring!!!';
+        }
+        elseif ($scoringBall < 200){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Skoring bali (200 ball) dan yuqori emas!!!';
+        }
+        elseif ($arr_row_7 > 0){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Просрочки от 30 до 60 дней!!!';
+        }
+        elseif ($arr_row_8 > 0){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Просрочки от 60 до 90 дней!!!';
+        }
+        elseif ($arr_row_9 > 0){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Просрочки от 90 дней и более!!!';
+        }
+        elseif ($model->is_inps == 1 && $model->summa >= intval($creditCanBe)){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Mijoz to`lov qobiliyati yetarli emas!!!';
+        }
+        elseif ($model->is_inps == 1 && $clientTotalSumMonthly < 2){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Mijozning Oylik daromadi davri yetarli emas (3 oydan kam)!!!';
+        }
+        elseif ($model->is_inps > 1 && !$modelFile){
+            $status = 0;
+            $modal_style = 'warning';
+            $message = 'Ilova hujjatlarini yuklang!!!';
+        }
+        else {
+            $status = 1;
+            $modal_style = 'success';
+            $message = 'Arizani yuborishni tasdiqlang';
+        }
+
+        return response()->json([
+            'status'   => $status,
+            'modal_style'   => $modal_style,
+            'message' => $message
+        ]);
+
+    }
 
 }
