@@ -10,6 +10,7 @@ use App\UwClientComments;
 use App\UwClientFiles;
 use App\UwClientGuars;
 use App\UwClients;
+use App\UwClientDebtors;
 use App\UwGuarType;
 use App\UwLoanTypes;
 use Carbon\Carbon;
@@ -21,10 +22,7 @@ use Illuminate\Support\Facades\Storage;
 class UwCreateClientsController extends Controller
 {
 
-    public function index(Request $request)
-    {
-
-    }
+    public function index(Request $request) {}
 
     public function getLoanType(Request $request)
     {
@@ -309,11 +307,14 @@ class UwCreateClientsController extends Controller
         //
         $model = UwClients::find($id);
 
+        $debtors = UwClientDebtors::where('uw_clients_id', $model->id)->get();
+
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 
         $regions = UnRegions::where('status', 1)->get();
 
         $districts = UnDistricts::where('status', 1)->get();
+
 
         $sch_type_d = 'checked';
         $sch_type_a = '';
@@ -323,7 +324,7 @@ class UwCreateClientsController extends Controller
         }
 
         return view('phy.ins.create-i-step-result',
-            compact('model', 'modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
+            compact('model', 'debtors','modelComments', 'regions', 'districts', 'sch_type_d', 'sch_type_a'));
     }
 
     /**

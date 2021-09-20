@@ -265,42 +265,6 @@
                                         <div class="box-header with-border">
                                             <div class="col-md-12">
                                                 @if($model->status == 0 || $model->status == 1)
-                                                    <a href="javascript:void(0)" class="btn btn-danger" id="create-debtor"><i class="fa fa-plus-circle"></i> Qo`shimcha qarzdor</a>
-                                                @else
-                                                    Qo`shimcha qarzdor ma`lumotlari
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <!-- /.box-header -->
-                                        <table class="table table-striped table-bordered" id="debtors_datatable">
-                                            <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>F.I.O.</th>
-                                                <th>STIR</th>
-                                                <th>Ish joy manzili</th>
-                                                <th>Oylik daromadi</th>
-                                                <th>Jami (Oy)da</th>
-                                                <th>To`lov qobiliyati</th>
-                                                <th>Action</th>
-                                            </tr>
-                                            </thead>
-                                            <tfoot align="right" class="bg-danger">
-                                            <tr>
-                                                <th colspan="4">Jami:</th>
-                                                <th colspan="2"></th>
-                                                <th colspan="2"></th>
-                                            </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <div class="box-body">
-                                        <div class="box-header with-border">
-                                            <div class="col-md-12">
-                                                @if($model->status == 0 || $model->status == 1)
                                                     <a href="javascript:void(0)" class="btn btn-warning" id="create-guar"><i class="fa fa-plus-circle"></i> Ta`minot</a>
                                                 @else
                                                     Ta`minot ma`lumotlari
@@ -515,7 +479,77 @@
                             </div>
                         </div>
 
-                    </div>
+                        <!-- Debtors table -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                    <div class="box-body">
+                                        <div class="box-header with-border">
+                                            <div class="col-md-12">
+                                                @if($model->status == 0 || $model->status == 1)
+                                                    <a href="javascript:void(0)" class="btn btn-danger" id="create-debtor"><i class="fa fa-plus-circle"></i> Qo`shimcha qarzdor</a>
+                                                @else
+                                                    Qo`shimcha qarzdor ma`lumotlari
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <!-- /.box-header -->
+                                        <table class="table table-striped table-bordered" id="debtors_table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>F.I.O.</th>
+                                                    <th>Oylik daromadi</th>
+                                                    <th>Jami (Oy)da</th>
+                                                    <th>To`lov qobiliyati</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($debtors as $key => $debtor )
+                                                    <tr>
+                                                        <td>{{$key+1}}</td>
+                                                        <td>{{$debtor->family_name}} {{$debtor->name}}</td>
+                                                        <td class="debtor_total_sum">{{bcdiv($debtor->total_sum,1,2)}}</td>
+                                                        <td>{{$debtor->total_month}}</td>
+                                                        <td class="debtor_total_sum_ability">{{ bcdiv(($debtor->total_sum/$debtor->total_month*0.87)*0.5,1,2) }}</td>
+                                                        <td style="width: 400px !important">
+                                                            <a href="javascript:void(0)" data-toggle="tooltip"  data-id="{{$debtor->id}}" data-original-title="Edit" class="edit edit-debtor">
+                                                                <span class="glyphicon glyphicon-pencil"></span>
+                                                            </a> | 
+                                                            <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="{{$debtor->id}}" class="delete text-maroon">
+                                                                <span class="glyphicon glyphicon-trash"></span>
+                                                            </a> | 
+                                                            <a href="javascript:void(0);" data-toggle="tooltip" data-original-title="Register" data-id="{{$debtor->id}}" class="text-green reg-debtor">
+                                                                <span class="glyphicon glyphicon-globe"></span>
+                                                            </a>
+                                                            
+                                                            @if ($debtor->isReg == 1)
+                                                                <button class="btn getDebtorScoring" id="getDebtorScoring_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-history'></i> Scroring KIAS</button>
+                                                                <button class="btn getDebtorSalary" id="getDebtorSalary_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-credit-card'></i> Oylik daromadi</button>
+                                                            @endif
+
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                    
+                                            </tbody>
+                                            <tfoot align="right" class="bg-danger">
+                                                <tr>
+                                                    <th colspan="2">Jami:</th>
+                                                    <th colspan="2">
+                                                        <span id="debtors_total_sum"></span>
+                                                    </th>
+                                                    <th colspan="2">
+                                                        <span id="debtors_total_sum_ablity"></span>
+                                                    </th>
+                                                </tr>
+                                            </tfoot> 
+                                        
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                 </div>
                 <!-- /.box -->
@@ -1113,10 +1147,44 @@
             }
 
             $(document).ready( function () {
+
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     }
+                });
+
+                var sum = 0;
+                var sum_2 = 0;
+                // Calculate total sum of rows
+                $('#debtors_table tbody tr').each(function () {
+
+
+                    $(this).find('.debtor_total_sum').each(function () {
+                        var debtor_total_sum = $(this).text();
+
+                        if (!isNaN(debtor_total_sum) && debtor_total_sum.length !== 0) {
+
+                            sum += parseFloat(debtor_total_sum);
+
+                        }
+
+                    });
+                
+                    $(this).find('.debtor_total_sum_ability').each(function () {
+                        var debtor_total_sum_ability = $(this).text();
+
+                        if (!isNaN(debtor_total_sum_ability) && debtor_total_sum_ability.length !== 0) {
+
+                            sum_2 += parseFloat(debtor_total_sum_ability);
+
+                        }
+
+                    });
+
+                    $('#debtors_total_sum').text(sum);
+                    $('#debtors_total_sum_ablity').text(sum_2);
+
                 });
 
                 // request KATM
@@ -1572,6 +1640,443 @@
                     });
                 });
 
+                // BUTTON GET SCORING RESULT OF DEBTOR
+
+                $('body').on('click', '.getDebtorScoring', function () {
+
+                    let id = $(this).data('id');
+                    $.ajax({
+                        url: '/phy/debtor/get-scoring',
+                        type: 'GET',
+                        data: {id: id},
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#overlayKias").show();
+                        },
+                        success: function(result){
+                            console.log(result);
+                            if(result.length > 0){
+                                if (result.scoring_k.isVersion === 2){
+
+                                    let res = result.scoring_file;
+                                    let data = '';
+                                    data+= '<table style="width: 1000px;"><tbody>';
+                                    for (let i = 0; i < res.length; i++) {
+
+                                        if (!Array.isArray(res[i]['td'])){
+                                            if (res[i]['td']['content'] !== undefined){
+                                                let cols;
+                                                if (res[i]['td']['colspan'] === undefined){
+                                                    cols = 7;
+                                                } else {
+                                                    cols = res[i]['td']['colspan'];
+                                                }
+                                                data+= '<tr>' +
+                                                    '<td class="text-muted" style="'+res[i]['td']['style']+'" colspan="'+cols+'">'
+                                                    +res[i]['td']['content'];
+
+                                                if (res[i]['td']['span']){
+
+                                                    data+=    '<span>'+res[i]['td']['span']['span']+'</span>';
+                                                }
+                                                data+=  '</td>' +
+                                                    '</tr>';
+                                            }
+                                        }else if (res[i]['td'].length === 2){
+                                            data+=
+                                                '<tr>' +
+                                                '<td style="'+res[i]['td'][0]['style']+'" colspan="'+res[i]['td'][0]['colspan']+'">' +
+                                                res[i]['td'][0]['content'] +
+                                                '</td>' +
+                                                '<td style="'+res[i]['td'][1]['style']+'" id="'+res[i]['td'][1]['id']+'" colspan="'+res[i]['td'][1]['colspan']+'">' +
+                                                '<span>'+res[i]['td'][1]['span']+'</span>' +
+                                                '</td>' +
+                                                '</tr>';
+                                        } else if (i === 10 && res[i]['td'].length === 3){
+                                            data+= '<tr>';
+                                            for (let j = 0; j < res[i]['td'].length; j++) {
+                                                let sc = res[i]['td'][j];
+                                                data+=
+                                                    '<td colspan="'+sc['colspan']+'" rowspan="'+sc['rowspan']+'" style="'+sc['style']+'">';
+                                                if (j === 1){
+                                                    data+='<img id="'+sc['img']['id']+'" style="'+sc['img']['style']+'" src="'+sc['img']['src']+'" height="149">';
+
+                                                    data+='<div id="'+sc['div']['id']+'" style="'+sc['div']['style']+'">' +
+                                                        '<span>'+sc['div']['span']+'</span>'+
+                                                        '</div>';
+
+                                                } else if (j === 2){
+                                                    data+='<div style="'+sc['div']['style']+'">';
+
+                                                    if (sc['div']['div'].length === 2){
+                                                        for (let k = 0; k < sc['div']['div'].length; k++) {
+                                                            let scb = sc['div']['div'][k];
+                                                            //console.log(scb);
+                                                            data+='<div style="'+scb['style']+'" id="'+scb['id']+'">' +
+                                                                '<span>'+scb['span']+'</span>'+
+                                                                '</div>';
+                                                        }
+
+                                                    }
+                                                    data+='</div>'
+
+                                                }
+                                                data+='</td>';
+                                            }
+                                            data+= '</tr>';
+
+
+                                        }else if (res[i]['td'].length === 4){
+                                            data+= '<tr style="font-weight: bold;">';
+                                            for (let j = 0; j < res[i]['td'].length; j++) {
+                                                let row_h = res[i]['td'][j];
+                                                data+='<td style="'+row_h['style']+'" rowspan="'+row_h['rowspan']+'" colspan="'+row_h['colspan']+'">'+row_h['content']+'</td>';
+
+                                            }
+                                            data+= '</tr>';
+
+                                        } else if (res[i]['td'].length === 6){
+                                            data+= '<tr>';
+                                            for (let k = 0; k < res[i]['td'].length; k++) {
+                                                let row = res[i]['td'][k];
+                                                if (k === 0 || k === 1){
+                                                    data+='<td style="'+row['style']+'" colspan="'+row['colspan']+'">'+row['content']+'</td>';
+
+                                                } else {
+                                                    data+='<td style="'+row['style']+'" id="'+row['id']+'">'+row['span']+'</td>';
+
+                                                }
+
+                                            }
+                                            data+= '</tr>';
+
+                                        } else if (i === 31 && res[i]['td'].length === 3){
+                                            data+= '<tr>';
+                                            for (let l = 0; l < res[i]['td'].length; l++) {
+                                                let row_l = res[i]['td'][l];
+                                                if (l === 0 || l === 1){
+                                                    data+='<td style="'+row_l['style']+'" colspan="'+row_l['colspan']+'">'+row_l['content']+'</td>';
+
+                                                } else {
+                                                    data+='<td style="'+row_l['style']+'" colspan="'+row_l['colspan']+'">';
+                                                    for (let j = 0; j < row_l['span'].length; j++) {
+                                                        let row_ll = row_l['span'][j];
+                                                        if (row_ll['span'] !== undefined){
+                                                            data+='<span id="'+row_ll['id']+'">'+row_ll['span']+'</span><br>';
+                                                        }
+                                                    }
+                                                    data+='</td>';
+
+                                                }
+
+                                            }
+                                            data+= '</tr>';
+
+                                        }
+
+                                    }
+                                    data+= '</tbody></table>';
+                                    $("#data_table").html(data);
+
+                                    $('#tableModal').modal('show');
+                                } else {
+                                    let data = result;
+                                    let katm_score = JSON.parse(result.scoring_k.katm_score);
+                                    let katm_tb = JSON.parse(result.scoring_k.katm_tb);
+                                    $('#scoringPage').empty();
+                                    $("#scoringPage").prepend(result.scoring_page);
+                                    $(".client_name").html(katm_score.client_info_1);
+                                    $(".client_birth_date").html(katm_score.client_info_2_text);
+                                    let gender = 'М';
+                                    if (result.client_model.gender === '2') {
+                                        gender = 'Ж';
+                                    }
+                                    $(".client_gender").html(gender);
+                                    $(".client_live_address").html(katm_score.client_info_4);
+                                    $(".client_pin").html(katm_score.client_info_5);
+                                    $(".client_inn").html(katm_score.client_info_6);
+                                    $(".client_phone").html(katm_score.client_info_8);
+                                    if (katm_score.client_info_7){
+                                        $(".client_info_7").html(katm_score.client_info_7);
+                                    }
+
+                                    var doc_formattedDate = new Date(result.client_model.document_date);
+                                    var doc_d = doc_formattedDate.getDate();
+                                    var doc_m = doc_formattedDate.getMonth();
+                                    doc_m += 1;  // JavaScript months are 0-11
+                                    if (doc_d < 10) {
+                                        doc_d = "0" + doc_d;
+                                    }
+                                    if (doc_m < 10) {
+                                        doc_m = "0" + doc_m;
+                                    }
+                                    var doc_y = doc_formattedDate.getFullYear();
+                                    $(".client_document").html(result.client_model.document_serial + ' ' + result.client_model.document_number + ' '
+                                        + doc_d + "." + doc_m + "." + doc_y);
+
+                                    $('.sc_ball').html(katm_score.sc_ball);
+                                    $('.sc_level_info').html(katm_score.sc_level_info);
+                                    $('.sc_version').html(katm_score.sc_version);
+                                    $('.score_date').html(katm_score.score_date);
+
+                                    $('.client_info_1').html(katm_score.client_info_1); // fio
+                                    $('.client_info_2_text').html(katm_score.client_info_2_text); // den roj
+                                    $('.client_info_4').html(katm_score.client_info_4); // adress
+                                    $('.client_info_5').html(katm_score.client_info_5); // pinfl
+                                    $('.client_info_6').html(katm_score.client_info_6); // inn
+                                    $('.client_info_8').html(katm_score.client_info_8); // passport
+
+                                    $('.score_img').html('' +
+                                        '<img id="score_chart" style="padding-left: 9px; margin-bottom: 15px; width: 311px;"' +
+                                        ' src="' + data.scoring_img + '" height="149">\n');
+
+                                    $('#tb_row_1_ot').html(katm_tb.row_1.open_total);
+                                    $('#tb_row_1_os').html(katm_tb.row_1.open_summ);
+                                    $('#tb_row_1_ct').html(katm_tb.row_1.close_total);
+                                    $('#tb_row_1_cs').html(katm_tb.row_1.close_summ);
+
+                                    $('#tb_row_2_ot').html(katm_tb.row_2.open_total);
+                                    $('#tb_row_2_os').html(katm_tb.row_2.open_summ);
+                                    $('#tb_row_2_ct').html(katm_tb.row_2.close_total);
+                                    $('#tb_row_2_cs').html(katm_tb.row_2.close_summ);
+
+                                    $('#tb_row_3_ot').html(katm_tb.row_3.open_total);
+                                    $('#tb_row_3_os').html(katm_tb.row_3.open_summ);
+                                    $('#tb_row_3_ct').html(katm_tb.row_3.close_total);
+                                    $('#tb_row_3_cs').html(katm_tb.row_3.close_summ);
+
+                                    $('#tb_row_4_ot').html(katm_tb.row_4.open_total);
+                                    $('#tb_row_4_os').html(katm_tb.row_4.open_summ);
+                                    $('#tb_row_4_ct').html(katm_tb.row_4.close_total);
+                                    $('#tb_row_4_cs').html(katm_tb.row_4.close_summ);
+
+                                    $('#tb_row_5_ot').html(katm_tb.row_5.open_total);
+                                    $('#tb_row_5_os').html(katm_tb.row_5.open_summ);
+                                    $('#tb_row_5_ct').html(katm_tb.row_5.close_total);
+                                    $('#tb_row_5_cs').html(katm_tb.row_5.close_summ);
+
+                                    $('#tb_row_6_ot').html(katm_tb.row_6.open_total);
+                                    $('#tb_row_6_os').html(katm_tb.row_6.open_summ);
+                                    $('#tb_row_6_ct').html(katm_tb.row_6.close_total);
+                                    $('#tb_row_6_cs').html(katm_tb.row_6.close_summ);
+
+                                    if (katm_tb.row_7){
+                                        $('#tb_row_7_ot').html(katm_tb.row_7.open_total);
+                                        $('#tb_row_7_os').html(katm_tb.row_7.open_summ);
+                                        $('#tb_row_7_ct').html(katm_tb.row_7.close_total);
+                                        $('#tb_row_7_cs').html(katm_tb.row_7.close_summ);
+                                    } else {
+                                        $('#tb_row_7_ot').html(0);
+                                        $('#tb_row_7_os').html(0);
+                                        $('#tb_row_7_ct').html(0);
+                                        $('#tb_row_7_cs').html(0);
+                                    }
+
+                                    if (katm_tb.row_8){
+                                        $('#tb_row_8_ot').html(katm_tb.row_8.open_total);
+                                        $('#tb_row_8_os').html(katm_tb.row_8.open_summ);
+                                        $('#tb_row_8_ct').html(katm_tb.row_8.close_total);
+                                        $('#tb_row_8_cs').html(katm_tb.row_8.close_summ);
+                                    } else {
+                                        $('#tb_row_8_ot').html(0);
+                                        $('#tb_row_8_os').html(0);
+                                        $('#tb_row_8_ct').html(0);
+                                        $('#tb_row_8_cs').html(0);
+                                    }
+
+                                    if (katm_tb.row_9){
+                                        $('#tb_row_9_ot').html(katm_tb.row_9.open_total);
+                                        $('#tb_row_9_os').html(katm_tb.row_9.open_summ);
+                                        $('#tb_row_9_ct').html(katm_tb.row_9.close_total);
+                                        $('#tb_row_9_cs').html(katm_tb.row_9.close_summ);
+                                    } else {
+                                        $('#tb_row_9_ot').html(0);
+                                        $('#tb_row_9_os').html(0);
+                                        $('#tb_row_9_ct').html(0);
+                                        $('#tb_row_9_cs').html(0);
+                                    }
+
+                                    $('#tb_row_12_agr_summ').html(katm_tb.row_12.agr_summ);
+                                    $('#tb_row_12_agr_comm2').html(katm_tb.row_12.agr_comm2.content);
+                                    $('#tb_row_12_agr_comm3').html(katm_tb.row_12.agr_comm3);
+                                    $('#tb_row_12_agr_comm4').html(katm_tb.row_12.agr_comm4);
+
+                                    $('#tb_ft_claim_id').html(result.client_model.claim_id);
+                                    $('#tb_ft_claim_date').html(result.client_model.claim_date);
+
+                                    $('#btn-save').val("KatmResult");
+                                    $('#katmClaimId').val(id);
+                                    $('#resultKATMModal').modal('show');
+                                }
+                            } else{
+                                $('#ResultMessageModal').removeClass('modal-success');
+                                $('#ResultMessageModal').addClass('modal-warning');
+                                $('#result_header').empty().append('Status Message');
+                                $('#result_title').empty();
+                                $('#result_text').empty().append("Ma`lumotlar ba`zadan topilmadi! <br> Qaytadan ro'yxatdan o`tkazing");
+                                $('#ResultMessageModal').modal('show');
+                            }
+
+                        },
+                        complete:function(res){
+                            $("#overlayKias").hide();
+                        }
+
+                    });
+
+                });
+
+                // BUTTON GET INPS RESULT OF DEBTOR
+                $('body').on('click', '.getDebtorSalary', function () {
+
+                    let id = $(this).data('id');
+
+                    $.ajax({
+                        url: '/phy/debtor/get-salary',
+                        type: 'GET',
+                        data: {id: id},
+                        dataType: 'json',
+                        beforeSend: function(){
+                            $("#overlayKias").show();
+                        },
+                        success: function(data){
+                            console.log(data)
+                            if(data.length > 0){
+                                let table = '';
+                                let salary = 0;
+                                let other_salary = 0;
+                                let sum = 0;
+                                let other_sum = 0;
+                                let salaryVersion = '';
+                                if (data[0]['isVersion'] === 2){
+
+                                    salaryVersion = 'Oylik daromadi natijasi (SOLIQ)';
+
+                                    table+= '<div class="box-body no-padding">' +
+                                        '<table class="table table-striped">' +
+                                            '<tr>' +
+                                                '<th style="width: 10px">#</th>' +
+                                                '<th>Mijoz F.I.O.</th>' +
+                                                '<th>M.STIR</th>' +
+                                                '<th>PINFL</th>' +
+                                                '<th>Davr</th>' +
+                                                '<th>Summa</th>' +
+                                                '<th>Other</th>' +
+                                                '<th>Tashkilot</th>' +
+                                                '<th>T.STIR</th>' +
+                                            '</tr>';
+
+                                    let key = 1;
+                                    for (let i = 0; i < data.length; i++){
+                                        let val = data[i];
+
+                                        salary+= val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum;
+
+                                        other_salary+= val.other_income;
+
+                                        sum = (val.INCOME_SUMMA-val.salary_tax_sum-val.inps_sum).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                        other_sum= val.other_income.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                        table+=
+                                            '<tr>' +
+                                                '<td>'+ key++ +'.</td>' +
+                                                '<td class="text-sm">'+val.client_name+'</td>' +
+                                                '<td>'+val.client_tin+'</td>' +
+                                                '<td>'+val.pinfl+'</td>' +
+                                                '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
+                                                '<td class="text-bold">'+sum+'</td>' +
+                                                '<td><span class="badge bg-info">'+other_sum+'</span></td>' +
+                                                '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                                '<td>'+val.ORG_INN+'</td>' +
+                                            '</tr>';
+                                    }
+
+                                    let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    let otherSalaryTotal = (other_salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    table+= '<tr>' +
+                                                '<td colspan="4"><b>Jami:</b><td>' +
+                                                '<td colspan="2"><b>'+salaryTotal+' <span class="badge bg-info pull-right">'+otherSalaryTotal+'</span></b><td>' +
+                                                '<td colspan="1"><td>' +
+                                            '</tr>';
+
+                                    table+= '</table>' +
+                                        '</div>';
+
+                                } else {
+
+                                    salaryVersion = 'Oylik daromadi natijasi (XALQBANK)';
+
+                                    table+=
+                                        '<div class="box-body no-padding">' +
+                                        '<table class="table table-striped">' +
+                                        '<tr>' +
+                                        '<th style="width: 10px">#</th>' +
+                                        '<th>F.I.O.</th>' +
+                                        '<th>PINFL</th>' +
+                                        '<th>Davr</th>' +
+                                        '<th>Summa</th>' +
+                                        '<th>Tashkilot</th>' +
+                                        '<th>T.STIR</th>' +
+                                        '</tr>';
+
+                                    let key = 1;
+                                    for (let i = 0; i < data.length; i++){
+                                        let val = data[i];
+
+                                        salary += val.INCOME_SUMMA;
+
+                                        sum = (val.INCOME_SUMMA).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                        table+= '<tr>' +
+                                            '<td>'+ key++ +'.</td>' +
+                                            '<td>'+val.client_name+'</td>' +
+                                            '<td>'+val.pinfl+'</td>' +
+                                            '<td style="min-width: 100px">'+val.PERIOD+' <span class="label label-danger">'+val.NUM+'-oy</span></td>' +
+                                            '<td>'+sum+'</td>' +
+                                            '<td class="text-sm">'+val.ORGNAME+'</td>' +
+                                            '<td>'+val.ORG_INN+'</td>' +
+                                            '</tr>';
+                                    }
+
+                                    let salaryTotal = (salary).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+
+                                    table+= '<tfoot>' +
+                                                '<tr>' +
+                                                    '<td colspan="3"><b>Jami:</b><td>' +
+                                                    '<td colspan="2"><b>'+salaryTotal+'</b><td>' +
+                                                '</tr>' +
+                                            '</tfoot>';
+
+                                    table+= '</table>' +
+                                        '</div>';
+                                }
+
+                                $('#resultINPSModal').modal('show');
+
+                                $("#salaryVersion").html(salaryVersion);
+
+                                $("#resultDataINPS").html(table);
+
+                            }else{
+                                $('#ResultMessageModal').removeClass('modal-success');
+                                $('#ResultMessageModal').addClass('modal-warning');
+                                $('#result_header').empty().append('Status Message');
+                                $('#result_title').empty();
+                                $('#result_text').empty().append("Ma`lumotlar ba`zadan topilmadi! <br> Qaytadan ro'yxatdan o`tkazing");
+                                $('#ResultMessageModal').modal('show');
+                            }
+
+                        },
+                        complete: function(){
+                            $("#overlayKias").hide();
+                        }
+
+                    });
+                });
+
                 // BUTTON GET STATUS SEND TO ADMIN
                 $('body').on('click', '#sendToAdmin', function () {
                     //console.log('ds');
@@ -1664,58 +2169,6 @@
                         },
                     });
 
-                });
-
-                // request DEBTORS
-                $('#debtors_datatable').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    paginate: false,
-                    searching: false,
-                    bInfo: false,
-                    scrollX: false,
-                    ajax: {
-                        url: "{{ url('/phy/client-debtors', ['id' => $model->id]) }}",
-                        type: 'GET',
-                    },
-                    columns: [
-                        { data: 'id', name: 'id', 'visible': false, "searchable": false},
-                        { data: null,
-                            render: function ( data, type, row ) {
-                                return data.family_name +' '+ data.name;
-                            }
-                        },
-                        { data: 'inn', name: 'inn', "visible": false },
-                        { data: 'live_address', name: 'live_address', "visible": false },
-                        { data: null,
-                            render: function ( data, type, row ) {
-                                return formatCurrency(data.total_sum);
-                            }
-                        },
-                        { data: 'total_month', name: 'total_month' },
-                        { data: null,name: 'total',
-                            render: function ( data, type, row ) {
-                                var payment = (data.total_sum/data.total_month*0.87)*0.5;
-                                return formatCurrency(payment);
-                            }
-                        },
-                        { data: 'action', name: 'action', orderable: false},
-                    ],
-                    footerCallback: function (row, data, start, end, display) {
-                        console.log(data)
-                        var totalAmount = 0;
-                        for (var i = 0; i < data.length; i++) {
-                            totalAmount += parseFloat(data[i]['total_sum']);
-                        }
-                        var totalPayment = 0;
-                        for (var j = 0; j < data.length; j++) {
-                            totalPayment += (parseFloat(data[j]['total_sum'])*0.87)/parseFloat(data[j]['total_month'])*0.5;
-                        }
-                        var api = this.api();
-                        $(api.column(4).footer()).html(formatCurrency(totalAmount));
-                        $(api.column(6).footer()).html(formatCurrency(totalPayment));
-                    },
-                    order: [[0, 'desc']]
                 });
 
                 $('#create-debtor').click(function () {

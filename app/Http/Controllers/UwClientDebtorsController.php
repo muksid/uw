@@ -239,12 +239,12 @@ class UwClientDebtorsController extends Controller
             return datatables()->of(UwClientDebtors::where('uw_clients_id', $id)->get())
                 ->addColumn('action', function($data) use ($disabled) {
                     $button = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit edit-debtor '.$disabled.'">
-<span class="glyphicon glyphicon-pencil"></span></a>';
-                    $button .= '&nbsp;&nbsp;';
-                    $button .= ' | <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
- <span class="glyphicon glyphicon-trash"></span></a>';
-                    $button .= ' | <a href="javascript:void(0);" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="text-green reg-debtor">
- <span class="glyphicon glyphicon-globe"></span></a>';
+                    <span class="glyphicon glyphicon-pencil"></span></a>';
+                                        $button .= '&nbsp;&nbsp;';
+                                        $button .= ' | <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="'.$data->id.'" class="delete text-maroon  '.$disabled.'">
+                    <span class="glyphicon glyphicon-trash"></span></a>';
+                                        $button .= ' | <a href="javascript:void(0);" data-toggle="tooltip" data-original-title="Register" data-id="'.$data->id.'" class="text-green reg-debtor">
+                    <span class="glyphicon glyphicon-globe"></span></a>';
                     return $button;
                 })
                 ->rawColumns(['action'])
@@ -1669,6 +1669,74 @@ class UwClientDebtorsController extends Controller
         } else {
             return 0;
         }
+    }
+
+    public function getDebtorScoring(Request $request)
+    {
+        $id = $request->id;
+
+        $scoring_k = UwKatmDebClients::where('uw_deb_id', $id)->where('status', 1)->first();
+        if(!$scoring_k){
+            return [];
+        }else{
+            $scoringBase64 = UwPhyKatmBaseDebFile::where('uw_katm_id', $scoring_k->id)->first();
+    
+            if (!$scoringBase64) {
+                return [];
+            }
+    
+            $katmBase64 = UwPhyKatmDebFile::where('uw_deb_id', $id)->where('file_type', 'B64')->orderBy('id', 'desc')->first();
+    
+            $scoring_file = '';
+            $scoring_img = '';
+            if ($katmBase64){
+                $path = $katmBase64->file_path.$katmBase64->file_hash;
+    
+                if ($scoring_k->isVersion == 1) {
+    
+                    $scoring_img = Storage::disk('ftp_nas')->get($path.".php");
+    
+                }
+    
+                if (Storage::disk('ftp_nas')->exists($path)){
+    
+                    $data = Storage::disk('ftp_nas')->get($path);
+    
+                    $base64 = base64_decode($data);
+    
+                    $scoring_file = json_decode($base64, true);
+    
+                }
+    
+            }
+    
+            $clientModel = UwClientDebtors::find($id);
+    
+            $scoringPage = file_get_contents("uw/scoring_page.php");
+    
+            return response()->json([
+                'client_model'  => $clientModel,
+                'scoring_k'  => $scoring_k,
+                'scoring_base64'  => $scoringBase64,
+                'scoring_file'  => $scoring_file,
+                'scoring_page'  => $scoringPage,
+                'scoring_img'  => $scoring_img,
+            ]);
+        }
+    }
+
+    public function getDebtorSalary(Request $request)
+    {
+        $id = $request->id;
+        $result = UwInpsDebClients::where('uw_deb_id', $id)->where('status', 1)->get();
+
+        if ($result->count() < 0) {
+            return response()->json([
+                'message' => 'error'
+            ]);
+        }
+        return response()->json($result, 200);
+
     }
 
 
