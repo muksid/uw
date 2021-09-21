@@ -70,33 +70,42 @@ class UwClientDebtorsController extends Controller
 
         $claim_id = '3'.$branchCode.$claim_number;
 
+        $total_sum = null;
+        $total_month = null;
+
+        if($request->has_salary == 'Y'){
+            $total_sum = $request->total_sum;
+            $total_month = $request->total_month;
+        }
+
         $model = UwClientDebtors::updateOrCreate(['id' => $id],
             [
-                'uw_clients_id' => $request->model_id,
-                'inn' => $request->inn,
-                'resident' => $request->resident,
-                'document_type' => $request->document_type,
-                'document_serial' => $request->document_serial,
-                'document_number' => $request->document_number,
-                'document_date' => $request->document_date,
-                'gender' => $request->gender,
-                'birth_date' => $request->birth_date,
-                'document_region' => $request->document_region,
+                'uw_clients_id'     => $request->model_id,
+                'inn'               => $request->inn,
+                'resident'          => $request->resident,
+                'document_type'     => $request->document_type,
+                'document_serial'   => $request->document_serial,
+                'document_number'   => $request->document_number,
+                'document_date'     => $request->document_date,
+                'gender'            => $request->gender,
+                'birth_date'        => $request->birth_date,
+                'document_region'   => $request->document_region,
                 'document_district' => $request->document_district,
-                'family_name' => $request->family_name,
-                'name' => $request->name,
-                'patronymic' => $request->patronymic,
-                'pin' => $request->pin,
-                'live_address' => $request->live_address,
-                'job_address' => $request->job_address,
-                'total_sum' => $request->total_sum,
-                'total_month' => $request->total_month,
-                'claim_id'=>$claim_id,
-                'claim_number'=>$claim_number,
-                'branch_code'=>$lastModelId->branch_code,
-                'has_salary'    => $request->has_salary,
-                'deb_type'    => $request->deb_type,
-                'isActive' => 1,
+                'family_name'       => $request->family_name,
+                'name'              => $request->name,
+                'patronymic'        => $request->patronymic,
+                'pin'               => $request->pin,
+                'live_address'      => $request->live_address,
+                'job_address'       => $request->job_address,
+                'total_sum'         => $total_sum,
+                'total_month'       => $total_month,
+                'claim_id'          =>$claim_id,
+                'claim_number'      =>$claim_number,
+                'branch_code'       =>$lastModelId->branch_code,
+                'has_salary'        => $request->has_salary,
+                'deb_type'          => $request->deb_type,
+                'isReg'             => $request->isReg,
+                'isActive'          => $request->isActive
             ]);
         return response()->json([
             'success' => true,
@@ -255,10 +264,6 @@ class UwClientDebtorsController extends Controller
 
     }
 
-
-
-
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -302,7 +307,6 @@ class UwClientDebtorsController extends Controller
             'message' => 'Data deleted successfully!'
         ]);
     }
-
 
     public function postKatm(Request $request)
     {
@@ -1102,6 +1106,19 @@ class UwClientDebtorsController extends Controller
                     }
                     $jon_data = base64_encode(json_encode($arr_table)); // table
 
+                    $katmBaseFileOld = UwPhyKatmBaseDebFile::where('uw_deb_id',$model_id)->delete();
+                    $katmFileOld     = UwPhyKatmDebFile::where('uw_deb_id',$model_id)->first();
+                    
+                    if($katmFileOld){
+
+                        $file_path = public_path().$katmFileOld->file_hash;
+                        if(file_exists($file_path)){
+                            unlink($file_path);
+                        }
+    
+                        $katmFileOldDelete = UwPhyKatmDebFile::where('uw_deb_id',$model_id)->delete();
+                    }
+
                     $katm = UwKatmDebClients::updateOrCreate(['uw_deb_id' => $model_id],
                         [
                             'uw_deb_id' => $model_id,
@@ -1411,7 +1428,7 @@ class UwClientDebtorsController extends Controller
                             }
 
                         } else {
-
+                            
                             $inps = new UwInpsDebClients();
 
                             $year = substr($array_income['PERIOD'], 0,4);
@@ -1438,7 +1455,11 @@ class UwClientDebtorsController extends Controller
                         }
 
                     } else {
-
+                        $old_salary = UwInpsDebClients::where('uw_deb_id', $model_id)->get();
+                        if($old_salary->count()){
+                            $old_salary = UwInpsDebClients::where('uw_deb_id', $model_id)->delete();
+                        }
+                        
                         $inps = new UwInpsDebClients();
                         $inps->uw_deb_id = $model_id;
                         $inps->claim_id = $claim_id;
@@ -1742,7 +1763,7 @@ class UwClientDebtorsController extends Controller
     }
 
 
-        public function getStatusSend($id, $sch_type)
+    public function getStatusSend($id, $sch_type)
     {
         //
         $model = UwClients::find($id);

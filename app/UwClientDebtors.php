@@ -37,8 +37,6 @@ class UwClientDebtors extends Model
         'isActive'
     ];
 
-    //Javlon
-
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
@@ -112,6 +110,32 @@ class UwClientDebtors extends Model
         }
 
         return $total / $inps;
+    }
+
+    public function calculateDebtorInpsTotalSum($id)
+    {
+        //
+        $summ = UwInpsDebClients::select('INCOME_SUMMA')->where('uw_deb_id', $id)->get();
+
+        $total = 0;
+        foreach ($summ as $key => $value){
+            $total +=$value->INCOME_SUMMA;
+        }
+
+        return $total;
+    }
+
+    public function countDebtorInpsMonthes($id)
+    {
+        //
+        $inps = UwInpsDebClients::where('uw_deb_id', $id)->get();
+
+        $inps = $inps->count();
+        if (!$inps){
+            $inps = 1;
+        }
+
+        return $inps;
     }
 
     public function files()

@@ -307,7 +307,7 @@ class UwCreateClientsController extends Controller
         //
         $model = UwClients::find($id);
 
-        $debtors = UwClientDebtors::where('uw_clients_id', $model->id)->get();
+        $debtors = UwClientDebtors::where('uw_clients_id', $model->id)->where('isActive', 1)->get();
 
         $modelComments = UwClientComments::where('uw_clients_id', $id)->get();
 

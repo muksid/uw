@@ -501,40 +501,79 @@
                                                     <th>Oylik daromadi</th>
                                                     <th>Jami (Oy)da</th>
                                                     <th>To`lov qobiliyati</th>
+                                                    <th>Type</th>
                                                     <th>Action</th>
+                                                    <th>Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($debtors as $key => $debtor )
-                                                    <tr>
-                                                        <td>{{$key+1}}</td>
-                                                        <td>{{$debtor->family_name}} {{$debtor->name}}</td>
-                                                        <td class="debtor_total_sum">{{bcdiv($debtor->total_sum,1,2)}}</td>
-                                                        <td>{{$debtor->total_month}}</td>
-                                                        <td class="debtor_total_sum_ability">{{ bcdiv(($debtor->total_sum/$debtor->total_month*0.87)*0.5,1,2) }}</td>
-                                                        <td style="width: 400px !important">
-                                                            <a href="javascript:void(0)" data-toggle="tooltip"  data-id="{{$debtor->id}}" data-original-title="Edit" class="edit edit-debtor">
-                                                                <span class="glyphicon glyphicon-pencil"></span>
-                                                            </a> | 
-                                                            <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="{{$debtor->id}}" class="delete text-maroon">
-                                                                <span class="glyphicon glyphicon-trash"></span>
-                                                            </a> | 
-                                                            <a href="javascript:void(0);" data-toggle="tooltip" data-original-title="Register" data-id="{{$debtor->id}}" class="text-green reg-debtor">
-                                                                <span class="glyphicon glyphicon-globe"></span>
-                                                            </a>
-                                                            
-                                                            @if ($debtor->isReg == 1)
-                                                                <button class="btn getDebtorScoring" id="getDebtorScoring_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-history'></i> Scroring KIAS</button>
-                                                                @if ($debtor->has_salary == 'Y')
-                                                                    <button class="btn getDebtorSalary" id="getDebtorSalary_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-credit-card'></i> Oylik daromadi</button>
-                                                                @else
-                                                                    <button class="btn bg-danger" id="" data-id=""><i class='fa fa-credit-card'></i> Daromadi yo`q</button>
+                                                @if ($debtors->count())
+                                                    @foreach ($debtors as $key => $debtor )
+                                                        <tr>
+                                                            <td>{{$key+1}}</td>
+                                                            <td>{{$debtor->family_name}} {{$debtor->name}}</td>
+                                                            <td class="debtor_total_sum">
+                                                                <span class="badge" style="font-size: large">
+                                                                    {{bcdiv($debtor->calculateDebtorInpsTotalSum($debtor->id)/$debtor->countDebtorInpsMonthes($debtor->id),1,2) }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-bold">{{$debtor->countDebtorInpsMonthes($debtor->id)}}</td>
+                                                            <td class="debtor_total_sum_ability">
+                                                                <span class="badge bg-orange" style="font-size: large">
+                                                                    {{ bcdiv((bcdiv($debtor->calculateDebtorInpsTotalSum($debtor->id)/$debtor->countDebtorInpsMonthes($debtor->id),1,2)*0.87)*0.5,1,2) }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-bold">
+                                                                @switch($debtor->deb_type)
+                                                                    @case('K')
+                                                                    <span class="badge bg-red" style="font-size: large">Kafil</span>
+                                                                        @break
+                                                                    @case('Q')
+                                                                    <span class="badge bg-red" style="font-size: large">Qo`shimcha qarzdor</span>
+                                                                        @break
+                                                                    @default
+                                                                        @break
+                                                                        
+                                                                @endswitch
+                                                            </td>
+                                                            <td style="width: 400px !important">
+                                                                <a href="javascript:void(0)" data-toggle="tooltip"  data-id="{{$debtor->id}}" data-original-title="Edit" class="edit edit-debtor">
+                                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                                </a> 
+                                                                <!--| 
+                                                                 <a href="javascript:void(0);" id="delete-debtor" data-toggle="tooltip" data-original-title="Delete" data-id="{{$debtor->id}}" class="delete text-maroon">
+                                                                    <span class="glyphicon glyphicon-trash"></span> 
+                                                                -->
+                                                                </a> | 
+                                                                <a href="javascript:void(0);" data-toggle="tooltip" data-original-title="Register" data-id="{{$debtor->id}}" class="text-green reg-debtor">
+                                                                    <span class="glyphicon glyphicon-globe"></span>
+                                                                </a>
+                                                                
+                                                                @if ($debtor->isReg == 1)
+                                                                    <button class="btn getDebtorScoring" id="getDebtorScoring_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-history'></i> Scroring KIAS</button>
+                                                                    @if ($debtor->has_salary == 'Y')
+                                                                        <button class="btn getDebtorSalary" id="getDebtorSalary_{{$debtor->id}}" data-id="{{$debtor->id}}"><i class='fa fa-credit-card'></i> Oylik daromadi</button>
+                                                                    @else
+                                                                        <button class="btn bg-danger" id="" data-id=""><i class='fa fa-credit-card'></i> Daromadi yo`q</button>
+                                                                    @endif
                                                                 @endif
-                                                            @endif
 
-                                                        </td>
+                                                            </td>
+                                                            <td>
+                                                                @if ($debtor->isActive == 1)
+                                                                    <i class="fa fa-check text-bold text-green" aria-hidden="true"></i>
+                                                                @else
+                                                                    <i class="fa fa-ban text-bold text-red" aria-hidden="true"></i>
+                                                                @endif    
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                @else
+                                                    <tr>
+                                                        <td class="text-center text-bold bg-warning" colspan="6">Qo`shimcha qarzdorlar topilmadi</td>
                                                     </tr>
-                                                @endforeach
+                                                    
+                                                @endif
                                                     
                                             </tbody>
                                             <tfoot align="right" class="bg-danger">
@@ -543,7 +582,7 @@
                                                     <th colspan="2">
                                                         <span id="debtors_total_sum"></span>
                                                     </th>
-                                                    <th colspan="2">
+                                                    <th colspan="4">
                                                         <span id="debtors_total_sum_ablity"></span>
                                                     </th>
                                                 </tr>
@@ -633,7 +672,7 @@
                                 <div class="col-sm-3">
                                     <div class="form-group">
                                         <label>STIR</label>
-                                        <input type="number" class="form-control" id="inn" name="inn" value="" minlength="9" maxlength="9">
+                                        <input type="number" class="form-control" id="inn" name="inn" value="" minlength="9" maxlength="9" disabled>
                                     </div>
                                 </div>
                                 <div class="col-sm-2">
@@ -698,20 +737,19 @@
                                     <div class="form-group">
                                         <label>Kafillik turi </label>
                                         <select class="form-control" name="deb_type" id="deb_type" required>
-                                            <option value="" SELECTED>Tanlang ...</option>
-                                            <option value="K">Kafil</option>
-                                            <option value="Q">Qo'shimcha qarzdor</option>
-                                            <option value="B">Birgalikdagi qarzdor</option>
+                                            <option value="" >Tanlang ...</option>
+                                            <option value="Q" SELECTED>Qo'shimcha qarzdor</option>
+                                            <!-- <option value="K" disabled>Kafil</option> -->
                                         </select>
                                     </div>
                                 </div>
                                 
                                 <div class="col-sm-2">
                                     <div class="form-group">
-                                        <label>Ish haqi <span class="text-red">*</span></label>
+                                        <label>Ish haqi </label>
                                         <div class="radio">
-                                            <label><input type="radio" name="has_salary" id="debtor_has_salary_yes" value="Y" checked> Ha</label>
-                                            <label><input type="radio" name="has_salary" id="debtor_has_salary_no" value="N"> Yo`q</label>
+                                            <label><input type="radio" name="has_salary" id="debtor_has_salary_Y" value="Y" checked> Ha</label>
+                                            <label><input type="radio" name="has_salary" id="debtor_has_salary_N" value="N"> Yo`q</label>
                                         </div>
                                     </div>
                                 </div>
@@ -726,6 +764,24 @@
                                     <div class="form-group">
                                         <label>Jami (Oy) da</label>
                                         <input type="number" class="form-control" id="total_month" name="total_month" maxlength="2" value="" required="">
+                                    </div>
+                                </div>
+    
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label>Status </label>
+                                    <div class="radio">
+                                        <label><input type="radio" name="isActive" id="debtor_status_1" value="1" checked> Active</label>
+                                        <label><input type="radio" name="isActive" id="debtor_status_0" value="0"> Passive</label>
+                                        <label><input type="radio" name="isActive" id="debtor_status_2" value="2"> Deleted</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label>Ro`yxattdan o`tkazilgan? </label>
+                                    <div class="radio">
+                                        <label><input type="radio" name="isReg" id="debtor_isReg_1" value="1"  disabled> Ha</label>
+                                        <label><input type="radio" name="isReg" id="debtor_isReg_0" value="0" checked disabled> Yo`q</label>
                                     </div>
                                 </div>
                             </div>
@@ -2203,7 +2259,30 @@
                     $('#debtor_id').val('');
                     $('#debtorForm').trigger("reset");
                     $('#debtorTitle').html("Qo`shimcha qarzdor kiriting");
+ 
+                    $('input[type=radio][name=isReg]').prop('checked',false).prop('disabled', true);
+                    $("#debtor_isReg_0").prop("checked", true);
+
+                    $('input[type=radio][name=isActive]').prop('checked',false);
+                    $("#debtor_status_1").prop('checked',true)   
+
                     $('#debtor-modal').modal('show');
+                });
+
+                $('input[type=radio][name=has_salary]').change(function() {
+                    if (this.value == 'Y') {
+                        $("#debtor_total_sum_div").show()
+                        $("#debtor_total_month_div").show()
+                        $('#total_sum').prop('required',true);
+                        $('#total_month').prop('required',true);
+
+                    }
+                    else if(this.value == 'N') {
+                        $("#debtor_total_sum_div").hide()
+                        $("#debtor_total_month_div").hide()
+                        $('#total_sum').prop('required',false);
+                        $('#total_month').prop('required',false);
+                    }
                 });
 
                 $('body').on('click', '.edit-debtor', function () {
@@ -2248,14 +2327,32 @@
                                 break;
                         }
 
-                        if(data.has_salary == 'Y'){
-                            $("#debtor_has_salary_yes").prop("checked", true);
-                            $("#debtor_has_salary_no").prop("checked", false);
-                        }else {
-                            $("#debtor_has_salary_yes").prop("checked", false);
-                            $("#debtor_has_salary_no").prop("checked", true);
+                        if(data.isReg == 1){
+                            $("#debtor_isReg_yes").prop("checked", true);
+                            $("#debtor_isReg_no").prop("checked", false);
+                        }else{
+                            $("#debtor_isReg_yes").prop("checked", true);
+                            $("#debtor_isReg_no").prop("checked", false);
                         }
 
+                        $('input[type=radio][name=has_salary]').prop('checked',false);
+                        $("#debtor_has_salary_"+data.has_salary).prop('checked',true)
+
+                        if(data.has_salary == 'Y'){
+                            $("#debtor_total_sum_div").show()
+                            $("#debtor_total_month_div").show()
+                        }
+                        else{
+                            $("#debtor_total_sum_div").hide()
+                            $("#debtor_total_month_div").hide()
+                        }
+
+                        $('input[type=radio][name=isReg]').prop('checked',false);
+                        $('input[type=radio][name=isReg]').prop('disabled',false);
+                        $("#debtor_isReg_"+data.isReg).prop('checked',true)
+
+                        $('input[type=radio][name=isActive]').prop('checked',false);
+                        $("#debtor_status_"+data.isActive).prop('checked',true)                        
                     })
                 });
 
@@ -2306,7 +2403,13 @@
                     },
                     columns: [
                         { data: 'id', name: 'id', 'visible': false, "searchable": false},
-                        { data: 'guar_type', name: 'guar_type' },
+                        { data: 'guar_type',render: function (data,type,row){
+                            if(data == 'K'){
+                                return 'Kafil';
+                            }else{
+                                return 'Qo`shimcha qarzdor';
+                            }
+                        }, name: 'guar_type' },
                         { data: 'title', name: 'title' },
                         { data: 'guar_owner', name: 'guar_owner', 'visible': false },
                         { data: null,
